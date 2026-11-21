@@ -534,14 +534,30 @@ namespace Ink_Canvas.Helpers
 
                 // 打断支持：若上一段动画（通常是收场）还在播，从它**当前**的视觉状态接续，
                 // 而不是先归位再重来——否则用户会看到"缩回去一半又跳回来"。
+                //
+                // 但要区分两种情形，否则首次打开会没有动画：
+                // - 打断：属性上确实还挂着正在跑的动画（HasAnimatedProperties），用当前值作起点；
+                // - 首次打开：属性已归位到终态（1.0），此时必须用标准起始值 0.72，
+                //   否则 From 和 To 都是 1.0，缩放动画等于不存在。
                 var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
+                if (!IsAnimating(child))
+                {
+                    scaleStart = PopupPopInStartScale;
+                    slideStart = 10;
+                    opacityStart = targetOpacity * 0.5;
+                }
 
                 // 清掉旧动画（不再归位），目的是让下面的基值写入能生效。
                 ClearTransformAnimations(child);
                 child.BeginAnimation(UIElement.OpacityProperty, null);
 
-                var scaleTransform = new ScaleTransform(scaleStart, scaleStart);
-                var slideTransform = new TranslateTransform(0, slideStart);
+                // 基值必须始终是**终态**（缩放 1、位移 0、目标透明度），不能写成当前状态。
+                // 写成当前状态会导致两个 bug：
+                //   1) 动画 To 省略时目标就是基值，From 又等于基值 => 缩放/位移完全没有变化；
+                //   2) 若当前状态是收场残留的 0.72，菜单会永久停在 0.72（表现为"特别小"）。
+                // 当前状态只用来决定 From（从哪儿开始），不影响终点。
+                var scaleTransform = new ScaleTransform(1, 1);
+                var slideTransform = new TranslateTransform(0, 0);
                 var transformGroup = new TransformGroup();
                 transformGroup.Children.Add(scaleTransform);
                 transformGroup.Children.Add(slideTransform);
@@ -550,8 +566,8 @@ namespace Ink_Canvas.Helpers
                 // 缩放基准点跟随触发按钮：从图标处放大、也缩回图标处。
                 child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
 
-                // 从当前视觉状态出发：透明度也要接续，避免中途重开时突然闪一下
-                child.Opacity = opacityStart;
+                // 透明度基值同样是终态；From 会在动画里用 opacityStart 表示当前值
+                child.Opacity = targetOpacity;
 
                 popup.IsOpen = true;
 
@@ -650,18 +666,27 @@ namespace Ink_Canvas.Helpers
 
                 // 打断支持：从当前视觉状态接续（通常是出场动画播到一半又点了关闭）
                 var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
+                if (!IsAnimating(child))
+                {
+                    // 未在动画中：按完整出场状态起步
+                    scaleStart = 1.0;
+                    slideStart = 0;
+                }
 
                 child.BeginAnimation(UIElement.OpacityProperty, null);
 
-                var exitScale = new ScaleTransform(scaleStart, scaleStart);
-                var exitSlide = new TranslateTransform(0, slideStart);
+                // 基值保持终态（缩放 1、位移 0、目标透明度），与出场一致。
+                // 收场的终点由动画的 To 描述，结束后清理归位；不能把基值写成当前状态，
+                // 否则中途被打断时菜单会永久停在缩小状态。
+                var exitScale = new ScaleTransform(1, 1);
+                var exitSlide = new TranslateTransform(0, 0);
                 var exitGroup = new TransformGroup();
                 exitGroup.Children.Add(exitScale);
                 exitGroup.Children.Add(exitSlide);
                 child.RenderTransform = exitGroup;
                 // 与出场同一个基准点：缩回图标所在的方向
                 child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
-                child.Opacity = opacityStart;
+                child.Opacity = targetOpacity;
 
                 // 收场 = 出场动画的逆过程：
                 //   出场 起始0.72 →(BackEase 冲到1.037)→ 回落 1.0
@@ -747,6 +772,38 @@ namespace Ink_Canvas.Helpers
         /// 读不到有效值时返回初始态（起始缩放、起始位移、半透明），
         /// 保证首次打开仍然是从小长出来。
         /// </remarks>
+        /// <summary>
+        /// 判断菜单的变换/透明度上是否真的挂着动画（即处于"播到一半"的状态）。
+        /// </summary>
+        /// <remarks>
+        /// 仅凭属性值无法区分"首次打开"与"被打断"：
+        /// 首次打开前属性已归位到 1.0，读出来也是合法值，
+        /// 若把它当作打断起点，From 与 To 相同，动画就消失了。
+        /// </remarks>
+        private static bool IsAnimating(FrameworkElement child)
+        {
+            if (child == null) return false;
+
+            try
+            {
+                if (child.HasAnimatedProperties) return true;
+                if (child.RenderTransform is TransformGroup group)
+                {
+                    foreach (var transform in group.Children)
+                    {
+                        if (transform is ScaleTransform scale && scale.HasAnimatedProperties) return true;
+                        if (transform is TranslateTransform translate && translate.HasAnimatedProperties) return true;
+                    }
+                }
+            }
+            catch
+            {
+                // 结构异常按"未在动画"处理，走首次打开路径更安全
+            }
+
+            return false;
+        }
+
         private static (double Scale, double Slide, double Opacity) CaptureCurrentVisualState(FrameworkElement child)
         {
             double scale = PopupPopInStartScale;
