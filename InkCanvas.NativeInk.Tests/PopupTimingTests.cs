@@ -14,8 +14,8 @@ namespace InkCanvas.NativeInk.Tests
     /// </remarks>
     internal static class PopupTimingTests
     {
-        private const double PopInSeconds = 0.15;
-        private const double PopOutSeconds = 0.10;
+        private const double PopInSeconds = 0.20;
+        private const double PopOutSeconds = 0.15;
 
         public static void RunAll()
         {
@@ -34,19 +34,19 @@ namespace InkCanvas.NativeInk.Tests
             var clamped = Math.Min(0.1, PopupTiming.MaxFrameSeconds);
             Equal(PopupTiming.MaxFrameSeconds, clamped);
 
-            // 夹取后单帧仍然只走完曲线的一小段：过冲段（8/11 到 1 之前的回落）
-            // 至少要能被两帧采到。
+            // 夹取后单帧仍然只走完曲线的一小段：曲线越过 1.0 后的那一段收尾回弹
+            // 至少要能被多帧采到，不能被一帧跨过去。
             var step = clamped / PopInSeconds;
             True(step < 0.35);
         }
 
         private static void InterruptKeepsDurationSoSpeedDoesNotJump()
         {
-            // 打开途中被打断：开场时长 0.15 正在用，收起时不能用 0.10。
+            // 打开途中被打断：开场时长 0.20 正在用，收起时不能用 0.15。
             var duration = PopupTiming.ResolveDuration(PopOutSeconds, PopInSeconds, isRunning: true);
             Equal(PopInSeconds, duration);
 
-            // 收起途中被打断：同理保持 0.10。
+            // 收起途中被打断：同理保持 0.15。
             var back = PopupTiming.ResolveDuration(PopInSeconds, PopOutSeconds, isRunning: true);
             Equal(PopOutSeconds, back);
         }

@@ -431,13 +431,17 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <remarks>
         /// 时长是「progress 从 0 走到 1」的时间，曲线形状与它无关：
-        /// 缩短只会整体加快，峰值位置(8/11)与过冲量都不变。
+        /// 缩短只会整体加快，峰值位置(0.529)与过冲量都不变。
         ///
         /// 基准时长应当就是「手感最舒服的那个速度」，而不是一个偏慢的"出厂值"，
         /// 否则用户只能常驻 2x 以上，倍率滑杆的 1.0 就失去了意义。
-        /// 用户实测结论：1x 要按 0.15s 这个速度才算对劲。
+        ///
+        /// 0.20s 是照曲线形状配出来的，不是拍脑袋：换成 Inkeys 的 EaseOutBack 之后，
+        /// 曲线在 p≈0.293 就越过 1.0（约 59ms），也就是"点下去 59ms 已看起来打开"，
+        /// 剩下 141ms 全是收尾回弹 —— 这正是"先快后慢"在时间轴上的样子。
+        /// 时长再压到 0.15s，单帧步进升到 0.143，观感从"弹"变成"跳"，所以基准取 0.20s。
         /// </remarks>
-        internal const double PopupPopInDurationSeconds = 0.15;
+        internal const double PopupPopInDurationSeconds = 0.20;
 
         /// <summary>
         /// 每个 Popup 当前的动画代次。
@@ -470,7 +474,7 @@ namespace Ink_Canvas.Helpers
         /// 「从哪继续」不再需要任何检测（HasAnimatedProperties、Completed、状态机同步），
         /// 也就不存在"起点读错、跳档、竞态覆盖"这一整类问题。
         ///
-        /// 进度由 DispatcherTimer 驱动而不是 Storyboard：
+        /// 进度由渲染帧回调（CompositionTarget.Rendering）驱动而不是 Storyboard：
         /// Storyboard 无法"从中间反向"，且 Completed/FillBehavior 的时序坑
         /// （Stop 先于 Completed 把值弹回基值）在前几轮反复引发回归。
         /// 时钟每帧自己算值并直接写入 Transform，方向切换天然平滑。
@@ -514,11 +518,12 @@ namespace Ink_Canvas.Helpers
         /// 低估会导致峰值时四边被裁。
         /// </summary>
         /// <remarks>
-        /// 取 1.05（过冲 5%）而不是更小的值，是被时长逼出来的：
-        /// 时长压到 0.15s 后，回落段只剩 3/11 × 150ms = 41ms，60fps 下约 2.5 帧。
-        /// 采样点落不到峰值上时，实测最大缩放只有 ~1.02——肉眼分辨不出"先放大再回落"。
-        /// 把峰值抬到 1.05，即使采样错过顶点，落点也在 1.02~1.04，过冲依然成立。
-        /// 这同时解释了为什么峰值必须与留白使用同一个常量：留白按 1.05 算，
+        /// 峰值不是直接写的数，而是由 <see cref="PopupCurve.BackTension"/> 反解出来的：
+        /// 张力取 2.412 时过冲行程正好 17.86%，缩放峰值落在 1.05。
+        /// Inkeys 原值 1.1 配它的 0.4s 时峰值只有 1.0125，肉眼几乎看不出"先放大再回落"；
+        /// 我们要的过冲比它强，所以按目标缩放反解张力，而不是照抄 1.1。
+        ///
+        /// 峰值必须与留白使用同一个常量：留白按 1.05 算，
         /// 而曲线若只到 1.03，多出来的留白纯属浪费。
         /// </remarks>
         private const double PopupPopInPeakScale = PopupCurve.PeakScale;
@@ -527,13 +532,15 @@ namespace Ink_Canvas.Helpers
         /// 收场时长（秒）。比出场短一点，让关闭显得干脆。
         /// </summary>
         /// <remarks>
-        /// 收起是同一曲线的倒放，所以"先涨后缩"那段同样占 3/11。
-        /// 0.10s 时该段约 27ms ≈ 1.6 帧，是这套曲线还能看出收起的最后一段余地；
-        /// 能站得住是因为 <see cref="PopupPopInPeakScale"/> 提到了 1.05 ——
-        /// 过冲量越大，越少的帧也足以传达"先涨后缩"。
-        /// 收起刻意比打开快（0.10 vs 0.15）：关闭要显得干脆，打开要从容。
+        /// 收起是同一曲线的倒放：先越过 1.0 涨到峰值，再一路缩回 0.72。
+        /// 0.15s 下 60fps 能采到 10 帧，其中 6 帧落在过冲段，
+        /// 与打开段的过冲占比相当（同一条曲线，只是播放方向相反）。
+        ///
+        /// 收起刻意比打开短（0.15 vs 0.20）：关闭要显得干脆，打开要从容。
+        /// 但不能再短 —— 0.10s 时只剩 6 帧、单帧步进 0.101，
+        /// 过冲会被压成"一顿"而不是"一弹"。
         /// </remarks>
-        internal const double PopupPopOutDurationSeconds = 0.10;
+        internal const double PopupPopOutDurationSeconds = 0.15;
 
         /// <summary>
         /// 菜单的目标状态：true = 正在（或已经）打开，false = 正在（或已经）收起。
@@ -661,13 +668,15 @@ namespace Ink_Canvas.Helpers
         /// 打断 = 再次调用本方法且方向相反：时钟沿用同一个 progress，
         /// 只是翻转步进符号，画面从当前大小直接反向，没有任何检测与拼接。
         ///
-        /// 为什么用 DispatcherTimer 而不是 Storyboard：
+        /// 为什么用渲染帧回调而不是 Storyboard：
         /// - Storyboard 无法从中间反向，也无法方便地读出"当前播到哪"；
         /// - 前几轮所有回归（Completed 时序、FillBehavior 弹回、起点检测）都源于它。
         /// 时钟模型下这些概念直接不存在。
         ///
-        /// 帧率说明：DispatcherTimer(Background) 大约按渲染节拍触发，
+        /// 帧率说明：CompositionTarget.Rendering 与合成帧同拍，
         /// 逐帧写 RenderTransform 属合成层属性，与 Storyboard 的每帧开销同级。
+        /// 单帧步进由 <see cref="PopupTiming.MaxFrameSeconds"/> 夹住（40ms），
+        /// 卡顿只会整体变慢，不会让 progress 一步跨过过冲区。
         /// </remarks>
         private static void DrivePopup(Popup popup, FrameworkElement child, bool opening,
             double durationSeconds, Action onFullyClosed)
