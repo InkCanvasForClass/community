@@ -584,6 +584,13 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                // 宿主容器（popup.Child）会被 PopupManagerHelper 在关闭时折叠，
+                // 而这里原本只把内部内容设为可见。宿主仍是 Collapsed 时，
+                // WPF 会按 0×0 的内容尺寸重新定位弹窗窗口 —— IsOpen 之后的第一帧
+                // 拿到的还是上一次的窗口矩形（实测 topLeft=(607,691)，正确值 (477,391)），
+                // 缩放原点随之算错：第二次打开从菜单左上角缩放，第一次却正常。
+                // 必须赶在 IsOpen 之前把宿主也恢复可见。
+                if (popup.Child is FrameworkElement host) host.Visibility = Visibility.Visible;
                 child.Visibility = Visibility.Visible;
                 popup.IsOpen = true;
 
