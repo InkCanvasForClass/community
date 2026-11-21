@@ -287,4 +287,10 @@
   <data name="Debug_UnlimitedFrameRate_Desc" xml:space="preserve">
     <value>按显示器刷新率设置单帧时间预算，并记录渲染环境诊断（刷新率/渲染层级/是否软件渲染），配合上方帧率显示使用。说明：WPF 的呈现节奏由合成器 vsync 驱动，显示器刷新率就是物理上限，本项不会、也无法把帧率推高到刷新率以上。</value>
   </data>
+  <data name="Debug_AnimationSpeed_Header" xml:space="preserve">
+    <value>全局动画速度</value>
+  </data>
+  <data name="Debug_AnimationSpeed_Desc" xml:space="preserve">
+    <value>调试用：统一缩放进度的快慢，范围 0.1 ~ 10。1 为原始速度，大于 1 变慢（便于观察细节），小于 1 变快。</value>
+  </data>
 </root>

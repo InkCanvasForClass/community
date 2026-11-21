@@ -166,7 +166,7 @@ namespace Ink_Canvas.Helpers
             {
                 From = 0.5,
                 To = 1,
-                Duration = TimeSpan.FromSeconds(duration)
+                Duration = AnimationSpeed.ScaleToTimeSpan(duration)
             };
             Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
@@ -201,7 +201,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTarget(fadeInAnimation, target);
@@ -211,7 +211,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 20,
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTarget(slideAnimation, target);
@@ -241,7 +241,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0.5,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
@@ -250,7 +250,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = element.RenderTransform.Value.OffsetX - 20, // 滑动距离
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
 
@@ -281,7 +281,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 Storyboard.SetTargetProperty(scaleXAnimation, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
 
@@ -290,7 +290,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 scaleYAnimation.EasingFunction = new CubicEase();
                 scaleXAnimation.EasingFunction = new CubicEase();
@@ -324,7 +324,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 Storyboard.SetTargetProperty(scaleXAnimation, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
 
@@ -333,7 +333,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 1,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 Storyboard.SetTargetProperty(scaleYAnimation, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
 
@@ -369,7 +369,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 1,
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 fadeOutAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
@@ -378,7 +378,7 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 0,
                     To = 10,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
 
@@ -411,7 +411,7 @@ namespace Ink_Canvas.Helpers
             {
                 From = 1,
                 To = 0,
-                Duration = TimeSpan.FromSeconds(duration)
+                Duration = AnimationSpeed.ScaleToTimeSpan(duration)
             };
             Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
 
@@ -564,7 +564,7 @@ namespace Ink_Canvas.Helpers
                 var fadeInAnimation = new DoubleAnimation
                 {
                     From = targetOpacity * 0.5,
-                    Duration = TimeSpan.FromSeconds(duration),
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
                     FillBehavior = FillBehavior.Stop
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
@@ -573,7 +573,7 @@ namespace Ink_Canvas.Helpers
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 10,
-                    Duration = TimeSpan.FromSeconds(duration),
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
                     FillBehavior = FillBehavior.Stop
                 };
                 slideAnimation.EasingFunction = new CubicEase();
@@ -585,7 +585,7 @@ namespace Ink_Canvas.Helpers
                 var scaleAnimation = new DoubleAnimation
                 {
                     From = PopupPopInStartScale,
-                    Duration = TimeSpan.FromSeconds(duration),
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
                     FillBehavior = FillBehavior.Stop,
                     EasingFunction = new BackEase
                     {
@@ -657,7 +657,7 @@ namespace Ink_Canvas.Helpers
                 var fadeOutAnimation = new DoubleAnimation
                 {
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 fadeOutAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
                 Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
@@ -666,7 +666,7 @@ namespace Ink_Canvas.Helpers
                 var slideAnimation = new DoubleAnimation
                 {
                     To = 10,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
                 Storyboard.SetTargetProperty(slideAnimation,
@@ -676,7 +676,7 @@ namespace Ink_Canvas.Helpers
                 var exitScaleAnimation = new DoubleAnimation
                 {
                     To = PopupPopOutEndScale,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
                 };
                 exitScaleAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
                 Storyboard.SetTargetProperty(exitScaleAnimation,
