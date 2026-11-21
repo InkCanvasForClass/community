@@ -150,7 +150,12 @@ namespace Ink_Canvas.Helpers
         /// 需要跳过的 Popup（调用方已自行处理，例如正在播放关闭动画）。
         /// 传 <c>null</c> 表示不跳过任何一个。
         /// </param>
-        public void CloseAllRegisteredPopups(ICollection<Popup> skip = null)
+        /// <param name="animate">
+        /// true = 播放收起动画（用户点了画布空白处这类"看得见"的关闭）；
+        /// false = 直接置 <see cref="Popup.IsOpen"/> 为 false（窗口即将隐藏、自动折叠这类"要立刻消失"的关闭）。
+        /// 默认 true：调用方若没想清楚就调用，至少不会出现画面瞬消。
+        /// </param>
+        public void CloseAllRegisteredPopups(ICollection<Popup> skip = null, bool animate = true)
         {
             // 关闭过程会触发 Closed 事件并修改 _openPopups，遍历注册表的副本避免集合被修改。
             var snapshot = _registeredPopups.ToArray();
@@ -161,7 +166,17 @@ namespace Ink_Canvas.Helpers
 
                 try
                 {
-                    popup.IsOpen = false;
+                    if (animate)
+                    {
+                        // 统一走收起动画：插件弹窗与宿主自带菜单用同一套开合表现，
+                        // 直接置 IsOpen=false 会让画面瞬间消失（其余菜单是缩放淡出的）。
+                        AnimationsHelper.HidePopupWithSlideAndFade(popup);
+                    }
+                    else
+                    {
+                        // 立刻消失的路径：硬关会触发 Closed，逐帧回调随之解绑，不会留下仍在推进的时钟。
+                        popup.IsOpen = false;
+                    }
                 }
                 catch (Exception ex)
                 {

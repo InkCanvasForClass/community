@@ -28,7 +28,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            if (BackgroundPalette.IsOpen)
+            if (AnimationsHelper.IsPopupTargetingOpen(BackgroundPalette))
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
             }

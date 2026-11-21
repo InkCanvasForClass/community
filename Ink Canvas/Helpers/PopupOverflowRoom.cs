@@ -47,7 +47,7 @@ namespace Ink_Canvas.Helpers
         /// 预留空间并返回应当施加动画的内容元素。
         /// </summary>
         /// <param name="popup">目标菜单。</param>
-        /// <param name="peakScale">动画峰值相对内容尺寸的倍数（≥1，例如 1.0367）。</param>
+        /// <param name="peakScale">动画峰值相对内容尺寸的倍数（≥1，例如 1.05）。</param>
         /// <returns>需要施加变换与动画的元素（内容本身，不是包装容器）。</returns>
         public static FrameworkElement Ensure(Popup popup, double peakScale)
         {
