@@ -548,6 +548,28 @@ namespace Ink_Canvas.Helpers
                 // 避免打开前测不到尺寸导致留白偏小、峰值时四边被裁。
                 PopupOverflowRoom.RefreshPadding(popup, PopupPopInPeakScale);
 
+                // 诊断：记录本次打开后的关键状态，便于对比第一次与后续打开的差异。
+                // 用 BeginInvoke 排到布局之后，才能取到真实的实际尺寸与屏幕位置。
+                child.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        var hostEl = popup.Child as FrameworkElement;
+                        var screen = child.PointToScreen(new Point(0, 0));
+                        PopupOverflowRoom.Diag(
+                            $"[Open] popup={PopupOverflowRoom.Name(popup)}"
+                            + $" childActual={child.ActualWidth:F1}x{child.ActualHeight:F1}"
+                            + $" hostActual={(hostEl != null ? hostEl.ActualWidth.ToString("F1") : "-")}x{(hostEl != null ? hostEl.ActualHeight.ToString("F1") : "-")}"
+                            + $" padding={(hostEl is Border hb ? hb.Padding.Left.ToString("F1") + "," + hb.Padding.Top.ToString("F1") : "-")}"
+                            + $" screen=({screen.X:F1},{screen.Y:F1})"
+                            + $" transform={DescribeTransform(child)}");
+                    }
+                    catch (Exception ex)
+                    {
+                        PopupOverflowRoom.Diag("[Open] 记录失败: " + ex.Message);
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+
                 // 注意：置顶由 PopupManagerHelper 统一管理，
                 // 此处不再调用 BringPopupToFront，避免重复置顶导致闪烁
 
@@ -692,11 +714,37 @@ namespace Ink_Canvas.Helpers
                     popup.IsOpen = false;
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
+
+                    // 诊断：收场时必须把变换还原成终态，否则下次打开会带着残留
+                    PopupOverflowRoom.Diag(
+                        $"[Close] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
                 };
+
+                PopupOverflowRoom.Diag(
+                    $"[CloseStart] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
 
                 sb.Begin(child);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        /// <summary>诊断用：把内容的变换状态描述成一行，便于比对。</summary>
+        private static string DescribeTransform(FrameworkElement element)
+        {
+            if (element?.RenderTransform is not TransformGroup group)
+            {
+                return element?.RenderTransform == null ? "none" : element.RenderTransform.GetType().Name;
+            }
+
+            var parts = new System.Text.StringBuilder();
+            foreach (var t in group.Children)
+            {
+                if (t is ScaleTransform st) parts.Append($"S({st.ScaleX:F3})");
+                else if (t is TranslateTransform tt) parts.Append($"T({tt.X:F1},{tt.Y:F1})");
+                else parts.Append(t.GetType().Name);
+                parts.Append(' ');
+            }
+            return parts.ToString().Trim();
         }
 
         /// <summary>
