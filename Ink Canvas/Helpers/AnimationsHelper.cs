@@ -443,8 +443,34 @@ namespace Ink_Canvas.Helpers
         /// </remarks>
         private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Popup, AnimationToken> PopupTokens = new();
 
+        /// <summary>
+        /// 每个菜单的动画状态：显式记录"当前处在缩放曲线的哪一档"，
+        /// 不依赖 WPF 的 HasAnimatedProperties 判断是否被打断。
+        /// </summary>
+        /// <remarks>
+        /// 为什么不用内省：动画播完后，属性上仍然挂着 Timeline（FillBehavior.Stop 也不移除对象），
+        /// HasAnimatedProperties 依旧为 true，于是第二次打开会被误判成"打断"，
+        /// 起点取成 1.0、终点也是 1.0 —— 动画就此消失。
+        ///
+        /// 这里自己维护状态，语义明确：
+        /// 打开时从 CurrentScale 出发；收起时同样从 CurrentScale 出发。
+        /// 动画结束把 CurrentScale 记为终值。
+        /// </remarks>
         private sealed class AnimationToken
         {
+            /// <summary>当前视觉缩放档位（0.72 ~ 1.0367）。</summary>
+            public double CurrentScale = PopupPopInStartScale;
+
+            /// <summary>当前视觉位移。</summary>
+            public double CurrentSlide = 10;
+
+            /// <summary>当前视觉透明度。</summary>
+            public double CurrentOpacity = 0.5;
+
+            /// <summary>是否有打开/收起流程正在进行（用于打断判断）。</summary>
+            public bool IsTransitioning;
+
+            /// <summary>代次：后发起的操作自增，旧动画回调据此作废。</summary>
             public int Generation;
         }
 
@@ -482,14 +508,19 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private const double PopupPopInBackAmplitude = 0.5;
 
-        /// <summary>
-        /// 收场结束时的缩放：与出场的起始缩放一致，观感上"从哪来回哪去"。
-        /// 消失不需要过冲，所以直接单调缩到该值。
-        /// </summary>
-        private const double PopupPopOutEndScale = 0.9;
-
         /// <summary>收场时长（秒）。比出场短一点，让关闭显得干脆。</summary>
         internal const double PopupPopOutDurationSeconds = 0.22;
+
+        /// <summary>
+        /// 打开动画中"涨到峰值"所占的时间比例。
+        /// 取自观感序列：上升 8 段、回落 3 段，共 11 段 => 8/11 ≈ 0.727。
+        /// </summary>
+        internal const double PopupOpenPeakPercent = 8.0 / 11.0;
+
+        /// <summary>
+        /// 收起动画中"先涨到峰值"所占比例。与打开互逆：3/11 ≈ 0.273。
+        /// </summary>
+        internal const double PopupClosePeakPercent = 3.0 / 11.0;
 
         public static void ShowPopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
         {
@@ -532,20 +563,23 @@ namespace Ink_Canvas.Helpers
                 child.BeginAnimation(UIElement.OpacityProperty, null);
                 child.Opacity = targetOpacity;
 
-                // 打断支持：若上一段动画（通常是收场）还在播，从它**当前**的视觉状态接续，
-                // 而不是先归位再重来——否则用户会看到"缩回去一半又跳回来"。
+                // 起点取自显式状态机，而不是内省 WPF 属性。
                 //
-                // 但要区分两种情形，否则首次打开会没有动画：
-                // - 打断：属性上确实还挂着正在跑的动画（HasAnimatedProperties），用当前值作起点；
-                // - 首次打开：属性已归位到终态（1.0），此时必须用标准起始值 0.72，
-                //   否则 From 和 To 都是 1.0，缩放动画等于不存在。
-                var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
-                if (!IsAnimating(child))
-                {
-                    scaleStart = PopupPopInStartScale;
-                    slideStart = 10;
-                    opacityStart = targetOpacity * 0.5;
-                }
+                // 内省不可靠：动画播完后 Timeline 仍挂在属性上（Stop 也不移除对象），
+                // HasAnimatedProperties 一直是 true，于是第二次打开会被误判成"打断"，
+                // 起点取成 1.0、终点也是 1.0 —— 这就是"第二次打开动画没了"的原因。
+                //
+                // 自己记录档位则语义明确：
+                // - 收起进行中被打断：从当时的档位继续升（例如 4 → 9 → 6）；
+                // - 打开已完成后再开：从终态 6 开始，同样会有 6 → 9 → 6 的动画。
+                var token = TokenFor(popup);
+                double scaleStart = token.CurrentScale;
+                double slideStart = token.CurrentSlide;
+                double opacityStart = token.CurrentOpacity;
+
+                // 起点已经等于终态时，仍要播一次"涨到峰值再回落"，
+                // 否则用户会看到"第二次打开没有任何动画"。
+                token.IsTransitioning = true;
 
                 // 清掉旧动画（不再归位），目的是让下面的基值写入能生效。
                 ClearTransformAnimations(child);
@@ -582,12 +616,14 @@ namespace Ink_Canvas.Helpers
 
                 // To 全部省略：目标就是基值（终态）。
                 // FillBehavior.Stop 让动画播完后释放属性、露出基值——基值已是终态，结果正确。
-                // 时间按"剩余行程"缩短：从 0.9 接续到 1.0 只需走 1/10 的路程，
-                // 仍用完整时长会显得拖沓。打断越快、剩余越少、时长越短。
+                // 时长：按"剩余行程"缩短，但**绝不因此归零**。
+                // 若起点已在终态附近（例如重复打开），remaining≈0，
+                // 若直接按比例算会得到 0s —— 那正是"第二次打开没有动画"的来源。
+                // 这里保底 0.35 倍的完整时长，保证"涨一下再回落"始终看得见。
                 double remaining = Math.Abs(1.0 - scaleStart);
                 double fullDistance = Math.Abs(1.0 - PopupPopInStartScale);
-                double effectiveDuration = Math.Max(0.08,
-                    duration * (fullDistance > 0.001 ? Math.Min(1.0, remaining / fullDistance) : 1.0));
+                double travelRatio = fullDistance > 0.001 ? Math.Min(1.0, remaining / fullDistance) : 0;
+                double effectiveDuration = Math.Max(duration * 0.35, duration * travelRatio);
 
                 var fadeInAnimation = new DoubleAnimation
                 {
@@ -608,28 +644,54 @@ namespace Ink_Canvas.Helpers
                 Storyboard.SetTargetProperty(slideAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
 
-                // 缩放入场：一条 BackEase 曲线完成"小 → 略大 → 回落"。
-                // 不要拆成两段关键帧：峰值处速度不连续会顿一下，EaseOutBack 本身就先冲过头再回落。
-                // From 用当前缩放值：中途被打断时从这里继续长到 1.0。
-                var scaleAnimation = new DoubleAnimation
+                // 缩放：显式三段关键帧 —— 起点 → 峰值 → 终值。
+                //
+                // 为什么不用单条 BackEase：
+                // BackEase 的峰值由 Amplitude 固定决定，且只在"起点≠终点"时才有可观的行程。
+                // 用户要求的是「从当前档位涨到峰值 9，再回落到 6」，起点可能就是 6，
+                // 单条缓动在 From==To 时完全看不出动作。
+                // 关键帧能把"先涨后落"写死成曲线本身，起点任意都成立。
+                var scaleAnimation = new DoubleAnimationUsingKeyFrames
                 {
-                    From = scaleStart,
                     Duration = AnimationSpeed.ScaleToTimeSpan(effectiveDuration),
-                    FillBehavior = FillBehavior.Stop,
-                    EasingFunction = new BackEase
-                    {
-                        EasingMode = EasingMode.EaseOut,
-                        Amplitude = PopupPopInBackAmplitude
-                    }
+                    FillBehavior = FillBehavior.Stop
                 };
+
+                // 起点：当前档位（打断时是中间值，正常打开时是 0.72 或 1.0）
+                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
+                    scaleStart, KeyTime.FromPercent(0.0)));
+
+                // 峰值：只在起点低于峰值时才需要"涨上去"；已高于峰值则不再上冲
+                double peak = PopupPopInPeakScale;
+                if (scaleStart < peak * 0.995)
+                {
+                    // 峰值位置取自观感序列比例：上升占 8/11、回落占 3/11。
+                    // 段内用线性：序列本身是"每帧等量变化"，用 EaseOut 会让峰值附近
+                    // 变化过慢，看起来像在峰值上"卡住"。
+                    scaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
+                        peak, KeyTime.FromPercent(PopupOpenPeakPercent)));
+                }
+
+                // 终值：1.0
+                scaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
+                    1.0, KeyTime.FromPercent(1.0)));
+
                 Storyboard.SetTargetProperty(scaleAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
                 var scaleAnimationY = scaleAnimation.Clone();
                 Storyboard.SetTargetProperty(scaleAnimationY,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
 
-                // 不需要 Completed 打补丁：基值已经是终态。
-                // Stop 让动画结束后露出基值（缩放 1、位移 0、目标透明度），天然就是正确结果。
+                // 终值由基值保证（已是终态）；Completed 只负责同步状态机，
+                // 让下一次打开能从"6"这样的正确档位继续。
+                sb.Completed += (_, _) =>
+                {
+                    if (!IsCurrent(popup, generation)) return;
+                    token.CurrentScale = 1.0;
+                    token.CurrentSlide = 0;
+                    token.CurrentOpacity = targetOpacity;
+                    token.IsTransitioning = false;
+                };
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
@@ -664,14 +726,11 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
-                // 打断支持：从当前视觉状态接续（通常是出场动画播到一半又点了关闭）
-                var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
-                if (!IsAnimating(child))
-                {
-                    // 未在动画中：按完整出场状态起步
-                    scaleStart = 1.0;
-                    slideStart = 0;
-                }
+                // 起点取自同一个显式状态机（与出场共用），保证打断时接得上。
+                var token = TokenFor(popup);
+                double scaleStart = token.CurrentScale;
+                double slideStart = token.CurrentSlide;
+                token.IsTransitioning = true;
 
                 child.BeginAnimation(UIElement.OpacityProperty, null);
 
@@ -688,26 +747,31 @@ namespace Ink_Canvas.Helpers
                 child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
                 child.Opacity = targetOpacity;
 
-                // 收场 = 出场动画的逆过程：
-                //   出场 起始0.72 →(BackEase 冲到1.037)→ 回落 1.0
-                //   收场 1.0 →(BackEase 先涨到1.037)→ 缩到 0.72 并消失
-                // 「先放大一点再缩小」正是 Back 曲线前半段的效果，
-                // 用一条 EaseInBack 就能同时表达这两种感觉，不必拼两段。
-                double exitDuration = Math.Max(0.10,
-                    duration * Math.Min(1.0, Math.Abs(scaleStart - PopupPopInStartScale)
-                                              / Math.Max(0.001, Math.Abs(1.0 - PopupPopInStartScale))));
+                // 收场曲线（按用户给的档位模型）：
+                //   从当前档位出发 → 涨到峰值 → 缩到底并消失
+                //   正常收起：6 → 7 → 8 → 9 → 8 → ... → 1
+                //   打断收起：4 → 涨到 9 → 降到底
+                // 用显式关键帧写死，起点任意都成立。
+                double exitDuration = Math.Max(duration * 0.5, duration * 0.9);
 
-                // 缩放：EaseInBack 起手先向外涨一点，随后加速缩到底
-                var exitScaleAnimation = new DoubleAnimation
+                var exitScaleAnimation = new DoubleAnimationUsingKeyFrames
                 {
-                    To = PopupPopInStartScale,
                     Duration = AnimationSpeed.ScaleToTimeSpan(exitDuration),
-                    EasingFunction = new BackEase
-                    {
-                        EasingMode = EasingMode.EaseIn,
-                        Amplitude = PopupPopInBackAmplitude
-                    }
+                    FillBehavior = FillBehavior.Stop
                 };
+                exitScaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
+                    scaleStart, KeyTime.FromPercent(0.0)));
+                // 先涨到峰值（起点已高于峰值时不再上冲）
+                if (scaleStart < PopupPopInPeakScale * 0.995)
+                {
+                    // 收起时先涨到峰值占 3/11，随后用 8/11 缩到底（与打开互逆）
+                    exitScaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
+                        PopupPopInPeakScale, KeyTime.FromPercent(PopupClosePeakPercent)));
+                }
+                // 再线性缩到底：终点与打开起点一致（0.72），做到"从哪来回哪去"
+                exitScaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
+                    PopupPopInStartScale, KeyTime.FromPercent(1.0)));
+
                 Storyboard.SetTargetProperty(exitScaleAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
                 var exitScaleAnimationY = exitScaleAnimation.Clone();
@@ -747,9 +811,16 @@ namespace Ink_Canvas.Helpers
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
 
-                    // 把变换上的动画彻底摘掉并归位。若不清理，缩放会停在 0.9，
+                    // 把变换上的动画彻底摘掉并归位。若不清理，缩放会停在中间值，
                     // 下次打开时布局按带残留的尺寸测量，popupSize 变小、定位偏下。
                     ClearTransformAnimations(child);
+
+                    // 同步状态机：收起完成后的档位是"最小态"，
+                    // 下次打开会从最小态重新长出来（0.72 → 峰值 → 1.0）。
+                    token.CurrentScale = PopupPopInStartScale;
+                    token.CurrentSlide = 10;
+                    token.CurrentOpacity = targetOpacity * 0.5;
+                    token.IsTransitioning = false;
                 };
 
                 // 收场动画一律 FillBehavior.Stop：结束后靠上面的清理归位
@@ -771,74 +842,6 @@ namespace Ink_Canvas.Helpers
         /// 而不是先跳回某个固定起点再重播。
         /// 读不到有效值时返回初始态（起始缩放、起始位移、半透明），
         /// 保证首次打开仍然是从小长出来。
-        /// </remarks>
-        /// <summary>
-        /// 判断菜单的变换/透明度上是否真的挂着动画（即处于"播到一半"的状态）。
-        /// </summary>
-        /// <remarks>
-        /// 仅凭属性值无法区分"首次打开"与"被打断"：
-        /// 首次打开前属性已归位到 1.0，读出来也是合法值，
-        /// 若把它当作打断起点，From 与 To 相同，动画就消失了。
-        /// </remarks>
-        private static bool IsAnimating(FrameworkElement child)
-        {
-            if (child == null) return false;
-
-            try
-            {
-                if (child.HasAnimatedProperties) return true;
-                if (child.RenderTransform is TransformGroup group)
-                {
-                    foreach (var transform in group.Children)
-                    {
-                        if (transform is ScaleTransform scale && scale.HasAnimatedProperties) return true;
-                        if (transform is TranslateTransform translate && translate.HasAnimatedProperties) return true;
-                    }
-                }
-            }
-            catch
-            {
-                // 结构异常按"未在动画"处理，走首次打开路径更安全
-            }
-
-            return false;
-        }
-
-        private static (double Scale, double Slide, double Opacity) CaptureCurrentVisualState(FrameworkElement child)
-        {
-            double scale = PopupPopInStartScale;
-            double slide = 10;
-            double opacity = child?.Opacity ?? 1.0;
-
-            if (double.IsNaN(opacity) || opacity < 0.05) opacity = 1.0;
-
-            try
-            {
-                if (child?.RenderTransform is TransformGroup group && group.Children.Count >= 2
-                    && group.Children[0] is ScaleTransform st
-                    && group.Children[1] is TranslateTransform tt)
-                {
-                    // 动画进行中时，属性上挂着动画，直接读会拿到动画当前值
-                    double currentScale = st.ScaleX;
-                    double currentSlide = tt.Y;
-
-                    if (!double.IsNaN(currentScale) && currentScale > 0.05 && currentScale < 1.2)
-                    {
-                        scale = currentScale;
-                    }
-                    if (!double.IsNaN(currentSlide) && Math.Abs(currentSlide) < 60)
-                    {
-                        slide = currentSlide;
-                    }
-                }
-            }
-            catch
-            {
-                // 结构异常时用默认起点
-            }
-
-            return (scale, slide, opacity);
-        }
 
         /// <summary>
         /// 清掉内容变换上的所有动画，并把缩放/位移恢复到单位值。
