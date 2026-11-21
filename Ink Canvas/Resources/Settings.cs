@@ -1857,7 +1857,7 @@ namespace Ink_Canvas
         /// 全局动画速度倍率，范围 0.1 ~ 10，默认 1.0。
         /// 大于 1 变慢（慢放），小于 1 变快。仅用于调试观察动画细节。
         /// </summary>
-        [JsonProperty("animationSpeedMultiplier")]
+        [JsonProperty("animationPlaybackSpeedV2")]
         public double AnimationSpeedMultiplier { get; set; } = 1.0;
 
         [JsonProperty("isPPTComDebugProbeEnabled")]
