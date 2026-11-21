@@ -1258,7 +1258,7 @@ namespace Ink_Canvas
                 SetSettingsToRecommendation();
                 Settings.Automation.AutoDelSavedFiles = true;
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
-                Settings.Automation.AutoSavedStrokesLocation = @"D:\Ink Canvas\AutoSavedStrokes";
+                Settings.Automation.AutoSavedStrokesLocation = System.IO.Path.Combine(App.RootPath, "Saves");
                 SaveSettingsToFile();
 
                 // 确保工具栏配置也被重置为默认值
