@@ -84,9 +84,13 @@ mc:Ignorable="d"
                                 TickFrequency="0.25" IsSnapToTickEnabled="True"
                                 VerticalAlignment="Center"
                                 ValueChanged="SliderAnimationSpeed_ValueChanged" />
-                        <TextBlock x:Name="TextAnimationSpeed" MinWidth="58" Margin="10,0,0,0"
+                        <!-- 数值区宽度固定：提示语（慢放/极快等）放 ToolTip，不进布局，
+                             否则文本一旦变长会把左边的滑杆往左挤，滑块像自己跳了。 -->
+                        <TextBlock x:Name="TextAnimationSpeed" Width="46" Margin="10,0,0,0"
+                                   TextAlignment="TextRight"
                                    VerticalAlignment="Center"
-                                   Text="1.0x" />
+                                   Text="1.0x"
+                                   ToolTip="1.0x 原始速度" />
                         <Button x:Name="ButtonResetAnimationSpeed" Content="重置" Margin="8,0,0,0"
                                 Padding="10,2" MinHeight="0"
                                 VerticalAlignment="Center"
