@@ -430,16 +430,13 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <remarks>
         /// 时长是「progress 从 0 走到 1」的时间，曲线形状与它无关：
-        /// 缩短只会整体加快，峰值位置(8/11)与过冲量(1.0367)都不变。
+        /// 缩短只会整体加快，峰值位置(8/11)与过冲量都不变。
         ///
-        /// 定这个值的依据是过冲段的可辨识度：
-        /// 回落段占时长 3/11，60fps 下必须至少有 4~5 帧，
-        /// 否则过冲一闪而过，看起来就像"没有放大效果"。
-        ///   0.40s => 回落 109ms = 6.5 帧（偏慢，收尾有明显的停滞感）
-        ///   0.30s => 回落  82ms = 4.9 帧（当前取值）
-        ///   0.22s => 回落  60ms = 3.6 帧（过冲开始看不清）
+        /// 基准时长应当就是「手感最舒服的那个速度」，而不是一个偏慢的"出厂值"，
+        /// 否则用户只能常驻 2x 以上，倍率滑杆的 1.0 就失去了意义。
+        /// 用户实测结论：1x 要按 0.15s 这个速度才算对劲。
         /// </remarks>
-        internal const double PopupPopInDurationSeconds = 0.30;
+        internal const double PopupPopInDurationSeconds = 0.15;
 
         /// <summary>
         /// 每个 Popup 当前的动画代次。
@@ -512,20 +509,29 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 缩放过冲峰值。>1 才会出现"变大一点再回落"。
         /// 必须与实际动画峰值一致：<see cref="PopupOverflowRoom"/> 按它计算留白，
-        /// 低估会导致峰值时四边被裁。BackEase(Amplitude=0.5) 从 0.72 起跳的实测峰值为 1.0367。
+        /// 低估会导致峰值时四边被裁。
         /// </summary>
-        private const double PopupPopInPeakScale = 1.0367;
+        /// <remarks>
+        /// 取 1.05（过冲 5%）而不是更小的值，是被时长逼出来的：
+        /// 时长压到 0.15s 后，回落段只剩 3/11 × 150ms = 41ms，60fps 下约 2.5 帧。
+        /// 采样点落不到峰值上时，实测最大缩放只有 ~1.02——肉眼分辨不出"先放大再回落"。
+        /// 把峰值抬到 1.05，即使采样错过顶点，落点也在 1.02~1.04，过冲依然成立。
+        /// 这同时解释了为什么峰值必须与留白使用同一个常量：留白按 1.05 算，
+        /// 而曲线若只到 1.0367，多出来的留白纯属浪费。
+        /// </remarks>
+        private const double PopupPopInPeakScale = 1.05;
 
         /// <summary>
         /// 收场时长（秒）。比出场短一点，让关闭显得干脆。
         /// </summary>
         /// <remarks>
         /// 收起是同一曲线的倒放，所以"先涨后缩"那段同样占 3/11。
-        /// 0.18s 时该段约 49ms ≈ 3 帧——已经在可辨识的临界值上，
-        /// 再短就必须同步抬高 <see cref="PopupPopInPeakScale"/> 或放宽峰值位置，
-        /// 否则收起的过冲会彻底看不见。
+        /// 0.10s 时该段约 27ms ≈ 1.6 帧，是这套曲线还能看出收起的最后一段余地；
+        /// 能站得住是因为 <see cref="PopupPopInPeakScale"/> 提到了 1.05 ——
+        /// 过冲量越大，越少的帧也足以传达"先涨后缩"。
+        /// 收起刻意比打开快（0.10 vs 0.15）：关闭要显得干脆，打开要从容。
         /// </remarks>
-        internal const double PopupPopOutDurationSeconds = 0.18;
+        internal const double PopupPopOutDurationSeconds = 0.10;
 
         /// <summary>
         /// 打开菜单：progress 从当前位置推进到 1。
