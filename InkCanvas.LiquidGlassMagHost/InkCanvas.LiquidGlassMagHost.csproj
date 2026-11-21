@@ -47,8 +47,8 @@
   <!-- Costura.Fody 把所有引用的运行时 dll（System.*、Microsoft.* 等）嵌入到 exe 里，
        运行时从内存加载，不产生额外 dll 文件。需要 FodyWeavers.xml 显式开启嵌入。 -->
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.8.2" PrivateAssets="all" />
-    <PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all" />
+    <PackageReference Include="Fody" Version="*" PrivateAssets="all" />
+    <PackageReference Include="Costura.Fody" Version="*" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
