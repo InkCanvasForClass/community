@@ -482,6 +482,15 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private const double PopupPopInBackAmplitude = 0.5;
 
+        /// <summary>
+        /// 收场结束时的缩放：与出场的起始缩放一致，观感上"从哪来回哪去"。
+        /// 消失不需要过冲，所以直接单调缩到该值。
+        /// </summary>
+        private const double PopupPopOutEndScale = 0.9;
+
+        /// <summary>收场时长（秒）。比出场短一点，让关闭显得干脆。</summary>
+        internal const double PopupPopOutDurationSeconds = 0.22;
+
         public static void ShowPopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
         {
             try
@@ -510,21 +519,21 @@ namespace Ink_Canvas.Helpers
                 double targetOpacity = GetPopupTargetOpacity(popup);
 
                 child.Visibility = Visibility.Visible;
-                child.Opacity = targetOpacity * 0.5;
 
-                // 关键：清掉上一次留下的动画。
+                // 关键设计：**基值就是终值**，动画只负责"从 From 播到基值"。
                 //
-                // WPF 的动画默认 FillBehavior = HoldEnd，播完后会一直"压住"属性值。
-                // 菜单反复开合时，第二次的 Storyboard 写不进去，表现为"只闪一下"。
-                // 因此在建立新变换之前，把旧动画从内容上摘掉。
+                // WPF 里属性值有三层：动画 > 基值。用 FillBehavior.Stop 时动画一结束
+                // 就回落到基值；如果把基值设成起始值（0.72），菜单播完就会停在小尺寸上，
+                // 表现为"第二次打开变小、位置偏"——靠 Completed 回调补终值非常脆弱，
+                // 回调一旦不执行（被后续操作打断、Storyboard 被替换）就永久停在错误状态。
+                //
+                // 因此这里把基线设成最终态（缩放 1、位移 0、目标透明度），
+                // From 只描述起点。播完后无论是否触发 Completed，属性都已经是终值。
                 child.BeginAnimation(UIElement.OpacityProperty, null);
+                child.Opacity = targetOpacity;
 
-                // 缩放 + 位移共存：用 TransformGroup 承载两段动画，互不覆盖。
-                // 窗外已有 PopupOverflowRoom 预留的留白，峰值 1.0367 不会越界被裁。
-                // 每次都用新的 Transform 实例：旧实例上可能还挂着 HoldEnd 的动画，
-                // 复用旧实例会把残留值一起带进来。
-                var scaleTransform = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
-                var slideTransform = new TranslateTransform(0, 10);
+                var scaleTransform = new ScaleTransform(1, 1);
+                var slideTransform = new TranslateTransform(0, 0);
                 var transformGroup = new TransformGroup();
                 transformGroup.Children.Add(scaleTransform);
                 transformGroup.Children.Add(slideTransform);
@@ -544,12 +553,12 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
+                // To 全部省略：目标就是基值（终态）。
+                // FillBehavior.Stop 让动画播完后释放属性、露出基值——基值已是终态，结果正确。
                 var fadeInAnimation = new DoubleAnimation
                 {
                     From = targetOpacity * 0.5,
-                    To = targetOpacity,
                     Duration = TimeSpan.FromSeconds(duration),
-                    // 播完即释放属性，避免 HoldEnd 把值压住导致下次播不进去
                     FillBehavior = FillBehavior.Stop
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
@@ -558,7 +567,6 @@ namespace Ink_Canvas.Helpers
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 10,
-                    To = 0,
                     Duration = TimeSpan.FromSeconds(duration),
                     FillBehavior = FillBehavior.Stop
                 };
@@ -571,7 +579,6 @@ namespace Ink_Canvas.Helpers
                 var scaleAnimation = new DoubleAnimation
                 {
                     From = PopupPopInStartScale,
-                    To = 1.0,
                     Duration = TimeSpan.FromSeconds(duration),
                     FillBehavior = FillBehavior.Stop,
                     EasingFunction = new BackEase
@@ -586,26 +593,8 @@ namespace Ink_Canvas.Helpers
                 Storyboard.SetTargetProperty(scaleAnimationY,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
 
-                // 用 FillBehavior.Stop 时必须自己把终态写死：
-                // Stop 会在动画结束后把属性弹回 From，菜单就会缩回去。
-                // 这里在结束时显式写入终值，并把动画从属性上摘掉，
-                // 既保证终态正确，也保证下次打开时没有 HoldEnd 残留。
-                sb.Completed += (_, _) =>
-                {
-                    // 已被更新的操作取代（例如用户又点了一次开合），不要覆盖当前状态
-                    if (!IsCurrent(popup, generation)) return;
-
-                    child.BeginAnimation(UIElement.OpacityProperty, null);
-                    child.Opacity = targetOpacity;
-
-                    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-                    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                    scaleTransform.ScaleX = 1.0;
-                    scaleTransform.ScaleY = 1.0;
-
-                    slideTransform.BeginAnimation(TranslateTransform.YProperty, null);
-                    slideTransform.Y = 0;
-                };
+                // 不需要 Completed 打补丁：基值已经是终态。
+                // Stop 让动画结束后露出基值（缩放 1、位移 0、目标透明度），天然就是正确结果。
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
@@ -617,7 +606,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
-        public static void HidePopupWithSlideAndFade(Popup popup, double duration = 0.15)
+        public static void HidePopupWithSlideAndFade(Popup popup, double duration = PopupPopOutDurationSeconds)
         {
             try
             {
@@ -640,28 +629,16 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
-                var fadeOutAnimation = new DoubleAnimation
-                {
-                    From = targetOpacity,
-                    To = 0,
-                    Duration = TimeSpan.FromSeconds(duration),
-                    FillBehavior = FillBehavior.Stop
-                };
-                fadeOutAnimation.EasingFunction = new CubicEase();
-                Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
+                // 收场与出场对称：缩放 + 位移 + 淡出，同一条时间轴。
+                // 原来只有淡出和 10px 下移，没有缩放，和出场（缩放+位移+淡入）不对称，
+                // 观感就会"生硬、像被抽走"。
+                //
+                // 基值仍保持终态（缩放 1、位移 0、目标透明度），
+                // 动画只描述"从现在播到 To"，播完由 Closed 重置，
+                // 这样中途被重新打开也不会留下错误状态。
+                child.BeginAnimation(UIElement.OpacityProperty, null);
+                child.Opacity = targetOpacity;
 
-                var slideAnimation = new DoubleAnimation
-                {
-                    From = 0,
-                    To = 10,
-                    Duration = TimeSpan.FromSeconds(duration)
-                };
-                slideAnimation.EasingFunction = new CubicEase();
-                // 收场与出场必须用同一套变换结构，否则路径对不上、位移会残留
-                Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
-
-                // 收场从"正常大小、无位移"起步，与出场终态一致
                 var exitScale = new ScaleTransform(1, 1);
                 var exitSlide = new TranslateTransform(0, 0);
                 var exitGroup = new TransformGroup();
@@ -670,8 +647,42 @@ namespace Ink_Canvas.Helpers
                 child.RenderTransform = exitGroup;
                 child.RenderTransformOrigin = new Point(0.5, 0.5);
 
+                // 淡出：用 EaseInCubic 起步慢、收尾快，符合"消失"的观感
+                var fadeOutAnimation = new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                fadeOutAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
+                Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
+
+                // 位移：向下滑出，与出场的向上滑入互为镜像，用 EaseIn 让加速感自然
+                var slideAnimation = new DoubleAnimation
+                {
+                    To = 10,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
+                Storyboard.SetTargetProperty(slideAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
+
+                // 缩小：与出场放大镜像。用 EaseIn 而非 Back，消失不需要回弹
+                var exitScaleAnimation = new DoubleAnimation
+                {
+                    To = PopupPopOutEndScale,
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                exitScaleAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
+                Storyboard.SetTargetProperty(exitScaleAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
+                var exitScaleAnimationY = exitScaleAnimation.Clone();
+                Storyboard.SetTargetProperty(exitScaleAnimationY,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
+
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
+                sb.Children.Add(exitScaleAnimation);
+                sb.Children.Add(exitScaleAnimationY);
 
                 sb.Completed += (s, e) =>
                 {
