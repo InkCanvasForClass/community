@@ -47,6 +47,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
             UpdateSliderText(QuickPanelOpacitySlider, QuickPanelOpacityText, "{0:P0}");
+            UpdateSliderText(FloatingFoldBallOpacitySlider, FloatingFoldBallOpacityText, "{0:P0}");
             UpdateSliderText(AutoCollapseDelaySlider, AutoCollapseDelayText, "{0:F1}s");
         }
 
@@ -68,12 +69,31 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings?.Appearance == null) return;
 
             ToggleSwitchEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
+            ComboBoxFoldedMode.SelectedIndex = settings.Appearance.UseFloatingFoldBall ? 1 : 0;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
             ToggleSwitchAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
+            FloatingFoldBallOpacitySlider.Value = settings.Appearance.FloatingFoldBallOpacity;
             ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
+        }
+
+        private void ComboBoxFoldedMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool useBall = ComboBoxFoldedMode.SelectedIndex == 1;
+            if (FloatingFoldBallOpacityCard != null)
+                FloatingFoldBallOpacityCard.Visibility = useBall ? Visibility.Visible : Visibility.Collapsed;
+            if (QuickPanelOpacityCard != null)
+                QuickPanelOpacityCard.Visibility = useBall ? Visibility.Collapsed : Visibility.Visible;
+            if (SidebarOptions != null)
+                SidebarOptions.Visibility = useBall ? Visibility.Collapsed : Visibility.Visible;
+            if (ToggleSwitchAllowDragSidePanel != null)
+                ToggleSwitchAllowDragSidePanel.ShowWhen = !useBall;
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.UseFloatingFoldBall = useBall;
+            SettingsManager.SaveSettingsToFile();
+            (Application.Current.MainWindow as MainWindow)?.ApplyFoldedMode();
         }
 
         private void ToggleSwitchEnableQuickPanel_Toggled(object sender, RoutedEventArgs e)
@@ -88,6 +108,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.AllowDragSidePanel = ToggleSwitchAllowDragSidePanel.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void FloatingFoldBallOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(FloatingFoldBallOpacitySlider, FloatingFoldBallOpacityText, "{0:P0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.FloatingFoldBallOpacity = FloatingFoldBallOpacitySlider.Value;
+            SettingsManager.SaveSettingsToFile();
+            (Application.Current.MainWindow as MainWindow)?.ApplyFloatingFoldBallOpacity();
         }
 
         private void QuickPanelOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)

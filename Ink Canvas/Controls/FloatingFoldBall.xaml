@@ -1,0 +1,29 @@
+<UserControl x:Class="Ink_Canvas.Controls.FloatingFoldBall"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             Width="50.342825" Height="{Binding Width, RelativeSource={RelativeSource Self}}"
+             HorizontalAlignment="Left" VerticalAlignment="Top"
+             Cursor="Hand" ToolTip="{x:Static props:ThemeStrings.Theme_FloatingFoldBall_Hint}" Focusable="True"
+             AutomationProperties.Name="{x:Static props:ThemeStrings.Theme_FloatingFoldBall_Hint}"
+             Stylus.IsPressAndHoldEnabled="False" Stylus.IsFlicksEnabled="False">
+    <UserControl.RenderTransform>
+        <TranslateTransform x:Name="MenuOffset" />
+    </UserControl.RenderTransform>
+    <Grid>
+        <Ellipse Fill="{DynamicResource FloatingBarBackgroundBrush}"
+                 Stroke="{DynamicResource FloatingBarBorderBrush}" StrokeThickness="1">
+            <Ellipse.Effect>
+                <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.25" />
+            </Ellipse.Effect>
+        </Ellipse>
+        <Grid IsHitTestVisible="False">
+            <Image x:Name="PenIcon" Source="{DynamicResource QuickPanelEyeIcon}" Width="24" Height="24"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+            <Path x:Name="CloseIcon" Data="M 0,0 L 12,12 M 12,0 L 0,12" StrokeThickness="2"
+                  Stroke="{DynamicResource FloatingBarForegroundBrush}" StrokeStartLineCap="Round"
+                  StrokeEndLineCap="Round" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Visibility="Collapsed" />
+        </Grid>
+    </Grid>
+</UserControl>

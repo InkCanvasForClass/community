@@ -94,7 +94,7 @@
     <value>中二之魂觉醒</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>一按展开钮侧边栏就 pop 出来</value>
+    <value>点展开钮，快捷工具 pop 出来</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启动动画整活开关</value>
@@ -474,7 +474,7 @@
     <value>侧边栏隐身值</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>社恐模式</value>
+    <value>快捷工具社恐模式</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
     <value>自动收起前的犹豫时间</value>
@@ -646,5 +646,26 @@
   </data>
   <data name="Theme_RestartRequired" xml:space="preserve">
     <value>主题切了，但全套皮肤得重开应用才完全到账。现在立刻重启？</value>
+  </data>
+  <data name="Theme_FoldedMode" xml:space="preserve">
+    <value>工具栏退场姿势</value>
+  </data>
+  <data name="Theme_FoldedMode_Sidebar" xml:space="preserve">
+    <value>经典侧边栏，贴边待机</value>
+  </data>
+  <data name="Theme_FoldedMode_Ball" xml:space="preserve">
+    <value>悬浮球，变成一颗球</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
+    <value>点我展开，拖我搬家</value>
+  </data>
+  <data name="Theme_EnableQuickPanel_Description" xml:space="preserve">
+    <value>关掉后一点，整条工具栏直接返场。</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Opacity" xml:space="preserve">
+    <value>悬浮球隐身值</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Opacity_Description" xml:space="preserve">
+    <value>小球和外圈一起隐身，数值越低越透明。</value>
   </data>
 </root>

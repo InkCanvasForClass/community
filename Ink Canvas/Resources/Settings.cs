@@ -1032,6 +1032,24 @@ namespace Ink_Canvas
         [JsonProperty("quickPanelBottomOffset")]
         public double QuickPanelBottomOffset { get; set; } = -150;
 
+        [JsonProperty("useFloatingFoldBall")]
+        public bool UseFloatingFoldBall { get; set; } = false;
+
+        [JsonProperty("floatingFoldBallX")]
+        public double FloatingFoldBallX { get; set; } = 80;
+
+        [JsonProperty("floatingFoldBallY")]
+        public double FloatingFoldBallY { get; set; } = 200;
+
+        private double _floatingFoldBallOpacity = 0.85;
+
+        [JsonProperty("floatingFoldBallOpacity")]
+        public double FloatingFoldBallOpacity
+        {
+            get => _floatingFoldBallOpacity;
+            set => _floatingFoldBallOpacity = double.IsFinite(value) ? Math.Clamp(value, 0.2, 1) : 0.85;
+        }
+
         [JsonProperty("useMinimalistGrabHandle")]
         public bool UseMinimalistGrabHandle { get; set; } = true;
 

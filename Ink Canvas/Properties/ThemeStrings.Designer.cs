@@ -76,6 +76,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_EnableQuickPanel => ResourceManager.GetString(nameof(Theme_EnableQuickPanel), _resourceCulture);
 
+        public static string Theme_EnableQuickPanel_Description => ResourceManager.GetString(nameof(Theme_EnableQuickPanel_Description), _resourceCulture);
+
         public static string Theme_EnableSplash => ResourceManager.GetString(nameof(Theme_EnableSplash), _resourceCulture);
 
         public static string Theme_FloatingBarButtonsTitle => ResourceManager.GetString(nameof(Theme_FloatingBarButtonsTitle), _resourceCulture);
@@ -193,6 +195,13 @@ namespace Ink_Canvas.Properties
         public static string Theme_UIFontLabel => ResourceManager.GetString(nameof(Theme_UIFontLabel), _resourceCulture);
 
         public static string Theme_UnfoldButtonIcon => ResourceManager.GetString(nameof(Theme_UnfoldButtonIcon), _resourceCulture);
+
+        public static string Theme_FoldedMode => ResourceManager.GetString(nameof(Theme_FoldedMode), _resourceCulture);
+        public static string Theme_FoldedMode_Sidebar => ResourceManager.GetString(nameof(Theme_FoldedMode_Sidebar), _resourceCulture);
+        public static string Theme_FoldedMode_Ball => ResourceManager.GetString(nameof(Theme_FoldedMode_Ball), _resourceCulture);
+        public static string Theme_FloatingFoldBall_Hint => ResourceManager.GetString(nameof(Theme_FloatingFoldBall_Hint), _resourceCulture);
+
+        public static string Theme_FloatingFoldBall_Opacity_Description => ResourceManager.GetString(nameof(Theme_FloatingFoldBall_Opacity_Description), _resourceCulture);
 
         public static string Theme_UnfoldIcon_Arrow => ResourceManager.GetString(nameof(Theme_UnfoldIcon_Arrow), _resourceCulture);
 

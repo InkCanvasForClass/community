@@ -316,7 +316,7 @@
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxFloatingBarOpacityText"
                                                VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
-                                    <Slider x:Name="ViewboxFloatingBarOpacityValueSlider" Minimum="0.3"
+                                    <Slider x:Name="ViewboxFloatingBarOpacityValueSlider" Minimum="0.3" IsMoveToPointEnabled="True" SmallChange="0.05" LargeChange="0.1"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
@@ -331,7 +331,7 @@
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxFloatingBarOpacityInPPTText"
                                                VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
-                                    <Slider x:Name="ViewboxFloatingBarOpacityInPPTValueSlider" Minimum="0.3"
+                                    <Slider x:Name="ViewboxFloatingBarOpacityInPPTValueSlider" Minimum="0.3" IsMoveToPointEnabled="True" SmallChange="0.05" LargeChange="0.1"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
@@ -352,7 +352,7 @@
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="FloatingBarMenuOpacityText"
                                                VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
-                                    <Slider x:Name="FloatingBarMenuOpacitySlider" Minimum="0.3"
+                                    <Slider x:Name="FloatingBarMenuOpacitySlider" Minimum="0.3" IsMoveToPointEnabled="True" SmallChange="0.05" LargeChange="0.1"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
@@ -366,7 +366,7 @@
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="FloatingBarMenuOpacityInPPTText"
                                                VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
-                                    <Slider x:Name="FloatingBarMenuOpacityInPPTSlider" Minimum="0.3"
+                                    <Slider x:Name="FloatingBarMenuOpacityInPPTSlider" Minimum="0.3" IsMoveToPointEnabled="True" SmallChange="0.05" LargeChange="0.1"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"

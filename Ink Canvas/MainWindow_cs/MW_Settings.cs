@@ -1495,6 +1495,7 @@ namespace Ink_Canvas
             LeftSidePanel?.ApplySettings();
             RightSidePanel?.ApplySettings();
             ApplyQuickPanelLayoutSettings();
+            ApplyFoldedMode();
         }
 
         public void ApplyQuickPanelLayoutSettings()

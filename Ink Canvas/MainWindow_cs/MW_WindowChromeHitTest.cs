@@ -288,6 +288,8 @@ namespace Ink_Canvas
             return ContainsPoint(ViewboxFloatingBar, windowPoint)
                    || ContainsPoint(LeftSidePanel, windowPoint)
                    || ContainsPoint(RightSidePanel, windowPoint)
+                   || ContainsPoint(FoldedBall, windowPoint)
+                   || IsPointInFloatingFoldMenu(windowPoint)
                    || ContainsPoint(LeftUnFoldButtonQuickPanel, windowPoint)
                    || ContainsPoint(RightUnFoldButtonQuickPanel, windowPoint)
                    || ContainsPoint(LeftBottomPanelForPPTNavigation, windowPoint)

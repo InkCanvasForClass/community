@@ -94,7 +94,7 @@
     <value>Dark</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>Show sidebar after clicking unfold button</value>
+    <value>Show quick menu on click</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>Enable startup animation</value>
@@ -474,7 +474,7 @@
     <value>Sidebar opacity</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>Auto-collapse sidebar after opening</value>
+    <value>Auto-close the quick menu</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
     <value>Wait time before auto-collapse</value>
@@ -646,5 +646,26 @@
   </data>
   <data name="Theme_RestartRequired" xml:space="preserve">
     <value>You need to restart the app for theme changes to fully take effect. Restart now?</value>
+  </data>
+  <data name="Theme_FoldedMode" xml:space="preserve">
+    <value>Folded toolbar style</value>
+  </data>
+  <data name="Theme_FoldedMode_Sidebar" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
+  <data name="Theme_FoldedMode_Ball" xml:space="preserve">
+    <value>Floating ball</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
+    <value>Click to expand; drag to move</value>
+  </data>
+  <data name="Theme_EnableQuickPanel_Description" xml:space="preserve">
+    <value>When off, clicking the expand button restores the toolbar.</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Opacity" xml:space="preserve">
+    <value>Floating ball opacity</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Opacity_Description" xml:space="preserve">
+    <value>Adjusts the opacity of both the floating ball and its radial menu.</value>
   </data>
 </root>

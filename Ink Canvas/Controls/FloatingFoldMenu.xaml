@@ -1,0 +1,84 @@
+<UserControl x:Class="Ink_Canvas.Controls.FloatingFoldMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             Width="260" Height="260" HorizontalAlignment="Left" VerticalAlignment="Top"
+             RenderTransformOrigin="0.5,0.5">
+    <UserControl.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform x:Name="PopScale" />
+            <RotateTransform x:Name="PopRotation" />
+        </TransformGroup>
+    </UserControl.RenderTransform>
+    <UserControl.LayoutTransform>
+        <ScaleTransform />
+    </UserControl.LayoutTransform>
+    <Canvas x:Name="Ring">
+        <Canvas.Resources>
+            <Style TargetType="Button">
+                <Setter Property="Width" Value="74" />
+                <Setter Property="Height" Value="70" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource FloatingBarForegroundBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="AutomationProperties.Name" Value="{Binding Content, RelativeSource={RelativeSource Self}}" />
+                <Setter Property="ToolTip" Value="{Binding Content, RelativeSource={RelativeSource Self}}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Tile" Background="{TemplateBinding Background}" BorderThickness="1"
+                                    BorderBrush="Transparent" CornerRadius="17">
+                                <StackPanel VerticalAlignment="Center">
+                                    <Image Source="{TemplateBinding Tag}" Width="26" Height="26" Margin="0,0,0,4"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
+                                    <TextBlock Text="{TemplateBinding Content}" TextAlignment="Center"
+                                               Margin="2,0" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Tile" Property="Background" Value="#22809CF5" />
+                                    <Setter TargetName="Tile" Property="BorderBrush" Value="#55809CF5" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Tile" Property="BorderBrush" Value="#FF688BE6" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Tile" Property="Background" Value="#44809CF5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Canvas.Resources>
+        <Ellipse Canvas.Left="3" Canvas.Top="3" Width="254" Height="254"
+                 Fill="{DynamicResource FloatingBarBackgroundBrush}"
+                 Stroke="{DynamicResource FloatingBarBorderBrush}">
+            <Ellipse.Effect>
+                <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.24" />
+            </Ellipse.Effect>
+        </Ellipse>
+        <Ellipse Canvas.Left="98" Canvas.Top="98" Width="64" Height="64" Stroke="#55809CF5"
+                 IsHitTestVisible="False" />
+        <Canvas x:Name="Tools" Width="260" Height="260">
+            <Canvas.Clip>
+                <EllipseGeometry Center="130,130" RadiusX="127" RadiusY="127" />
+            </Canvas.Clip>
+            <Button x:Name="RestoreToolbar" Content="{x:Static props:FloatingBarStrings.QuickPanel_Show}"
+                Tag="{DynamicResource QuickPanelEyeIcon}" />
+            <Button x:Name="SingleDraw" Content="{x:Static props:FloatingBarStrings.QuickPanel_SingleDraw}"
+                Tag="{DynamicResource QuickPanelPersonMoneyIcon}" />
+            <Button x:Name="RandomDraw" Content="{x:Static props:FloatingBarStrings.Tools_RandomDraw}"
+                Tag="{DynamicResource QuickPanelPeopleMoneyIcon}" />
+            <Button x:Name="Timer" Content="{x:Static props:FloatingBarStrings.QuickPanel_Timer}"
+                Tag="{DynamicResource QuickPanelTimerIcon}" />
+            <Button x:Name="Whiteboard" Content="{x:Static props:FloatingBarStrings.FloatingBar_Whiteboard}"
+                Tag="{DynamicResource QuickPanelBlackboardIcon}" />
+            <Button x:Name="ExitShow" Content="{x:Static props:FloatingBarStrings.QuickPanel_ExitShow}"
+                Tag="{DynamicResource QuickPanelEndSlideshowIcon}" Visibility="Collapsed" />
+        </Canvas>
+    </Canvas>
+</UserControl>

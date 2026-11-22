@@ -278,6 +278,13 @@ namespace Ink_Canvas
         private async Task AnimateSidePanelsAsync(int edge, bool skipAnimation)
         {
             int thisVersion = ++_sidePanelAnimVersion;
+            if (Settings.Appearance.UseFloatingFoldBall)
+            {
+                LeftSidePanel.Visibility = Visibility.Collapsed;
+                FoldedBall.Visibility = isFloatingBarFolded ? Visibility.Visible : Visibility.Collapsed;
+                UpdateFloatingFoldBallLayout();
+                return;
+            }
 
             Task leftMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
@@ -299,6 +306,7 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
+                if (_sidePanelAnimVersion != thisVersion) return;
                 if (edge == SidePanelEdgeHidden) LeftSidePanel.Visibility = Visibility.Collapsed;
             });
         }
@@ -316,12 +324,14 @@ namespace Ink_Canvas
         /// </remarks>
         private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
+            int modeVersion = _foldedModeVersion;
             if (Settings.Appearance.IsShowQuickPanel)
             {
                 SidePannelMarginAnimation(-50);
                 HideRightQuickPanel();
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await MoveQuickPanelTo(LeftUnFoldButtonQuickPanel, QuickPanelUnfoldedMargin, false);
+                if (modeVersion != _foldedModeVersion) return;
 
                 StartAutoCollapseQuickPanelTimer();
             }
@@ -344,12 +354,14 @@ namespace Ink_Canvas
         /// </remarks>
         private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
+            int modeVersion = _foldedModeVersion;
             if (Settings.Appearance.IsShowQuickPanel)
             {
                 SidePannelMarginAnimation(-50);
                 HideLeftQuickPanel();
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await MoveQuickPanelTo(RightUnFoldButtonQuickPanel, QuickPanelUnfoldedMargin, true);
+                if (modeVersion != _foldedModeVersion) return;
 
                 StartAutoCollapseQuickPanelTimer();
             }
@@ -370,9 +382,11 @@ namespace Ink_Canvas
         /// </remarks>
         private async void HideLeftQuickPanel()
         {
+            int modeVersion = _foldedModeVersion;
             if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
                 await MoveQuickPanelTo(LeftUnFoldButtonQuickPanel, QuickPanelFoldedMargin, false);
+                if (modeVersion != _foldedModeVersion) return;
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             }
         }
@@ -388,9 +402,11 @@ namespace Ink_Canvas
         /// </remarks>
         private async void HideRightQuickPanel()
         {
+            int modeVersion = _foldedModeVersion;
             if (RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
                 await MoveQuickPanelTo(RightUnFoldButtonQuickPanel, QuickPanelFoldedMargin, true);
+                if (modeVersion != _foldedModeVersion) return;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             }
         }
@@ -470,6 +486,7 @@ namespace Ink_Canvas
             {
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
+                CloseFloatingFoldMenu(animate: false);
             });
 
             await Dispatcher.InvokeAsync(() =>
@@ -584,6 +601,7 @@ namespace Ink_Canvas
         /// </summary>
         private void AutoCollapseTimer_Tick(object sender, EventArgs e)
         {
+            if (FoldedBallMenu.IsOpen && FoldedBall.IsPointerPressed) return;
             StopAutoCollapseQuickPanelTimer();
             HideQuickPanelAndResetMargin();
         }
@@ -604,6 +622,7 @@ namespace Ink_Canvas
         /// </summary>
         private void HideQuickPanelAndResetMargin()
         {
+            if (FoldedBallMenu.IsOpen) CloseFloatingFoldMenu();
             if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
                 RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
@@ -622,7 +641,8 @@ namespace Ink_Canvas
             if (!isFloatingBarFolded) return;
 
             bool isQuickPanelVisible = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
-                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible;
+                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                                       FoldedBallMenu.IsOpen;
 
             if (!isQuickPanelVisible) return;
 
@@ -634,7 +654,9 @@ namespace Ink_Canvas
                 if (IsDescendantOf(hitTarget, LeftUnFoldButtonQuickPanel) ||
                     IsDescendantOf(hitTarget, RightUnFoldButtonQuickPanel) ||
                     IsDescendantOf(hitTarget, LeftSidePanel) ||
-                    IsDescendantOf(hitTarget, RightSidePanel))
+                    IsDescendantOf(hitTarget, RightSidePanel) ||
+                    IsDescendantOf(hitTarget, FoldedBall) ||
+                    IsDescendantOf(hitTarget, FoldedBallMenu))
                 {
                     // 重置计时器
                     StartAutoCollapseQuickPanelTimer();
@@ -740,7 +762,8 @@ namespace Ink_Canvas
         /// </summary>
         private bool IsFoldedAppearanceIntact()
         {
-            if (LeftSidePanel.Visibility != Visibility.Visible) return false;
+            var entry = Settings.Appearance.UseFloatingFoldBall ? (FrameworkElement)FoldedBall : LeftSidePanel;
+            if (entry.Visibility != Visibility.Visible) return false;
             return IsFloatingBarUiAbsentFromScreens();
         }
 
