@@ -98,6 +98,13 @@ mc:Ignorable="d"
                     </StackPanel>
                 </ui:SettingsCard>
 
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchPopupAnimationLog"
+                    Header="{x:Static props:AdvancedStrings.Debug_PopupAnimationLog_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_PopupAnimationLog_Desc}"
+                    Icon="{x:Static ui:SegoeFluentIcons.Play}"
+                    IsOn="False"
+                    Toggled="ToggleSwitchPopupAnimationLog_Toggled"/>
+
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchUnlimitedFrameRate"
                     Header="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Header}"
                     Description="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Desc}"

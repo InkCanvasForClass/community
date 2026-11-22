@@ -1564,6 +1564,9 @@ namespace Ink_Canvas
                 // 恢复全局动画速度倍率（调试设置，影响所有经 AnimationSpeed 换算的动画）
                 Helpers.AnimationSpeed.Set(Settings.Advanced.AnimationSpeedMultiplier);
 
+                // 菜单动画日志默认关闭，只在调试设置里打开后才写
+                Helpers.AnimationLog.SetEnabled(Settings.Advanced.IsPopupAnimationLogEnabled);
+
                 Helpers.RenderPacingController.ProbeDisplayRefreshRate();
                 Helpers.RenderPacingController.ApplyUnlimitedFrameRate(
                     Settings.Advanced.IsUnlimitedFrameRateEnabled);

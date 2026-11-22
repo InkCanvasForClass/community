@@ -16,12 +16,34 @@ namespace Ink_Canvas.Helpers
     /// 1) 只在**状态变化点**记录（打开/收起/完成/打断），不记录逐帧数据；
     /// 2) 每个菜单每秒最多写若干条，超限静默丢弃，避免用户快速连点时爆量。
     ///
-    /// 日志开关：<see cref="Enabled"/>，排查完可置 false 停止写入（不影响功能）。
+    /// 日志开关：<see cref="Enabled"/>，由「设置 → 调试 → 菜单动画日志」控制，
+    /// 默认关闭，只在排查菜单动画问题时临时打开。
     /// </remarks>
     internal static class AnimationLog
     {
-        /// <summary>是否启用动画日志。</summary>
-        internal static bool Enabled = true;
+        /// <summary>是否启用动画日志，默认关闭。</summary>
+        internal static bool Enabled { get; private set; }
+
+        /// <summary>
+        /// 打开或关闭日志。
+        /// </summary>
+        /// <remarks>
+        /// 状态没变时直接返回，避免启动时每次启动都往日志写一条"已关闭"。
+        /// 切换时清空限流表，否则重新打开后的第一秒会沿用旧的"这一秒已经写过"而丢掉首批日志。
+        /// </remarks>
+        public static void SetEnabled(bool enabled)
+        {
+            if (Enabled == enabled) return;
+
+            Enabled = enabled;
+            RateGuard.Clear();
+
+            LogHelper.WriteLogToFile(
+                enabled
+                    ? "[PopupAnim] 菜单动画日志已开启"
+                    : "[PopupAnim] 菜单动画日志已关闭",
+                LogHelper.LogType.Info);
+        }
 
         /// <summary>同一个菜单每秒最多写入的条数。</summary>
         private const int MaxLinesPerSecondPerPopup = 8;
