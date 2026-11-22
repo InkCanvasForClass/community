@@ -94,7 +94,7 @@
     <value>深色主题</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>点击展开按钮后显示侧边栏</value>
+    <value>点击展开按钮后显示快捷面板</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
@@ -471,10 +471,10 @@
     <value>自定义一言分类</value>
   </data>
   <data name="Theme_QuickPanelOpacity" xml:space="preserve">
-    <value>侧边栏透明度</value>
+    <value>侧边栏不透明度</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>打开侧边栏后自动收起</value>
+    <value>打开快捷面板后自动收起</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
     <value>自动收起前的等待时间</value>
@@ -657,7 +657,7 @@
     <value>收纳方式</value>
   </data>
   <data name="Theme_FoldedMode_Sidebar" xml:space="preserve">
-    <value>原有侧边栏</value>
+    <value>侧边栏</value>
   </data>
   <data name="Theme_FoldedMode_Ball" xml:space="preserve">
     <value>悬浮球</value>
@@ -665,7 +665,13 @@
   <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
     <value>点击展开，拖动调整位置</value>
   </data>
+  <data name="Theme_EnableQuickPanel_Description" xml:space="preserve">
+    <value>关闭后，点击展开按钮直接恢复工具栏。</value>
+  </data>
   <data name="Theme_FloatingFoldBall_Opacity" xml:space="preserve">
     <value>悬浮球不透明度</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Opacity_Description" xml:space="preserve">
+    <value>同时调整悬浮球和环形菜单的不透明度。</value>
   </data>
 </root>

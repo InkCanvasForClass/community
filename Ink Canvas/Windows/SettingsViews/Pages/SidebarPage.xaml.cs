@@ -84,9 +84,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             bool useBall = ComboBoxFoldedMode.SelectedIndex == 1;
             if (FloatingFoldBallOpacityCard != null)
                 FloatingFoldBallOpacityCard.Visibility = useBall ? Visibility.Visible : Visibility.Collapsed;
-            if (QuickPanelBottomOffsetSlider != null) QuickPanelBottomOffsetSlider.IsEnabled = !useBall;
-            if (ToggleSwitchAllowDragSidePanel != null) ToggleSwitchAllowDragSidePanel.IsEnabled = !useBall;
-            if (ComboBoxUnFoldBtnImg != null) ComboBoxUnFoldBtnImg.IsEnabled = !useBall;
+            if (QuickPanelOpacityCard != null)
+                QuickPanelOpacityCard.Visibility = useBall ? Visibility.Collapsed : Visibility.Visible;
+            if (SidebarOptions != null)
+                SidebarOptions.Visibility = useBall ? Visibility.Collapsed : Visibility.Visible;
+            if (ToggleSwitchAllowDragSidePanel != null)
+                ToggleSwitchAllowDragSidePanel.ShowWhen = !useBall;
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.UseFloatingFoldBall = useBall;
             SettingsManager.SaveSettingsToFile();
