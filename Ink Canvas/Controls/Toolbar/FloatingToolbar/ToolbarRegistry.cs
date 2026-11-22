@@ -1712,8 +1712,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 _activeSegmentTweens.Add(border);
                 animation.Completed += (_, _) =>
                 {
-                    if (!IsCurrentSegmentGeneration(border, generation)) return;
+                    // 注意：清理必须无守卫地执行。之前把 Remove 放在代际守卫 return 之后，
+                    // 动画一被打断就永远清不掉，_activeSegmentTweens 只增不减，
+                    // 于是之后每次都被误判成"正在动画"——这是确定性故障，不是偶发。
                     _activeSegmentTweens.Remove(border);
+                    if (!IsCurrentSegmentGeneration(border, generation)) return;
                     border.BeginAnimation(extentProperty, null);
                     border.ClearValue(extentProperty);
                     // 补间收尾后通知跟随者重新落位：居中要跟着**最终**宽度走
@@ -1771,131 +1774,117 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return;
             }
 
-            // 一直显示、只是内容增减：走内容变化的跨度补间
+            // 一直显示、只是内容增减：走内容变化的跨度补间（不碰 Visibility，安全）
             if (shouldShow && wasVisible)
             {
                 AnimateBorderExtentToFit(border, vertical, beforeExtent, true);
                 return;
             }
 
-            // 一直隐藏、仍判为隐藏：不动
-            if (!shouldShow && !wasVisible) return;
+            // 隐藏：**瞬时收起**。
+            //
+            // 这里曾经试过"把跨度补间到 0，收完再 Collapsed"，结果是两类确定性故障：
+            //   1. 补间一旦被打断（0.1x 倍率下一次要 2.2 秒，几乎必然被打断），
+            //      代际守卫会让 Completed 提前 return，Collapsed 就**再也不会执行**，
+            //      分段卡在 Visible + 宽度 0。下一轮把 Visibility 当真值读，判据从此全错——
+            //      这正是"第一次正常、隐藏异常、之后全异常"的机制。
+            //   2. 段内内容在 UpdatePanelVisibility 里已经瞬时收起，屏幕上剩下一个**空壳胶囊**，
+            //      按距离算时长会挂着两秒，本身就是明显的观感缺陷。
+            //
+            // 收起必须立刻让出布局空间：工具栏尺寸等不起，这是取舍不是遗漏。
+            // "背景跟着内容变宽"由上面那条内容增减分支负责，那条不涉及 Visibility。
+            if (!shouldShow)
+            {
+                ApplySegmentSettled(border, vertical, false);
+                return;
+            }
 
-            var duration = AnimationSpeed.ScaleMilliseconds(ToolbarWidthTransitionMs);
-
+            // 从无到有：从 0 跨度长到目标值，恒定速度
             try
             {
-                // 打断上一轮：动画与固定值都先摘掉，否则会从旧值原地重启
                 int generation = NextSegmentGeneration(border);
                 border.BeginAnimation(extentProperty, null);
                 border.ClearValue(extentProperty);
                 border.BeginAnimation(UIElement.OpacityProperty, null);
                 border.Opacity = 1;
 
-                if (shouldShow)
+                border.Visibility = Visibility.Visible;
+                border.UpdateLayout();
+                double targetExtent = vertical ? border.ActualHeight : border.ActualWidth;
+                if (targetExtent <= 0)
                 {
-                    border.Visibility = Visibility.Visible;
-                    border.UpdateLayout();
-                    double targetExtent = vertical ? border.ActualHeight : border.ActualWidth;
-
-                    if (targetExtent <= 0)
-                    {
-                        // 量不到尺寸（尚未进视觉树）：退化成淡入，至少不要卡在 0 跨度
-                        border.ClearValue(extentProperty);
-                        border.BeginAnimation(UIElement.OpacityProperty,
-                            new System.Windows.Media.Animation.DoubleAnimation(0.35, 1.0, duration)
-                            {
-                                EasingFunction = CreateEnterEasing()
-                            });
-                        return;
-                    }
-
-                    // 从当前可见跨度长到目标值（被打断时就从半途接着长，不退回 0）
-                    border.ClipToBounds = true;
-                    double growFrom = beforeExtent > 0 && beforeExtent < targetExtent ? beforeExtent : 0.0;
-                    if (vertical) border.Height = growFrom;
-                    else border.Width = growFrom;
-
-                    var grow = new System.Windows.Media.Animation.DoubleAnimation
-                    {
-                        From = growFrom,
-                        To = targetExtent,
-                        Duration = ScaleDurationForRemaining(growFrom, targetExtent, targetExtent, ToolbarWidthTransitionMs),
-                        EasingFunction = new System.Windows.Media.Animation.CubicEase
-                        {
-                            EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                        }
-                    };
-                    _activeSegmentTweens.Add(border);
-                    grow.Completed += (_, _) =>
-                    {
-                        if (!IsCurrentSegmentGeneration(border, generation)) return;
-                        _activeSegmentTweens.Remove(border);
-                        border.BeginAnimation(extentProperty, null);
-                        border.ClearValue(extentProperty);
-                        border.ClipToBounds = false;
-                        NotifyExtentChanged(vertical);
-                    };
-                    border.BeginAnimation(extentProperty, grow);
-
-                    border.BeginAnimation(UIElement.OpacityProperty,
-                        new System.Windows.Media.Animation.DoubleAnimation(0.35, 1.0, duration)
-                        {
-                            EasingFunction = CreateEnterEasing()
-                        });
+                    // 量不到尺寸（尚未进视觉树）：直接落定，不要卡在 0 跨度
+                    ApplySegmentSettled(border, vertical, true);
                     return;
                 }
 
-                // 消失：钉住当前跨度收到 0，收完才真正折叠
-                double fromExtent = beforeExtent > 0
+                // 被打断时从当前可见跨度接着长，不退回 0
+                double growFrom = _activeSegmentTweens.Contains(border) && beforeExtent > 0 && beforeExtent < targetExtent
                     ? beforeExtent
-                    : (vertical ? border.ActualHeight : border.ActualWidth);
-                if (fromExtent <= 0)
+                    : 0.0;
+
+                if (targetExtent - growFrom < 1.0)
                 {
-                    border.Visibility = Visibility.Collapsed;
+                    ApplySegmentSettled(border, vertical, true);
                     return;
                 }
 
-                if (vertical) border.Height = fromExtent;
-                else border.Width = fromExtent;
+                // 裁剪溢出，否则固定尺寸的按钮会画到胶囊外
+                border.ClipToBounds = true;
+                if (vertical) border.Height = growFrom;
+                else border.Width = growFrom;
 
-                var shrink = new System.Windows.Media.Animation.DoubleAnimation
-                {
-                    From = fromExtent,
-                    To = 0.0,
-                    Duration = ScaleDurationForRemaining(fromExtent, 0.0, fromExtent, ToolbarWidthTransitionMs),
-                    EasingFunction = new System.Windows.Media.Animation.CubicEase
-                    {
-                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                    }
-                };
+                var grow = new System.Windows.Media.Animation.DoubleAnimation(
+                    growFrom, targetExtent,
+                    DurationForDistance(targetExtent - growFrom, ToolbarWidthTransitionMs));
+
                 _activeSegmentTweens.Add(border);
-                shrink.Completed += (_, _) =>
+                grow.Completed += (_, _) =>
                 {
                     if (!IsCurrentSegmentGeneration(border, generation)) return;
-                    _activeSegmentTweens.Remove(border);
-                    border.BeginAnimation(extentProperty, null);
-                    border.ClearValue(extentProperty);
-                    border.BeginAnimation(UIElement.OpacityProperty, null);
-                    border.Opacity = 1;
-                    border.Visibility = Visibility.Collapsed;
-                    NotifyExtentChanged(vertical);
+                    ApplySegmentSettled(border, vertical, true);
                 };
-                border.BeginAnimation(extentProperty, shrink);
+                border.BeginAnimation(extentProperty, grow);
 
+                // 同时淡入；全透明会让胶囊先"空"一帧，0.35 起更实
                 border.BeginAnimation(UIElement.OpacityProperty,
-                    new System.Windows.Media.Animation.DoubleAnimation(1.0, 0.0, duration));
+                    new System.Windows.Media.Animation.DoubleAnimation(
+                        0.35, 1.0, DurationForDistance(targetExtent - growFrom, ToolbarWidthTransitionMs)));
             }
             catch (Exception ex)
             {
-                border.BeginAnimation(extentProperty, null);
-                border.ClearValue(extentProperty);
-                border.BeginAnimation(UIElement.OpacityProperty, null);
-                border.Opacity = 1;
-                border.ClipToBounds = false;
-                border.Visibility = shouldShow ? Visibility.Visible : Visibility.Collapsed;
+                ApplySegmentSettled(border, vertical, true);
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 分段显隐补间失败: {ex.Message}", LogHelper.LogType.Warning);
             }
+        }
+
+        /// <summary>
+        /// 把分段落定到终态：清掉动画与固定值，按期望设置 Visibility。
+        /// </summary>
+        /// <remarks>
+        /// 这是隐藏与"补间收尾"的**唯一出口**。清状态放在最前面、且不受任何守卫影响，
+        /// 是为了避免出现"状态没清、Visibility 没落"的中间态——
+        /// 一旦出现，下一轮把 Visibility 当真值读就会连环错下去。
+        /// </remarks>
+        private static void ApplySegmentSettled(Border border, bool vertical, bool shown)
+        {
+            if (border == null) return;
+
+            _activeSegmentTweens.Remove(border);
+            NextSegmentGeneration(border);
+
+            DependencyProperty extentProperty = vertical
+                ? FrameworkElement.HeightProperty
+                : FrameworkElement.WidthProperty;
+
+            border.BeginAnimation(extentProperty, null);
+            border.ClearValue(extentProperty);
+            border.BeginAnimation(UIElement.OpacityProperty, null);
+            border.Opacity = 1;
+            border.ClipToBounds = false;
+            border.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+
+            NotifyExtentChanged(vertical);
         }
 
         /// <summary>
