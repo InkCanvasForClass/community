@@ -156,6 +156,9 @@
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
 
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
+    <!-- AForge.Imaging / AForge.Math 用于视频展台画面校正。 -->
+    <PackageReference Include="AForge.Imaging" Version="2.2.5" />
+    <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
