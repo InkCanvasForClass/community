@@ -1864,6 +1864,13 @@ namespace Ink_Canvas
         [JsonProperty("isRealtimeInkDebugLogEnabled")]
         public bool IsRealtimeInkDebugLogEnabled { get; set; } = false;
 
+        /// <summary>
+        /// 菜单弹出/收起动画的诊断日志（AnimationLog），默认关闭。
+        /// 打开后每次状态切换往日志写一条，排查菜单动画问题时用。
+        /// </summary>
+        [JsonProperty("isPopupAnimationLogEnabled")]
+        public bool IsPopupAnimationLogEnabled { get; set; } = false;
+
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
 

@@ -131,6 +131,10 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_RealtimeInkLog_Desc => ResourceManager.GetString(nameof(Debug_RealtimeInkLog_Desc), _resourceCulture);
 
+        public static string Debug_PopupAnimationLog_Header => ResourceManager.GetString(nameof(Debug_PopupAnimationLog_Header), _resourceCulture);
+
+        public static string Debug_PopupAnimationLog_Desc => ResourceManager.GetString(nameof(Debug_PopupAnimationLog_Desc), _resourceCulture);
+
         public static string Debug_IconSettings => ResourceManager.GetString(nameof(Debug_IconSettings), _resourceCulture);
 
         public static string Debug_SettingsExpanderExample => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample), _resourceCulture);

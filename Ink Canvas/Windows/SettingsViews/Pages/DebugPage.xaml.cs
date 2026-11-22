@@ -23,6 +23,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
                 ToggleSwitchRenderFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled;
                 ToggleSwitchUnlimitedFrameRate.IsOn = SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled;
+                ToggleSwitchPopupAnimationLog.IsOn = SettingsManager.Settings.Advanced.IsPopupAnimationLogEnabled;
 
                 // 恢复全局动画播放速度：滑杆位置 = log10(倍率)
                 double multiplier = SettingsManager.Settings.Advanced.AnimationSpeedMultiplier;
@@ -82,6 +83,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
                     : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
                 LogHelper.LogType.Info);
+        }
+
+        private void ToggleSwitchPopupAnimationLog_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            bool isOn = ToggleSwitchPopupAnimationLog.IsOn;
+            SettingsManager.Settings.Advanced.IsPopupAnimationLogEnabled = isOn;
+            if (MainWindow.Settings?.Advanced != null)
+                MainWindow.Settings.Advanced.IsPopupAnimationLogEnabled = isOn;
+            SettingsManager.SaveSettingsToFile();
+            AnimationLog.SetEnabled(isOn);
         }
 
         private void SliderAnimationSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

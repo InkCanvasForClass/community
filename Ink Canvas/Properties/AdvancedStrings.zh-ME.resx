@@ -207,6 +207,12 @@
   <data name="Debug_RealtimeInkLog_Desc" xml:space="preserve">
     <value>打开后会记录实时笔迹输入/重绘/等帧/慢事件。每抬一笔就刷新 Configs/RealtimeInkDebugLive.json，并往 Configs/PerformanceHistory.json 写 realtimeInk*；关掉或退出时收尾。默认关着；只在查实时笔迹（TouchVelocity/实时笔锋）卡顿时临时开。跟性能页监测开关无关。普通自带 Ink 笔迹不进这本账。</value>
   </data>
+  <data name="Debug_PopupAnimationLog_Header" xml:space="preserve">
+    <value>啟用選單動畫除錯日誌</value>
+  </data>
+  <data name="Debug_PopupAnimationLog_Desc" xml:space="preserve">
+    <value>開啟後選單彈出/收起/打斷/完成這幾個狀態切換會各寫一條 [PopupAnim] 日誌（含進度與方向），用於排查選單動畫。只在狀態變化點記錄，同一選單每秒最多 8 條，不寫逐幀資料。預設關閉。</value>
+  </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>换装间</value>
   </data>
