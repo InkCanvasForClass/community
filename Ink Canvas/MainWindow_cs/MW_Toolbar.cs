@@ -297,6 +297,15 @@ namespace Ink_Canvas
             {
                 ToolbarRegistry.EnsureDefaultConfigExists();
                 ToolbarHost = new ToolbarHost(this);
+
+                // 背景宽度补间收尾后让居中重新落位：
+                // 补间期间工具栏的可见宽度一直在变，只在开始前算一次居中，走完就会停在偏的位置。
+                // 先退订再订阅，避免每次 RebuildToolbar 叠加多个处理器。
+                ToolbarRegistry.ExtentSettled -= OnToolbarExtentSettled;
+                ToolbarRegistry.ExtentSettled += OnToolbarExtentSettled;
+                // 补间进行中逐帧跟随居中（没有补间时这个回调什么都不做）
+                HookCenteringFollow();
+
                 var layout = ToolbarRegistry.LoadActiveConfig();
 
                 // 根据设置确定工具栏方向
@@ -317,6 +326,7 @@ namespace Ink_Canvas
 
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
+                ToolbarRegistry.RefreshEnterSlideDirection(StackPanelFloatingBarRoot);
 
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 ApplyFloatingBarBorderColor();
@@ -422,6 +432,95 @@ namespace Ink_Canvas
             }
 
             SetFloatingBarHighlightPosition(_currentToolMode);
+        }
+
+        /// <summary>
+        /// 背景宽度补间收尾后重新居中：让"背景变宽"与"整体居中"联动。
+        /// </summary>
+        /// <remarks>
+        /// 居中位置 = (屏幕宽 - 工具栏宽) / 2。工具栏宽度在补间期间每帧都在变，
+        /// 所以除了逐帧跟随（见 FollowFloatingBarCenterDuringExtentTween），
+        /// 收尾时再对一次终值，避免最后一帧的量化误差留在偏位。
+        /// 直接跳位（skipAnimation）而不是再补一段位移动画：补间刚结束，
+        /// 叠加位移动画会让整条工具栏看起来在飘。
+        /// </remarks>
+        private void OnToolbarExtentSettled()
+        {
+            if (isFloatingBarFolded || _userHasDraggedFloatingBar) return;
+            if (!Topmost) return;
+
+            var placement = IsPptPlacementScene
+                ? FloatingBarPlacement.PptExpanded
+                : FloatingBarPlacement.DesktopExpanded;
+
+            ShowFloatingBar(placement, true);
+        }
+
+        private bool _centerFollowHooked;
+
+        /// <summary>
+        /// 跨度补间期间逐帧把工具栏水平居中：背景长宽的同时整体保持居中。
+        /// </summary>
+        /// <remarks>
+        /// "背景和居中联动"要求两者同帧推进。若只在补间开始/结束各算一次，
+        /// 中间的 2 秒里工具栏中心会持续偏离屏幕中心，看起来是"背景自己在长"。
+        /// 这里挂 CompositionTarget.Rendering，只在补间进行中生效，收尾即停：
+        /// 没有补间时不做任何计算，拖动与其它交互完全不受影响。
+        /// </remarks>
+        private void HookCenteringFollow()
+        {
+            if (_centerFollowHooked) return;
+            _centerFollowHooked = true;
+            CompositionTarget.Rendering += OnCenterFollowFrame;
+        }
+
+        private void OnCenterFollowFrame(object sender, EventArgs e)
+        {
+            // 只在跨度补间进行中、且处于适合居中的状态时才跟随
+            if (!ToolbarRegistry.IsExtentAnimating) return;
+            if (isFloatingBarFolded || _userHasDraggedFloatingBar) return;
+            if (!Topmost) return;
+            if (IsVerticalToolbar) return;
+            if (ViewboxFloatingBar == null || ViewboxFloatingBar.Visibility != Visibility.Visible) return;
+
+            try
+            {
+                double width = ViewboxFloatingBar.ActualWidth;
+                if (width <= 0) return;
+
+                var margin = ViewboxFloatingBar.Margin;
+                double targetLeft = GetFloatingBarCenteredLeft(width);
+                if (double.IsNaN(targetLeft)) return;
+
+                // 只调横向，纵向交给既有落位逻辑；差小于 0.5px 不动，免得每帧写一次布局
+                if (Math.Abs(margin.Left - targetLeft) < 0.5) return;
+                ViewboxFloatingBar.Margin = new Thickness(targetLeft, margin.Top, margin.Right, margin.Bottom);
+            }
+            catch
+            {
+                // 帧回调里不抛异常：窗口关闭、控件卸载都可能让这里短暂失效
+            }
+        }
+
+        /// <summary>按给定工具栏宽度算出"水平居中"应有的左边距；无法计算时返回 NaN。</summary>
+        private double GetFloatingBarCenteredLeft(double floatingBarWidth)
+        {
+            if (floatingBarWidth <= 0) return double.NaN;
+
+            double dpiScaleX = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+            {
+                dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
+            }
+
+            var screen = GetFloatingBarTargetScreen();
+            double screenWidth = (Settings.Advanced.IsEnableAvoidFullScreenHelper
+                ? screen.WorkingArea.Width
+                : screen.Bounds.Width) / dpiScaleX;
+            if (screenWidth <= 0) return double.NaN;
+
+            return (screenWidth - floatingBarWidth) / 2.0;
         }
 
         internal void RebuildToolbar()
