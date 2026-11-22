@@ -31,6 +31,11 @@ namespace Ink_Canvas.Helpers
         private static Dictionary<StrokeVisual, PendingRedraw> PendingSnapshot =
             new Dictionary<StrokeVisual, PendingRedraw>();
 
+        // Track the earliest request as entries arrive, avoiding a full extra scan
+        // of every dirty visual at the start of each rendering frame.
+        private static StrokeVisual PendingEarliestVisual;
+        private static long PendingEarliestRequestedAt;
+
         private static readonly Action GlobalDispatcherProbeAction = CompleteGlobalDispatcherProbe;
         private static DispatcherOperation GlobalDispatcherProbeOperation;
         private static long GlobalProbeStartedAt;
@@ -151,6 +156,8 @@ namespace Ink_Canvas.Helpers
                         0);
                 }
                 PendingRedraws.Remove(strokeVisual);
+                if (ReferenceEquals(PendingEarliestVisual, strokeVisual))
+                    RecalculatePendingEarliest();
             }
 
             UnsubscribeIfIdle();
@@ -164,7 +171,9 @@ namespace Ink_Canvas.Helpers
             if (strokeVisual == null)
                 return;
 
-            PendingRedraws.Remove(strokeVisual);
+            if (PendingRedraws.Remove(strokeVisual)
+                && ReferenceEquals(PendingEarliestVisual, strokeVisual))
+                RecalculatePendingEarliest();
             UnsubscribeIfIdle();
         }
 
@@ -172,6 +181,8 @@ namespace Ink_Canvas.Helpers
         {
             PendingRedraws.Clear();
             PendingSnapshot.Clear();
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
             LastRenderingAt = 0L;
             LastKickAt = 0L;
             ActiveStrokeSessions = 0;
@@ -228,6 +239,12 @@ namespace Ink_Canvas.Helpers
                 Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
+
+            if (wasEmpty || PendingEarliestRequestedAt == 0L || now < PendingEarliestRequestedAt)
+            {
+                PendingEarliestVisual = strokeVisual;
+                PendingEarliestRequestedAt = now;
+            }
 
             if (wasEmpty || ShouldForceKick(now))
             {
@@ -357,29 +374,24 @@ namespace Ink_Canvas.Helpers
             PendingRedraws = PendingSnapshot;
             PendingSnapshot = completedBatch;
             PendingRedraws.Clear();
-
-            KeyValuePair<StrokeVisual, PendingRedraw>? earliest = null;
-            foreach (var pair in PendingSnapshot)
-            {
-                if (pair.Value.RequestedAt != 0L
-                    && (earliest == null || pair.Value.RequestedAt < earliest.Value.Value.RequestedAt))
-                {
-                    earliest = pair;
-                }
-            }
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
 
             double frameWaitSampleMs = 0;
-            // One FrameWait sample per render pass (earliest dirty).
-            if (earliest.HasValue)
+            // The earliest dirty request was tracked on enqueue; avoid scanning the
+            // entire batch solely to select its single FrameWait telemetry sample.
+            if (PendingEarliestVisual != null && PendingEarliestRequestedAt != 0L
+                && PendingSnapshot.TryGetValue(PendingEarliestVisual, out var earliestRedraw))
             {
-                var earliestPair = earliest.Value;
-                frameWaitSampleMs = ToMilliseconds(renderedAt - earliestPair.Value.RequestedAt);
+                var earliestPairKey = PendingEarliestVisual;
+                var earliestPairValue = earliestRedraw;
+                frameWaitSampleMs = ToMilliseconds(renderedAt - earliestPairValue.RequestedAt);
                 RealtimeInkPerformanceMonitor.RecordFrameWait(
-                    earliestPair.Key,
-                    renderedAt - earliestPair.Value.RequestedAt,
-                    earliestPair.Value.Gen0CollectionCountStart,
-                    earliestPair.Value.Gen1CollectionCountStart,
-                    earliestPair.Value.Gen2CollectionCountStart,
+                    earliestPairKey,
+                    renderedAt - earliestPairValue.RequestedAt,
+                    earliestPairValue.Gen0CollectionCountStart,
+                    earliestPairValue.Gen1CollectionCountStart,
+                    earliestPairValue.Gen2CollectionCountStart,
                     probeDelayMs,
                     renderingIntervalMs);
             }
@@ -412,6 +424,21 @@ namespace Ink_Canvas.Helpers
             {
                 // Keep a short warm window while strokes are active.
                 EnsureRenderingSubscribed();
+            }
+        }
+
+        private static void RecalculatePendingEarliest()
+        {
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
+            foreach (var pair in PendingRedraws)
+            {
+                if (pair.Value.RequestedAt == 0L
+                    || (PendingEarliestRequestedAt != 0L && pair.Value.RequestedAt >= PendingEarliestRequestedAt))
+                    continue;
+
+                PendingEarliestVisual = pair.Key;
+                PendingEarliestRequestedAt = pair.Value.RequestedAt;
             }
         }
 
