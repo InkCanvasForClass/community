@@ -421,6 +421,8 @@ namespace Ink_Canvas.Helpers
 
                     if (_mainWindow.BtnExitPPTFromSidebarRight != null)
                         _mainWindow.BtnExitPPTFromSidebarRight.Visibility = visibility;
+
+                    _mainWindow.FoldedBallMenu?.SetExitShowVisibility(visibility);
                 }
                 catch (Exception ex)
                 {

@@ -1,6 +1,8 @@
 using Ink_Canvas.Controls;
 using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Ink_Canvas
 {
@@ -13,7 +15,7 @@ namespace Ink_Canvas
             // 使旧布局失效，但保留折叠/展开互斥状态，直到进行中的操作结束。
             ++_foldedModeVersion;
             ++_sidePanelAnimVersion;
-            StopAutoCollapseQuickPanelTimer();
+            CloseFloatingFoldMenu(animate: false);
             LeftSidePanel.BeginAnimation(MarginProperty, null);
             RightSidePanel.BeginAnimation(MarginProperty, null);
             LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, null);
@@ -21,7 +23,6 @@ namespace Ink_Canvas
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             bool useBall = Settings.Appearance.UseFloatingFoldBall;
-            LeftUnFoldButtonQuickPanel.VerticalAlignment = useBall ? VerticalAlignment.Top : VerticalAlignment.Center;
             LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelFoldedMargin, 0, 0,
                 Settings.Appearance.QuickPanelBottomOffset);
             LeftSidePanel.Visibility = isFloatingBarFolded && !useBall ? Visibility.Visible : Visibility.Collapsed;
@@ -29,7 +30,17 @@ namespace Ink_Canvas
             RightSidePanel.Margin = new Thickness(0, 0, -10, Settings.Appearance.QuickPanelBottomOffset);
             FoldedBall.Visibility = isFloatingBarFolded && useBall ? Visibility.Visible : Visibility.Collapsed;
             FoldedBall.SetPosition(new Point(Settings.Appearance.FloatingFoldBallX, Settings.Appearance.FloatingFoldBallY));
+            ApplyFloatingFoldBallOpacity();
         }
+
+        internal void ApplyFloatingFoldBallOpacity()
+        {
+            FoldedBall.Opacity = Settings.Appearance.FloatingFoldBallOpacity;
+            FoldedBallMenu.Opacity = FoldedBall.Opacity;
+        }
+
+        private bool AnimateFloatingFoldMenu =>
+            SystemParameters.ClientAreaAnimation && !Settings.Appearance.DisableToolbarAnimation;
 
         private void FoldedBall_Click(object sender, RoutedEventArgs e)
         {
@@ -39,16 +50,54 @@ namespace Ink_Canvas
                 UnFoldFloatingBar_MouseUp(sender, null);
                 return;
             }
-            if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
+            if (FoldedBallMenu.IsOpen)
             {
-                HideQuickPanelAndResetMargin();
+                CloseFloatingFoldMenu();
                 return;
             }
-            LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, null);
-            LeftUnFoldButtonQuickPanel.VerticalAlignment = VerticalAlignment.Top;
-            LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
+            FoldedBallMenu.PopOpen(AnimateFloatingFoldMenu);
             UpdateFloatingFoldBallLayout();
             StartAutoCollapseQuickPanelTimer();
+        }
+
+        private void CloseFloatingFoldMenu(bool animate = true)
+        {
+            StopAutoCollapseQuickPanelTimer();
+            if (FoldedBallMenu.Visibility != Visibility.Visible) return;
+            if (animate && !FoldedBallMenu.IsOpen) return;
+            bool menuHadFocus = FoldedBallMenu.IsKeyboardFocusWithin;
+            FoldedBallMenu.Close(animate && AnimateFloatingFoldMenu,
+                () => FoldedBall.ShowMenuState(false, default));
+            if (menuHadFocus) FoldedBall.Focus();
+        }
+
+        private void FoldedBallMenu_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Escape || !FoldedBallMenu.IsOpen) return;
+            CloseFloatingFoldMenu();
+            e.Handled = true;
+        }
+
+        private void FoldedBallMenu_ToolClick(object sender, RoutedEventArgs e)
+        {
+            if (!FoldedBallMenu.IsOpen || e.OriginalSource is not Button tool) return;
+
+            CloseFloatingFoldMenu();
+            e.Handled = true;
+            switch (tool.Name)
+            {
+                case "RestoreToolbar": UnFoldFloatingBar_MouseUp(tool, null); break;
+                case "SingleDraw": SymbolIconRandOne_MouseUp(tool, null); break;
+                case "RandomDraw": SymbolIconRand_MouseUp(tool, null); break;
+                case "Timer": ImageCountdownTimer_MouseUp(tool, null); break;
+                case "Whiteboard": ImageBlackboard_MouseUp(tool, null); break;
+                case "ExitShow": ExitPPTSlideShow_MouseUp(tool, null); break;
+            }
+        }
+
+        private void FoldedBall_DragMoved(object sender, EventArgs e)
+        {
+            if (FoldedBallMenu.Visibility == Visibility.Visible) UpdateFloatingFoldBallLayout(moving: true);
         }
 
         private void FoldedBall_PositionChanged(object sender, EventArgs e)
@@ -56,25 +105,35 @@ namespace Ink_Canvas
             Settings.Appearance.FloatingFoldBallX = FoldedBall.Margin.Left;
             Settings.Appearance.FloatingFoldBallY = FoldedBall.Margin.Top;
             SaveSettingsToFile();
-            UpdateFloatingFoldBallLayout();
+            if (FoldedBallMenu.IsOpen) StartAutoCollapseQuickPanelTimer();
         }
 
         private void FoldedBallHost_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateFloatingFoldBallLayout();
 
-        private void UpdateFloatingFoldBallLayout()
+        private void UpdateFloatingFoldBallLayout(bool moving = false)
         {
             if (FoldedBall == null || !Settings.Appearance.UseFloatingFoldBall ||
                 Main_Grid.ActualWidth <= 0 || Main_Grid.ActualHeight <= 0) return;
             FoldedBall.SetPosition(new Point(FoldedBall.Margin.Left, FoldedBall.Margin.Top));
-            if (LeftUnFoldButtonQuickPanel.Visibility != Visibility.Visible) return;
-            // 复用原快捷面板；优先放在球右侧，空间不足时放在左侧。
-            LeftUnFoldButtonQuickPanel.Margin = new Thickness(0);
-            LeftUnFoldButtonQuickPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-            var size = LeftUnFoldButtonQuickPanel.DesiredSize;
-            double x = FoldedBall.Margin.Left + FoldedBall.Width + 8;
-            if (x + size.Width > Main_Grid.ActualWidth) x = FoldedBall.Margin.Left - size.Width - 8;
-            var point = FloatingFoldBall.ClampPosition(new Point(x, FoldedBall.Margin.Top), Main_Grid.RenderSize, size);
-            LeftUnFoldButtonQuickPanel.Margin = new Thickness(point.X, point.Y, 0, 0);
+            if (FoldedBallMenu.Visibility != Visibility.Visible) return;
+
+            var anchor = new Point(FoldedBall.Margin.Left + FoldedBall.Width / 2,
+                FoldedBall.Margin.Top + FoldedBall.Height / 2);
+            var offset = FoldedBallMenu.Place(anchor, Main_Grid.RenderSize);
+            if (moving)
+            {
+                // 保存圆心实际到达的位置，避免收起时小球跳到被圆环边界挡住的位置。
+                FoldedBall.SetPosition(new Point(FoldedBall.Margin.Left + offset.X, FoldedBall.Margin.Top + offset.Y));
+                offset = default;
+            }
+            FoldedBall.ShowMenuState(true, offset);
+        }
+
+        private bool IsPointInFloatingFoldMenu(Point windowPoint)
+        {
+            if (FoldedBallMenu?.IsVisible != true || !FoldedBallMenu.IsOpen) return false;
+            var point = TranslatePoint(windowPoint, FoldedBallMenu);
+            return FoldedBallMenu.InputHitTest(point) != null;
         }
     }
 }

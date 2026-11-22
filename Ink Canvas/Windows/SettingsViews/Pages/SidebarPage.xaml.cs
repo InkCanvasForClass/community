@@ -47,6 +47,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             UpdateSliderText(QuickPanelBottomOffsetSlider, QuickPanelBottomOffsetText, "{0:F0}");
             UpdateSliderText(QuickPanelOpacitySlider, QuickPanelOpacityText, "{0:P0}");
+            UpdateSliderText(FloatingFoldBallOpacitySlider, FloatingFoldBallOpacityText, "{0:P0}");
             UpdateSliderText(AutoCollapseDelaySlider, AutoCollapseDelayText, "{0:F1}s");
         }
 
@@ -73,14 +74,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
             ToggleSwitchAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
+            FloatingFoldBallOpacitySlider.Value = settings.Appearance.FloatingFoldBallOpacity;
             ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
         }
 
         private void ComboBoxFoldedMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            bool useBall = ComboBoxFoldedMode.SelectedIndex == 1;
+            if (FloatingFoldBallOpacityCard != null)
+                FloatingFoldBallOpacityCard.Visibility = useBall ? Visibility.Visible : Visibility.Collapsed;
+            if (QuickPanelBottomOffsetSlider != null) QuickPanelBottomOffsetSlider.IsEnabled = !useBall;
+            if (ToggleSwitchAllowDragSidePanel != null) ToggleSwitchAllowDragSidePanel.IsEnabled = !useBall;
+            if (ComboBoxUnFoldBtnImg != null) ComboBoxUnFoldBtnImg.IsEnabled = !useBall;
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.UseFloatingFoldBall = ComboBoxFoldedMode.SelectedIndex == 1;
+            SettingsManager.Settings.Appearance.UseFloatingFoldBall = useBall;
             SettingsManager.SaveSettingsToFile();
             (Application.Current.MainWindow as MainWindow)?.ApplyFoldedMode();
         }
@@ -97,6 +105,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Appearance.AllowDragSidePanel = ToggleSwitchAllowDragSidePanel.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void FloatingFoldBallOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(FloatingFoldBallOpacitySlider, FloatingFoldBallOpacityText, "{0:P0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.FloatingFoldBallOpacity = FloatingFoldBallOpacitySlider.Value;
+            SettingsManager.SaveSettingsToFile();
+            (Application.Current.MainWindow as MainWindow)?.ApplyFloatingFoldBallOpacity();
         }
 
         private void QuickPanelOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)

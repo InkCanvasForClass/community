@@ -1465,9 +1465,12 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Grid>
-        <!--侧边栏//左-->
+        <localControls:FloatingFoldMenu x:Name="FoldedBallMenu" Visibility="Collapsed"
+                                        Button.Click="FoldedBallMenu_ToolClick" PreviewKeyDown="FoldedBallMenu_KeyDown" />
         <localControls:FloatingFoldBall x:Name="FoldedBall" Visibility="Collapsed"
-                                       Click="FoldedBall_Click" PositionChanged="FoldedBall_PositionChanged" />
+                                       Click="FoldedBall_Click" PositionChanged="FoldedBall_PositionChanged"
+                                       DragMoved="FoldedBall_DragMoved" PreviewKeyDown="FoldedBallMenu_KeyDown" />
+        <!--侧边栏//左-->
         <localControls:SidePanelToggle x:Name="LeftSidePanel" Click="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />

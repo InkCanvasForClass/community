@@ -1041,6 +1041,15 @@ namespace Ink_Canvas
         [JsonProperty("floatingFoldBallY")]
         public double FloatingFoldBallY { get; set; } = 200;
 
+        private double _floatingFoldBallOpacity = 0.85;
+
+        [JsonProperty("floatingFoldBallOpacity")]
+        public double FloatingFoldBallOpacity
+        {
+            get => _floatingFoldBallOpacity;
+            set => _floatingFoldBallOpacity = double.IsFinite(value) ? Math.Clamp(value, 0.2, 1) : 0.85;
+        }
+
         [JsonProperty("useMinimalistGrabHandle")]
         public bool UseMinimalistGrabHandle { get; set; } = true;
 

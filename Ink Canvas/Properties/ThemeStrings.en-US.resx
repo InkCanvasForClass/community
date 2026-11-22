@@ -659,4 +659,7 @@
   <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
     <value>Click to expand; drag to move</value>
   </data>
+  <data name="Theme_FloatingFoldBall_Opacity" xml:space="preserve">
+    <value>Floating ball opacity</value>
+  </data>
 </root>

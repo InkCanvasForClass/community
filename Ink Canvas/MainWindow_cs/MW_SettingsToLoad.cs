@@ -952,16 +952,12 @@ namespace Ink_Canvas
             var leftQuickPanelMargin = LeftUnFoldButtonQuickPanel.Margin;
             LeftUnFoldButtonQuickPanel.Margin = new Thickness(leftQuickPanelMargin.Left, leftQuickPanelMargin.Top, leftQuickPanelMargin.Right, offset);
 
-            UpdateFloatingFoldBallLayout();
-
             var rightQuickPanelMargin = RightUnFoldButtonQuickPanel.Margin;
             RightUnFoldButtonQuickPanel.Margin = new Thickness(rightQuickPanelMargin.Left, rightQuickPanelMargin.Top, rightQuickPanelMargin.Right, offset);
         }
 
         internal void ApplyQuickPanelOpacity(double opacity)
         {
-            if (FoldedBall != null)
-                FoldedBall.Opacity = opacity;
             if (LeftUnFoldButtonQuickPanel != null)
                 LeftUnFoldButtonQuickPanel.Opacity = opacity;
             if (RightUnFoldButtonQuickPanel != null)

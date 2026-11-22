@@ -9,6 +9,8 @@ namespace Ink_Canvas.Controls
     {
         public event RoutedEventHandler Click;
         public event EventHandler PositionChanged;
+        public event EventHandler DragMoved;
+        internal bool IsPointerPressed => _pressed;
 
         private Point _pointerStart;
         private Point _positionStart;
@@ -46,10 +48,18 @@ namespace Ink_Canvas.Controls
             Margin = new Thickness(point.X, point.Y, 0, 0);
         }
 
+        internal void ShowMenuState(bool isOpen, Vector offset)
+        {
+            MenuOffset.X = offset.X;
+            MenuOffset.Y = offset.Y;
+            PenIcon.Visibility = isOpen ? Visibility.Collapsed : Visibility.Visible;
+            CloseIcon.Visibility = isOpen ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void BeginDrag(Point pointer)
         {
             _pointerStart = pointer;
-            _positionStart = new Point(Margin.Left, Margin.Top);
+            _positionStart = new Point(Margin.Left + MenuOffset.X, Margin.Top + MenuOffset.Y);
             _pressed = true;
             _dragged = false;
         }
@@ -62,6 +72,7 @@ namespace Ink_Canvas.Controls
                 Math.Abs(delta.Y) < SystemParameters.MinimumVerticalDragDistance) return;
             _dragged = true;
             SetPosition(_positionStart + delta);
+            DragMoved?.Invoke(this, EventArgs.Empty);
         }
 
         private void EndDrag(bool cancelled)
@@ -105,6 +116,14 @@ namespace Ink_Canvas.Controls
         {
             base.OnLostMouseCapture(e);
             if (_touch == null) EndDrag(true);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key != Key.Enter && e.Key != Key.Space) return;
+            if (!e.IsRepeat) Click?.Invoke(this, new RoutedEventArgs());
+            e.Handled = true;
         }
 
         protected override void OnTouchDown(TouchEventArgs e)

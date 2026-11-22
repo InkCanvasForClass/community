@@ -665,4 +665,7 @@
   <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
     <value>点击展开，拖动调整位置</value>
   </data>
+  <data name="Theme_FloatingFoldBall_Opacity" xml:space="preserve">
+    <value>悬浮球不透明度</value>
+  </data>
 </root>

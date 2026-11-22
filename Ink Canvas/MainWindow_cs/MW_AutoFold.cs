@@ -383,12 +383,6 @@ namespace Ink_Canvas
         private async void HideLeftQuickPanel()
         {
             int modeVersion = _foldedModeVersion;
-            if (Settings.Appearance.UseFloatingFoldBall)
-            {
-                LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, null);
-                LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-                return;
-            }
             if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
                 await MoveQuickPanelTo(LeftUnFoldButtonQuickPanel, QuickPanelFoldedMargin, false);
@@ -492,6 +486,7 @@ namespace Ink_Canvas
             {
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
+                CloseFloatingFoldMenu(animate: false);
             });
 
             await Dispatcher.InvokeAsync(() =>
@@ -606,6 +601,7 @@ namespace Ink_Canvas
         /// </summary>
         private void AutoCollapseTimer_Tick(object sender, EventArgs e)
         {
+            if (FoldedBallMenu.IsOpen && FoldedBall.IsPointerPressed) return;
             StopAutoCollapseQuickPanelTimer();
             HideQuickPanelAndResetMargin();
         }
@@ -626,6 +622,7 @@ namespace Ink_Canvas
         /// </summary>
         private void HideQuickPanelAndResetMargin()
         {
+            if (FoldedBallMenu.IsOpen) CloseFloatingFoldMenu();
             if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
                 RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
@@ -644,7 +641,8 @@ namespace Ink_Canvas
             if (!isFloatingBarFolded) return;
 
             bool isQuickPanelVisible = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
-                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible;
+                                       RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible ||
+                                       FoldedBallMenu.IsOpen;
 
             if (!isQuickPanelVisible) return;
 
@@ -657,7 +655,8 @@ namespace Ink_Canvas
                     IsDescendantOf(hitTarget, RightUnFoldButtonQuickPanel) ||
                     IsDescendantOf(hitTarget, LeftSidePanel) ||
                     IsDescendantOf(hitTarget, RightSidePanel) ||
-                    IsDescendantOf(hitTarget, FoldedBall))
+                    IsDescendantOf(hitTarget, FoldedBall) ||
+                    IsDescendantOf(hitTarget, FoldedBallMenu))
                 {
                     // 重置计时器
                     StartAutoCollapseQuickPanelTimer();

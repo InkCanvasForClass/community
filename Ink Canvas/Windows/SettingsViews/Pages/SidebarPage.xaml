@@ -39,6 +39,17 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard x:Name="FloatingFoldBallOpacityCard" Visibility="Collapsed"
+                                     Header="{x:Static props:ThemeStrings.Theme_FloatingFoldBall_Opacity}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="FloatingFoldBallOpacityText" VerticalAlignment="Center"
+                                       FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" />
+                            <Slider x:Name="FloatingFoldBallOpacitySlider" Minimum="0.2" Maximum="1.0" Width="200"
+                                    IsSnapToTickEnabled="True" Value="0.85" TickFrequency="0.05"
+                                    ValueChanged="FloatingFoldBallOpacitySlider_ValueChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableQuickPanel, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>
