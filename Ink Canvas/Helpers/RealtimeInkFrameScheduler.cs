@@ -15,7 +15,8 @@ namespace Ink_Canvas.Helpers
             Force
         }
 
-        private sealed class PendingRedraw
+        // A value type avoids one heap allocation per dirty StrokeVisual per frame.
+        private struct PendingRedraw
         {
             public RedrawRequestKind Kind;
             public long RequestedAt;
@@ -88,9 +89,11 @@ namespace Ink_Canvas.Helpers
 
         // Input-side coalesce window: multiple TouchMove requests within this window
         // share one render pass without forcing another kick.
-        private const double CoalesceWindowMs = 10.0;
+        // Keep timing comparisons in Stopwatch ticks to avoid floating-point conversion
+        // on every touch sample entering the scheduler.
+        private static readonly long CoalesceWindowTicks = Stopwatch.Frequency / 100;
         // If Rendering has not run for this long while dirty, force another kick.
-        private const double StalledRenderKickMs = 24.0;
+        private static readonly long StalledRenderKickTicks = Stopwatch.Frequency * 24 / 1000;
         // Keep a short warm subscription after strokes go idle, then unbind.
         private const int IdleEmptyFrameUnbindThreshold = 2;
 
@@ -198,7 +201,6 @@ namespace Ink_Canvas.Helpers
                 return;
 
             var now = Stopwatch.GetTimestamp();
-            var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
 
             // 每次 RequestRedraw 调用都计 1 帧"墨迹入帧"。
             // 即便 Coalesce 窗口内重复调用命中已 dirty 路径,这里也照样入帧:
@@ -208,17 +210,21 @@ namespace Ink_Canvas.Helpers
 
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
-                if (requestKind == RedrawRequestKind.Force)
+                if (requestKind == RedrawRequestKind.Force && pending.Kind != RedrawRequestKind.Force)
+                {
                     pending.Kind = RedrawRequestKind.Force;
+                    PendingRedraws[strokeVisual] = pending;
+                }
 
                 // Already dirty: re-kick only if the render loop looks stalled.
+                // A false result guarantees Rendering is already subscribed, so no
+                // per-contact EnsureRenderingSubscribed call is needed here.
                 if (ShouldForceKick(now))
                     KickRender(strokeVisual, now);
-                else
-                    EnsureRenderingSubscribed();
                 return;
             }
 
+            var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
             var wasEmpty = PendingRedraws.Count == 0;
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
@@ -242,12 +248,7 @@ namespace Ink_Canvas.Helpers
                 // First dirty of a batch, or coalesce window expired / render stalled.
                 KickRender(strokeVisual, now);
             }
-            else
-            {
-                // Inside coalesce window: mark dirty only. The already-kicked frame
-                // (or sticky Rendering subscription) will pick it up.
-                EnsureRenderingSubscribed();
-            }
+            // Otherwise this request joins the already-subscribed rendering batch.
         }
 
         private static bool ShouldForceKick(long nowTicks)
@@ -258,12 +259,12 @@ namespace Ink_Canvas.Helpers
             // No render observed yet after a kick — wait unless stalled.
             if (LastKickAt != 0L && (LastRenderingAt == 0L || LastRenderingAt < LastKickAt))
             {
-                return ToMilliseconds(nowTicks - LastKickAt) >= StalledRenderKickMs;
+                return nowTicks - LastKickAt >= StalledRenderKickTicks;
             }
 
             // Render has run since last kick: only force a new kick after coalesce window.
             if (LastKickAt != 0L)
-                return ToMilliseconds(nowTicks - LastKickAt) >= CoalesceWindowMs;
+                return nowTicks - LastKickAt >= CoalesceWindowTicks;
 
             return true;
         }
