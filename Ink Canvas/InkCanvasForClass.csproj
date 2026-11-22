@@ -126,8 +126,6 @@
     </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop" Version="*" />
     <PackageReference Include="H.NotifyIcon.Wpf" Version="*" />
-    <!-- 组织维护的非官方 fork：包 ID 为 InkCanvasForClass.UI.WPF.Modern，程序集仍叫 iNKORE.UI.WPF.Modern -->
-    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="*" />
     <PackageReference Include="iNKORE.UI.WPF" Version="*" />
     <PackageReference Include="MdXaml" Version="*" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="*" />
