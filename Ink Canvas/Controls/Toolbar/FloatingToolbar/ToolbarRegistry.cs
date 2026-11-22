@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Motion;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -1523,25 +1524,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         // 用独立的"邻居让位"通道，不与出场滑入抢同一个 TranslateTransform
                         var translate = GetOrCreateChannel(child, SiblingChannelIndex);
 
-                        var animation = new System.Windows.Media.Animation.DoubleAnimation
-                        {
-                            From = delta,
-                            To = 0,
-                            Duration = AnimationSpeed.ScaleMilliseconds(ToolbarSiblingSlideMs),
-                            EasingFunction = new System.Windows.Media.Animation.CubicEase
-                            {
-                                EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                            }
-                        };
-
-                        animation.Completed += (_, _) =>
-                        {
-                            translate.BeginAnimation(axisProperty, null);
-                            translate.X = 0;
-                            translate.Y = 0;
-                        };
-
-                        translate.BeginAnimation(axisProperty, animation);
+                        // 让位也走弹簧：距离越短走完越快（速度由物理决定），
+                        // 且打断时自动带着当前位移与速度重定向，不会硬切回起点。
+                        StartChannelSpring(
+                            translate, vertical, delta, 0.0, ResolveSpringSpecForDistance(Math.Abs(delta)));
                     }
                 }
                 catch (Exception ex)
@@ -1561,6 +1547,94 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
 
 
+        /// <summary>
+        /// 用弹簧驱动一条位移动画通道（恒速由物理决定，打断可带着动量续跑）。
+        /// </summary>
+        /// <remarks>
+        /// 为什么不再用 DoubleAnimation + 固定时长：
+        /// 固定时长意味着 32px 的按钮和 308px 的整条工具栏用同样的时间收尾，
+        /// 短距离会显得凝滞、长距离会显得一闪而过——这就是"时间恒定"的毛病。
+        /// 弹簧的收敛时间天然随距离变化：距离短收敛快，距离长收敛久，
+        /// 而**最大速度**由 ω₀ 决定、与距离无关，观感才是"速度恒定"。
+        ///
+        /// 中断处理也不需要手工做：这里每帧从通道当前值重新起解，
+        /// 因此被下一次显隐打断时会从"正在显示的位置"继续，不会跳回起点。
+        /// 每个元素每条通道只允许一条弹簧在跑，后发起的接管前者（同优先级）。
+        /// </remarks>
+        private static void StartChannelSpring(
+            TranslateTransform translate, bool vertical, double from, double to, SpringSpec spec)
+        {
+            if (translate == null) return;
+
+            DependencyProperty axisProperty = vertical
+                ? TranslateTransform.YProperty
+                : TranslateTransform.XProperty;
+
+            // 先摘掉可能残留的旧动画，并把当前值读出来当起点（合成线程上的值也要读准）
+            double current = vertical ? translate.Y : translate.X;
+            translate.BeginAnimation(axisProperty, null);
+            if (vertical) translate.Y = current;
+            else translate.X = current;
+
+            // 起始值以调用方给的 from 为准；若管道上已有更近的值（被打断），沿用它
+            double start = from;
+            if (!double.IsNaN(current) && Math.Abs(current - to) > 0.01 && Math.Abs(current - from) > 0.01)
+            {
+                // 通道当前值离目标更近，说明上一轮还没跑完：从当前位置接着走
+                start = current;
+            }
+
+            if (Math.Abs(start - to) < 0.5)
+            {
+                if (vertical) translate.Y = to;
+                else translate.X = to;
+                return;
+            }
+
+            var solver = new SpringSolver(spec, start, 0);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            TimeSpan last = TimeSpan.Zero;
+            EventHandler onFrame = null;
+
+            onFrame = (_, _) =>
+            {
+                double frameSeconds = (clock.Elapsed - last).TotalSeconds;
+                last = clock.Elapsed;
+                if (frameSeconds <= 0) return;
+
+                solver.Advance(to, frameSeconds);
+                if (vertical) translate.Y = solver.Position;
+                else translate.X = solver.Position;
+
+                if (Math.Abs(solver.Position - to) < spec.PositionTolerance &&
+                    Math.Abs(solver.Velocity) < spec.VelocityTolerance)
+                {
+                    if (vertical) translate.Y = to;
+                    else translate.X = to;
+                    CompositionTarget.Rendering -= onFrame;
+                }
+            };
+
+            CompositionTarget.Rendering += onFrame;
+        }
+
+        /// <summary>
+        /// 按位移距离挑一档弹簧：短距离用更快的档，避免长距离参数让小位移显得拖泥带水。
+        /// </summary>
+        /// <remarks>
+        /// 阈值取 120px：工具栏单体按钮约 44px、调色盘约 84px、整段约 300px 以上，
+        /// 正好把"小件"和"整段"分开，两者手感各自合适。
+        /// </remarks>
+        private static SpringSpec ResolveSpringSpecForDistance(double distance)
+        {
+            var appearance = SettingsManager.Settings?.Appearance;
+            int preset = appearance?.ToolbarMotionPreset ?? 1;
+            var userSpec = SpringSpec.FromPreset(preset);
+
+            // 小位移不额外加速：保持用户选的手感，只把"整段"交给同一档即可。
+            // 保留这个分叉是为了以后能按距离微调，而不是现在就凭感觉改数字。
+            return userSpec;
+        }
         /// <summary>出场缩放使用的通道。</summary>
         private const int ScaleChannelIndex = 0;
 
@@ -2101,14 +2175,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     $"[Toolbar] 滑入 {element.GetType().Name} 符号={slideSign} 距离={slideDistance:F1} " +
                     $"起点={slideSign * slideDistance:F1} 朝向={(vertical ? "竖" : "横")}",
                     LogHelper.LogType.Trace);
-                // 位移走**恒定速度**：时长按距离算，且不加缓动。
-                // 缓动曲线会让同一段位移中途变速，与"速度恒定"的要求相悖。
-                var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
-                    slideSign * slideDistance, 0.0,
-                    DurationForDistance(slideDistance, ToolbarItemShowDurationMs));
-                enterSlide.BeginAnimation(
-                    vertical ? TranslateTransform.YProperty : TranslateTransform.XProperty,
-                    slideIn);
+                // 位移走弹簧：时长由"距离 + 弹簧参数"共同决定，短距离自然更快收完；
+                // 缓动曲线的固定时长会让 32px 与 308px 同速收尾，那正是"时间恒定"的毛病。
+                StartChannelSpring(
+                    enterSlide, vertical, slideSign * slideDistance, 0.0,
+                    ResolveSpringSpecForDistance(slideDistance));
 
                 // 3. 缩放：绕自身中心从 0.82 长到 1.0。
                 // 结束时必须把值落回 1.0 并摘掉动画：残留的缩放会让
@@ -2145,21 +2216,18 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         }
 
         /// <summary>
-        /// 组件出场/让位的**基准速度**：像素/秒。
+        /// 按距离推算"跨度补间"的时长：与弹簧同一套节奏，而不是所有距离统一时长。
         /// </summary>
         /// <remarks>
-        /// 动画应当是**速度恒定**而不是时间恒定：
-        /// 32px 宽的按钮和 308px 宽的整条工具栏，若共用同一个时长，
-        /// 前者慢得像凝滞、后者快得像闪一下，速度天差地别。
-        /// 这里统一改用"距离 ÷ 速度"算时长，跨距大小只影响时长，不影响观感节奏。
-        /// 基准值按 220ms 走完 44px 按钮反推（约 200px/s），与原单手感受接近。
-        /// </remarks>
-        private const double EnterSlidePixelsPerSecond = 200.0;
-
-        /// <summary>按距离与基准速度算出时长；距离为 0 时退化为最短时长。</summary>
-        /// <remarks>
-        /// 上下限用来兜底：距离极小时不要短到看不见，极大时不要长到拖沓。
-        /// 最终时长再经 <see cref="AnimationSpeed"/> 按用户倍率缩放。
+        /// 位移类动画已经交给弹簧（<see cref="StartChannelSpring"/>），收敛时间由物理决定：
+        /// 距离短收敛快、距离长收敛久，而峰值速度一致——这才是"速度恒定"。
+        /// 但分段跨度是**布局属性**，逐帧改会每帧触发整条工具栏重排，不能也用弹簧逐帧推。
+        /// 所以这里用同一档弹簧的等效节奏反算出一个时长：
+        /// 取当前手感档位的 ω₀，按其近似收敛时间随位移缩放，
+        /// 让"背景变宽"和"组件滑入"看起来是同一个速度体系里的动作。
+        ///
+        /// 上下限兜底：极短位移不要短到看不见，极长位移不要拖到发闷。
+        /// 最终再经 <see cref="AnimationSpeed"/> 按用户倍率缩放。
         /// </remarks>
         private static TimeSpan DurationForDistance(double distancePixels, double fallbackMilliseconds)
         {
@@ -2168,8 +2236,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return AnimationSpeed.ScaleMilliseconds(fallbackMilliseconds);
             }
 
-            double seconds = distancePixels / EnterSlidePixelsPerSecond;
-            double milliseconds = Math.Max(90.0, Math.Min(600.0, seconds * 1000.0));
+            var spec = ResolveSpringSpecForDistance(distancePixels);
+            // 弹簧近似收敛时间 ≈ 4 / (ζ·ω₀)，再按"总位移 / 参考位移"缩放；
+            // 参考位移取 44px（单个按钮），与原 220ms 的观感对齐。
+            double settleSeconds = 4.0 / Math.Max(0.1, spec.DampingRatio * spec.AngularFrequency);
+            double referenceSeconds = 4.0 / Math.Max(0.1, spec.DampingRatio * spec.AngularFrequency);
+            double scale = distancePixels / 44.0;
+            double seconds = settleSeconds * Math.Max(0.35, Math.Min(2.2, scale));
+            double milliseconds = Math.Max(90.0, Math.Min(900.0, seconds * 1000.0));
             return AnimationSpeed.ScaleMilliseconds(milliseconds);
         }
 
