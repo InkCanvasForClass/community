@@ -24,10 +24,12 @@ namespace Ink_Canvas.Helpers
             public int Gen2CollectionCountStart;
         }
 
-        private static readonly Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
+        // Swap the two dictionaries at frame start so requests arriving during redraw
+        // are collected separately without copying every dirty visual into a list.
+        private static Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
             new Dictionary<StrokeVisual, PendingRedraw>();
-        private static readonly List<KeyValuePair<StrokeVisual, PendingRedraw>> PendingSnapshot =
-            new List<KeyValuePair<StrokeVisual, PendingRedraw>>(8);
+        private static Dictionary<StrokeVisual, PendingRedraw> PendingSnapshot =
+            new Dictionary<StrokeVisual, PendingRedraw>();
 
         private static readonly Action GlobalDispatcherProbeAction = CompleteGlobalDispatcherProbe;
         private static DispatcherOperation GlobalDispatcherProbeOperation;
@@ -348,18 +350,23 @@ namespace Ink_Canvas.Helpers
             GlobalProbeDelayMs = 0;
             GlobalProbeStartedAt = 0;
 
-            PendingSnapshot.Clear();
+            // Detach the current frame's batch in O(1). Any RequestRedraw raised while
+            // executing this snapshot is added to the now-empty PendingRedraws dictionary
+            // and therefore belongs to the next frame.
+            var completedBatch = PendingRedraws;
+            PendingRedraws = PendingSnapshot;
+            PendingSnapshot = completedBatch;
+            PendingRedraws.Clear();
+
             KeyValuePair<StrokeVisual, PendingRedraw>? earliest = null;
-            foreach (var pair in PendingRedraws)
+            foreach (var pair in PendingSnapshot)
             {
-                PendingSnapshot.Add(pair);
                 if (pair.Value.RequestedAt != 0L
                     && (earliest == null || pair.Value.RequestedAt < earliest.Value.Value.RequestedAt))
                 {
                     earliest = pair;
                 }
             }
-            PendingRedraws.Clear();
 
             double frameWaitSampleMs = 0;
             // One FrameWait sample per render pass (earliest dirty).
