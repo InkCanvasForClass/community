@@ -213,6 +213,16 @@
 
 本项目使用了 [Inkeys](https://github.com/Alan-CRL/Inkeys) 的部分代码。该部分以 GPL-3.0 发布，著作权归 AlanCRL Studio 所有（© 2023–2026）；本项目保留其版权声明，并以同一许可证（GPL-3.0）公开全部对应源代码。
 
+### 浮动工具栏动效（移植自 Inkeys）
+
+浮动工具栏的展开/收起动效移植自 [Inkeys](https://github.com/Alan-CRL/Inkeys)，实现见 `Ink Canvas/Controls/Toolbar/FloatingToolbar/ToolbarRegistry.cs` 与 `Ink Canvas/MainWindow_cs/MW_FloatingBarCenterFollow.cs`：
+
+- **同一条时间轴**：展开与收起共用一个进度（0 = 收起端，1 = 展开端），基准时长 400 ms，再按全局动画速度倍率缩放；胶囊宽度与组件位移、透明度同曲线、同时长。
+- **展开 EaseOutBack（回弹 1.1）、收起 EaseInBack**：由于 `EaseInBack(t) ≡ 1 − EaseOutBack(1 − t)`，收起就是展开的严格倒放；播放中途被打断时只翻转方向、沿用当前进度，不重新计时，所以不会跳变。
+- **透明度走正弦缓动**：展开 EaseOutSine、收起 EaseInSine，与位移同时起落。
+- **独立边框段当做一个组件**：宽=高的方形不参与跨度补间；段内组件与该方形背景一起进退（背景淡出/淡入 + 0.82 缩放），两者都收完才折掉排布占位。
+- **居中跟随**：整条栏的居中补偿逐帧按当前视觉跨度计算，退场/入场中的方形按不透明度折算回跨度，避免收起/展开首帧的横向跳动。
+
 ### ClassIsland
 
 本项目的「组件排序」与「自动化」功能参考并沿用了 [ClassIsland](https://github.com/ClassIsland/ClassIsland) 的实现。ClassIsland 以 GPL-3.0 发布，著作权归 ClassIsland 项目及 [HelloWRC](https://github.com/HelloWRC) 等贡献者所有；本项目保留其版权声明，并以同一许可证（GPL-3.0）公开全部对应源代码。此外，本项目的点名功能支持通过 `classisland://` 协议调用 ClassIsland 完成外部点名。
