@@ -176,11 +176,11 @@ namespace Ink_Canvas
             {
                 void SetToolbarGeometry(ToolbarImageButton btn, string geometry)
                 {
-                    if (btn != null) btn.Icon.Geometry = Geometry.Parse(geometry);
+                    if (btn != null) InkResourceCache.SetGeometry(btn.Icon, geometry);
                 }
                 void SetMenuGeometry(ToolMenuButton btn, string geometry)
                 {
-                    if (btn != null) btn.Icon.Geometry = Geometry.Parse(geometry);
+                    if (btn != null) InkResourceCache.SetGeometry(btn.Icon, geometry);
                 }
 
                 SetToolbarGeometry(SymbolIconDelete, XamlGraphicsIconGeometries.DeleteIcon);
@@ -226,7 +226,7 @@ namespace Ink_Canvas
 
                 void SetSelectedFloatingBarButtonBrush(ToolbarImageButton btn)
                 {
-                    if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = new SolidColorBrush(selectedColor);
+                    if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = InkResourceCache.GetBrush(selectedColor);
                 }
 
                 switch (_currentToolMode)
@@ -256,7 +256,7 @@ namespace Ink_Canvas
 
         void SetAllFloatingBarButtonsToColor(Color color)
         {
-            var brush = new SolidColorBrush(color);
+            var brush = InkResourceCache.GetBrush(color);
 
             void SetFloatingBarButtonBrush(ToolbarImageButton btn)
             {

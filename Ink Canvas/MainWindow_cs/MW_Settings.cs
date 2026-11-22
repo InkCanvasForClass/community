@@ -1293,7 +1293,7 @@ namespace Ink_Canvas
                 void SetIcon(ToolbarImageButton btn, bool isSolid, string solidGeom, string linedGeom)
                 {
                     if (btn == null) return;
-                    btn.Icon.Geometry = Geometry.Parse(isSolid ? solidGeom : linedGeom);
+                    InkResourceCache.SetGeometry(btn.Icon, isSolid ? solidGeom : linedGeom);
                 }
 
                 if (Settings.Appearance.UseLegacyFloatingBarUI)

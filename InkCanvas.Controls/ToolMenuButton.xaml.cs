@@ -37,9 +37,9 @@ namespace Ink_Canvas.Controls
             var button = (ToolMenuButton)d;
             if (e.NewValue is string geometry && !string.IsNullOrEmpty(geometry))
             {
-                button._pendingGeometry = Geometry.Parse(geometry);
+                button._pendingGeometry = InkResourceCache.GetGeometry(geometry);
                 if (button.IconGeometryInternal != null)
-                    button.IconGeometryInternal.Geometry = button._pendingGeometry;
+                    InkResourceCache.SetGeometry(button.IconGeometryInternal, button._pendingGeometry);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Ink_Canvas.Controls
             var button = (ToolMenuButton)d;
             button._pendingBrush = (Brush)e.NewValue;
             if (button.IconGeometryInternal != null)
-                button.IconGeometryInternal.Brush = button._pendingBrush;
+                InkResourceCache.SetBrush(button.IconGeometryInternal, button._pendingBrush);
         }
 
         public Brush IconBrush
@@ -99,9 +99,9 @@ namespace Ink_Canvas.Controls
             if (IconGeometryInternal != null)
             {
                 if (_pendingGeometry != null)
-                    IconGeometryInternal.Geometry = _pendingGeometry;
+                    InkResourceCache.SetGeometry(IconGeometryInternal, _pendingGeometry);
                 if (_pendingBrush != null)
-                    IconGeometryInternal.Brush = _pendingBrush;
+                    InkResourceCache.SetBrush(IconGeometryInternal, _pendingBrush);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Ink_Canvas.Controls
                 _lastPressedButton.ButtonBorder.Background = Brushes.Transparent;
             }
             _lastPressedButton = this;
-            ButtonBorder.Background = new SolidColorBrush(Color.FromArgb(80, 24, 24, 27));
+            ButtonBorder.Background = InkResourceCache.GetBrush(Color.FromArgb(80, 24, 24, 27));
             ButtonMouseDown?.Invoke(this, e);
         }
 

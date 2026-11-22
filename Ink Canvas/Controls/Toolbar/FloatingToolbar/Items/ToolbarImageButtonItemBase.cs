@@ -53,7 +53,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             }
             else if (!string.IsNullOrEmpty(IconGeometry))
             {
-                btn.Icon.Geometry = Geometry.Parse(IconGeometry);
+                btn.Icon.Geometry = InkResourceCache.GetGeometry(IconGeometry);
             }
 
             if (!string.IsNullOrEmpty(IconBrushResourceKey))
