@@ -86,13 +86,6 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         internal static event Action<long, double> RenderingSampleAvailable;
 
-        /// <summary>
-        /// 每次 <see cref="RequestRedraw"/>/<see cref="RequestForceRedraw"/>/<see cref="Flush"/> 被调用时触发(参数为 Stopwatch 时间戳)。
-        /// HUD 用 1s 滑窗统计 tick 数,得到"墨迹入帧率":每秒钟有多少个墨迹脏标记入队。
-        /// 而不是 WPF 进程整体 CompositionTarget.Rendering 频率(屏幕刷新率)。
-        /// </summary>
-        internal static event Action<long> InkTickAvailable;
-
         // Input-side coalesce window: multiple TouchMove requests within this window
         // share one render pass without forcing another kick.
         private const double CoalesceWindowMs = 10.0;
@@ -163,7 +156,6 @@ namespace Ink_Canvas.Helpers
             UnsubscribeIfIdle();
             ExecuteRedraw(strokeVisual, requestKind);
             // Flush 也是一次墨迹入帧:笔尖起跳/收尾即应计 1 帧。
-            RaiseInkTick(Stopwatch.GetTimestamp());
         }
 
         public static void Cancel(StrokeVisual strokeVisual)
@@ -213,7 +205,6 @@ namespace Ink_Canvas.Helpers
             // 每次入队都 +1，保持墨迹入帧计数语义一致。
             // 注意:真正的"墨迹帧率"计数已转移到 StrokeVisual.Redraw 入口,
             // 这里仅保留事件 raise 以便其他订阅者使用。
-            RaiseInkTick(now);
 
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
@@ -478,18 +469,5 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static void RaiseInkTick(long renderedAtTicks)
-        {
-            var handler = InkTickAvailable;
-            if (handler == null) return;
-            try
-            {
-                handler.Invoke(renderedAtTicks);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"RealtimeInkFrameScheduler.InkTickAvailable subscriber threw: {ex.Message}");
-            }
-        }
     }
 }
