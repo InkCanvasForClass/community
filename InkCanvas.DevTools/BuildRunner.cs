@@ -142,18 +142,29 @@ namespace InkCanvas.DevTools
         /// <summary>
         /// 根据构建模式获取 dotnet 子命令（build / publish），不带任何额外参数。
         /// </summary>
-        public string GetDotnetArguments(BuildMode mode)
+        public string GetDotnetArguments(BuildMode mode, bool skipProjectReferences = false)
         {
+            string verb;
             switch (mode)
             {
                 case BuildMode.Debug:
                 case BuildMode.Release:
-                    return "build";
+                    verb = "build";
+                    break;
                 case BuildMode.Publish:
-                    return "publish";
+                    verb = "publish";
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode));
             }
+
+            // 辅助进程（LiquidGlassMagHost / IACoreHelper）是 ReferenceOutputAssembly=false 的
+            // 构建依赖：不参与主程序编译，却每次 build 都会被连带重新编译，
+            // 那是本地改一行代码要等十几秒的主因。产物已存在时跳过它们，
+            // 主程序本身的增量编译只要 2~3 秒；需要更新辅助进程时用完整构建即可。
+            return skipProjectReferences
+                ? verb + " -p:BuildProjectReferences=false"
+                : verb;
         }
 
         /// <summary>
@@ -210,10 +221,47 @@ namespace InkCanvas.DevTools
         /// <summary>
         /// 异步执行 dotnet 命令，逐行回传输出文本。返回进程退出码。
         /// </summary>
+        /// <summary>
+        /// 判断能否跳过辅助项目（LiquidGlassMagHost / IACoreHelper）的重新编译。
+        /// </summary>
+        /// <remarks>
+        /// 它们是 ReferenceOutputAssembly=false 的构建依赖：不参与主程序编译，
+        /// 但每次 build 都会被连带重新编译——本地改一行代码要等十几秒的主因。
+        /// 这里只确认产物是否已随主程序复制到输出目录：缺失时必须走完整构建，
+        /// 宁可慢一次，也不能产出缺文件的输出。
+        /// </remarks>
+        private bool HasAllHelperOutputs(ProjectDefinition project, BuildMode mode)
+        {
+            try
+            {
+                var exePath = GetExecutablePath(project, mode);
+                if (string.IsNullOrEmpty(exePath)) return false;
+
+                var outputDir = Path.GetDirectoryName(exePath);
+                if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir)) return false;
+
+                return File.Exists(Path.Combine(outputDir, "InkCanvas.LiquidGlassMagHost.exe"))
+                    && File.Exists(Path.Combine(outputDir, "InkCanvas.IACoreHelper.dll"));
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<int> RunDotnetAsync(ProjectDefinition project, BuildMode mode, IProgress<string> output)
         {
-            string args = GetDotnetArguments(mode);
+            bool canSkipRefs = mode != BuildMode.Publish
+                && project.IsExecutable
+                && HasAllHelperOutputs(project, mode);
+
+            string args = GetDotnetArguments(mode, canSkipRefs);
             string workingDirectory = GetWorkingDirectory(project);
+
+            if (canSkipRefs)
+            {
+                output?.Report("（辅助进程产物已存在，跳过其重新编译以加速；需要更新它们时用完整构建）\n");
+            }
 
             // 命令本身不带任何参数；通过进程环境变量 Configuration 让 MSBuild 使用对应配置。
             string configuration = mode == BuildMode.Debug ? "Debug" : "Release";
