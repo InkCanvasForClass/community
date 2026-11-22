@@ -653,4 +653,16 @@
   <data name="Theme_RestartRequired" xml:space="preserve">
     <value>更改主题后需要重启应用程序才能完全生效。是否立即重启？</value>
   </data>
+  <data name="Theme_FoldedMode" xml:space="preserve">
+    <value>收纳方式</value>
+  </data>
+  <data name="Theme_FoldedMode_Sidebar" xml:space="preserve">
+    <value>原有侧边栏</value>
+  </data>
+  <data name="Theme_FoldedMode_Ball" xml:space="preserve">
+    <value>悬浮球</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
+    <value>点击展开，拖动调整位置</value>
+  </data>
 </root>

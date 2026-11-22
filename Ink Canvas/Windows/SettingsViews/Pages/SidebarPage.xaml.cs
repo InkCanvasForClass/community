@@ -68,12 +68,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings?.Appearance == null) return;
 
             ToggleSwitchEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
+            ComboBoxFoldedMode.SelectedIndex = settings.Appearance.UseFloatingFoldBall ? 1 : 0;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
             ToggleSwitchAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
             ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
+        }
+
+        private void ComboBoxFoldedMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.UseFloatingFoldBall = ComboBoxFoldedMode.SelectedIndex == 1;
+            SettingsManager.SaveSettingsToFile();
+            (Application.Current.MainWindow as MainWindow)?.ApplyFoldedMode();
         }
 
         private void ToggleSwitchEnableQuickPanel_Toggled(object sender, RoutedEventArgs e)

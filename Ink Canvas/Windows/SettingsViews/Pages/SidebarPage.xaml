@@ -31,6 +31,14 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_SidebarGroupTitle}" />
 
+                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FoldedMode}">
+                        <ComboBox x:Name="ComboBoxFoldedMode" SelectedIndex="0"
+                                  SelectionChanged="ComboBoxFoldedMode_SelectionChanged">
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FoldedMode_Sidebar}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_FoldedMode_Ball}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableQuickPanel, Mode=OneWay}">
                         <ui:SettingsExpander.HeaderIcon>

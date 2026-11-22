@@ -142,7 +142,7 @@
             </Style>
         </ResourceDictionary>
     </helpers:PerformanceTransparentWin.Resources>
-    <Grid x:Name="Main_Grid">
+    <Grid x:Name="Main_Grid" SizeChanged="FoldedBallHost_SizeChanged">
         <!--黑/白 板幕布-->
         <Grid Name="GridBackgroundCoverHolder">
             <Grid Name="GridBackgroundCover" Visibility="Collapsed" Background="#1F1F1F">
@@ -1466,6 +1466,8 @@
             </Border>
         </Grid>
         <!--侧边栏//左-->
+        <localControls:FloatingFoldBall x:Name="FoldedBall" Visibility="Collapsed"
+                                       Click="FoldedBall_Click" PositionChanged="FoldedBall_PositionChanged" />
         <localControls:SidePanelToggle x:Name="LeftSidePanel" Click="LeftUnFoldButtonDisplayQuickPanel_MouseUp"
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />

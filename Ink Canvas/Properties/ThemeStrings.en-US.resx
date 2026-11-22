@@ -647,4 +647,16 @@
   <data name="Theme_RestartRequired" xml:space="preserve">
     <value>You need to restart the app for theme changes to fully take effect. Restart now?</value>
   </data>
+  <data name="Theme_FoldedMode" xml:space="preserve">
+    <value>Folded toolbar style</value>
+  </data>
+  <data name="Theme_FoldedMode_Sidebar" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
+  <data name="Theme_FoldedMode_Ball" xml:space="preserve">
+    <value>Floating ball</value>
+  </data>
+  <data name="Theme_FloatingFoldBall_Hint" xml:space="preserve">
+    <value>Click to expand; drag to move</value>
+  </data>
 </root>

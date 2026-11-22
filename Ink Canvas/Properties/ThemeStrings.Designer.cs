@@ -194,6 +194,11 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_UnfoldButtonIcon => ResourceManager.GetString(nameof(Theme_UnfoldButtonIcon), _resourceCulture);
 
+        public static string Theme_FoldedMode => ResourceManager.GetString(nameof(Theme_FoldedMode), _resourceCulture);
+        public static string Theme_FoldedMode_Sidebar => ResourceManager.GetString(nameof(Theme_FoldedMode_Sidebar), _resourceCulture);
+        public static string Theme_FoldedMode_Ball => ResourceManager.GetString(nameof(Theme_FoldedMode_Ball), _resourceCulture);
+        public static string Theme_FloatingFoldBall_Hint => ResourceManager.GetString(nameof(Theme_FloatingFoldBall_Hint), _resourceCulture);
+
         public static string Theme_UnfoldIcon_Arrow => ResourceManager.GetString(nameof(Theme_UnfoldIcon_Arrow), _resourceCulture);
 
         public static string Theme_UnfoldIcon_ClassicArrow => ResourceManager.GetString(nameof(Theme_UnfoldIcon_ClassicArrow), _resourceCulture);
