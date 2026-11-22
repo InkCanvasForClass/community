@@ -258,7 +258,10 @@ namespace Ink_Canvas.Helpers
 
             _lastCommittedPointCount = currentPointCount;
             _activeVisual = null;
-            _activePenCache.Clear();
+            // Keep the per-stroke frozen Pen cache across visual commits.
+            // Long strokes are split into DrawingVisuals, but pressure values
+            // commonly revisit the same quantized widths. Clearing here would
+            // recreate those Pens every COMMIT_POINT_THRESHOLD points.
         }
 
         /// <summary>
