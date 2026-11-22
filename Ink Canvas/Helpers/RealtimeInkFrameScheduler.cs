@@ -274,8 +274,11 @@ namespace Ink_Canvas.Helpers
             if (dispatcher == null)
                 return;
 
+            // A pending probe already measures the dispatcher wait for this dirty batch.
+            // Do not abort and enqueue another Render-priority operation for every re-kick:
+            // that only churns the UI Dispatcher queue and can postpone the original probe.
             if (GlobalDispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
-                GlobalDispatcherProbeOperation.Abort();
+                return;
 
             GlobalProbeStartedAt = startedAt;
             GlobalProbeDelayMs = 0;
