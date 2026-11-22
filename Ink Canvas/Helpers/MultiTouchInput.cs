@@ -65,6 +65,7 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual
     {
         private int _lastCommittedPointCount = 0;
+        private int _lastRenderedPointCount = -1;
         private const int COMMIT_POINT_THRESHOLD = 48;
         private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
@@ -279,6 +280,12 @@ namespace Ink_Canvas.Helpers
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
+            // Duplicate requests can arrive while this stroke's point set is unchanged.
+            // Avoid reopening the DrawingVisual and replaying all active segments.
+            // ForceRedraw bypasses this guard for same-count point replacements.
+            if (!forceRedraw && currentPointCount == _lastRenderedPointCount)
+                return;
+
             var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var gen0CollectionCountStart = startedAt != 0L ? GC.CollectionCount(0) : -1;
             var gen1CollectionCountStart = startedAt != 0L ? GC.CollectionCount(1) : -1;
@@ -294,6 +301,7 @@ namespace Ink_Canvas.Helpers
 
                 var activeStartIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
                 DrawSegment(_activeVisual, activeStartIndex, currentPointCount);
+                _lastRenderedPointCount = currentPointCount;
 
                 if (currentPointCount - _lastCommittedPointCount >= COMMIT_POINT_THRESHOLD)
                 {
@@ -335,6 +343,7 @@ namespace Ink_Canvas.Helpers
                 _activeVisual = null;
                 _activePenCache.Clear();
                 _lastCommittedPointCount = 0;
+                _lastRenderedPointCount = -1;
             }
             else if (_activeVisual != null)
             {
