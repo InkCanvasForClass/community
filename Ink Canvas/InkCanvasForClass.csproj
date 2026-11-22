@@ -121,49 +121,49 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="*">
+    <PackageReference Include="Costura.Fody" Version="6.2.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="gong-wpf-dragdrop" Version="*" />
-    <PackageReference Include="H.NotifyIcon.Wpf" Version="*" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <!-- 组织维护的非官方 fork：包 ID 为 InkCanvasForClass.UI.WPF.Modern，程序集仍叫 iNKORE.UI.WPF.Modern -->
-    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="*" />
-    <PackageReference Include="iNKORE.UI.WPF" Version="*" />
-    <PackageReference Include="MdXaml" Version="*" />
-    <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="*" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="*">
+    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="0.11.0-icc.7df536a" />
+    <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
+    <PackageReference Include="MdXaml" Version="1.27.0" />
+    <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MicrosoftOfficeCore" Version="*" />
-    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="*" />
-    <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="*" />
+    <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
+    <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Composition" Version="*" />
-    <PackageReference Include="System.Composition.AttributedModel" Version="*" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="*" />
-    <PackageReference Include="System.Management" Version="*" />
-    <PackageReference Include="Newtonsoft.Json" Version="*" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.11" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="10.0.11" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Management" Version="10.0.11" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <!-- UInk 1.0 规范：主文件为 MessagePack 对象流（Header/HeaderExtension/Canvas/Ink/Shape/Media），由 UInk/ 下的读写器使用 -->
-    <PackageReference Include="MessagePack" Version="*" />
-    <PackageReference Include="NHotkey.Wpf" Version="*" />
-    <PackageReference Include="OSVersionExt" Version="*" />
+    <PackageReference Include="MessagePack" Version="3.1.12" />
+    <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
+    <PackageReference Include="OSVersionExt" Version="4.1.0" />
     <!-- PDFsharp 6.1.x 是最后一个以 net6.0 为目标框架的版本；用于插件「背景 + 墨迹」导出 PDF -->
-    <PackageReference Include="PDFsharp" Version="*" />
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
     <!-- 照片校正：OpenCvSharp4（OpenCV 4.13 封装，.NET 10 原生、MIT 免费），用于纸张角点检测 + 透视矫正 -->
-    <PackageReference Include="OpenCvSharp4.Windows" Version="*" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="*" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
 
-    <PackageReference Include="WebDav.Client" Version="*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="*" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="*" />
-    <PackageReference Include="Vortice.Direct2D1" Version="*" />
-    <PackageReference Include="Vortice.Direct3D11" Version="*" />
-    <PackageReference Include="Vortice.DirectComposition" Version="*" />
-    <PackageReference Include="Vortice.DXGI" Version="*" />
+    <PackageReference Include="WebDav.Client" Version="2.9.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
+    <PackageReference Include="Vortice.DirectComposition" Version="3.8.3" />
+    <PackageReference Include="Vortice.DXGI" Version="3.8.3" />
     <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染 -->
-    <PackageReference Include="WPFMediaKit" Version="*" />
+    <PackageReference Include="WPFMediaKit" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
