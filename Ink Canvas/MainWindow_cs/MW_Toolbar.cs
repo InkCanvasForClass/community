@@ -312,9 +312,11 @@ namespace Ink_Canvas
                 // 填充工具栏组件
                 ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout, orientation);
 
+                // 跨度逐帧变化时让整条栏保持居中（幂等，重建工具栏时不会重复挂）
+                HookFloatingBarCenterFollow();
+
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
-                ToolbarRegistry.RefreshEnterSlideDirection(StackPanelFloatingBarRoot);
 
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 ApplyFloatingBarBorderColor();

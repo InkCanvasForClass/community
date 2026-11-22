@@ -3083,6 +3083,9 @@ namespace Ink_Canvas
                 pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
             }
 
+            ToolbarRegistry.MotionTrace(
+                $"展开落位 计算 pos=({pos.X:F1},{pos.Y:F1}) 实排宽={ViewboxFloatingBar.ActualWidth:F1} 实排高={ViewboxFloatingBar.ActualHeight:F1} 置顶={Topmost}");
+
             // 唯一的位置写入路径：布局一次到位 + 弹簧收敛视觉位移。
             // 旧实现逐帧改 Margin（布局属性），每帧都要重新测量排列，长距离滑动就掉帧；
             // 缓动又是从零速度开始的固定曲线，被下一次操作打断只能硬切。

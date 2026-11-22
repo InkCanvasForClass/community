@@ -1,4 +1,5 @@
-﻿using Ink_Canvas.Helpers.Motion;
+using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
+using Ink_Canvas.Helpers.Motion;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Animation;
@@ -58,6 +59,10 @@ namespace Ink_Canvas
         /// <returns>弹簧静止后完成的任务；不播放动画时返回已完成任务。</returns>
         private Task MoveFloatingBarTo(Thickness targetMargin, bool animate)
         {
+            // 居中跟随的补偿还挂在 RenderTransform 上：先原子提交进 Margin，
+            // 下面读到的 currentMargin 才是视觉上的真实位置，弹簧起点不会跳
+            FlushFloatingBarCenterFollow();
+
             var spring = FloatingBarSpring;
 
             if (!animate || !IsFloatingBarMotionEnabled)
@@ -76,11 +81,28 @@ namespace Ink_Canvas
             double visualLeft = currentMargin.Left + offset.X;
             double visualTop = currentMargin.Top + offset.Y;
 
+            // 跨度补间（收起/展开的胶囊宽度动画）还没跑完时，调用方按「当前实排宽度」算出的
+            // 横向居中位置是中间值：独立方形刚让出 58px 排布、胶囊还停在 718，用 779 重新居中
+            // 会把整条栏横着推 30.5px（日志实测 Margin.Left 420 → 450.5，就是收起时往右闪那一下）。
+            // 跨度动画期间横向位置归居中跟随所有：它按逐帧跨度托住中心，收尾再提交终值。
+            // 折叠/换边这类大幅位移（>64px）仍照常落位，不受影响。
+            if (ToolbarRegistry.IsExtentAnimating &&
+                System.Math.Abs(targetMargin.Left - currentMargin.Left) <= 64.0)
+            {
+                ToolbarRegistry.MotionTrace(
+                    $"落位跳过横向居中 跨度补间中 目标Left={targetMargin.Left:F1} 保持={currentMargin.Left:F1} 实排宽={ViewboxFloatingBar.ActualWidth:F1}");
+                targetMargin = new Thickness(currentMargin.Left, targetMargin.Top, targetMargin.Right, targetMargin.Bottom);
+            }
+
             // 布局一次落到终点；之后所有逐帧变化都只发生在 RenderTransform 上。
             ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
             ViewboxFloatingBar.Margin = targetMargin;
 
             var start = new Vector(visualLeft - targetMargin.Left, visualTop - targetMargin.Top);
+
+            ToolbarRegistry.MotionTrace(
+                $"落位 target=({targetMargin.Left:F1},{targetMargin.Top:F1}) 视觉起点=({visualLeft:F1},{visualTop:F1}) 偏移=({offset.X:F1},{offset.Y:F1}) 弹簧起点=({start.X:F1},{start.Y:F1})");
+
             return spring.RunAsync(start, default, velocity, ToolbarSpringSpec);
         }
 
