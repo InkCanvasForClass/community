@@ -2158,6 +2158,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static readonly Dictionary<FrameworkElement, ExitPlan> _exiting =
             new Dictionary<FrameworkElement, ExitPlan>();
 
+        /// <summary>入场中的独立方形：排布已经回来，但背景还在从 0 淡入（值是它的排布跨度）。</summary>
+        private static readonly Dictionary<Border, double> _enteringUnits = new Dictionary<Border, double>();
+
         /// <summary>把元素的排布尺寸压到 0：让出布局，但仍然绘制。</summary>
         private static Thickness ZeroFootprintMargin(Thickness margin, FrameworkElement element, bool vertical)
         {
@@ -2563,6 +2566,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
 
             double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
+            _enteringUnits.Remove(border);
             scale.ScaleX = 1.0;
             scale.ScaleY = 1.0;
 
@@ -2606,6 +2610,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             scale.ScaleY = ToolbarItemShowStartScale;
             border.Opacity = 0.0;
 
+            // 排布已经回来了，眼睛还没看见它：记下这块跨度，由跟随按不透明度慢慢加回去
+            double footprint = vertical
+                ? border.ActualHeight + border.Margin.Top + border.Margin.Bottom
+                : border.ActualWidth + border.Margin.Left + border.Margin.Right;
+            if (footprint <= 0.5) footprint = 58.0;
+            _enteringUnits[border] = footprint;
+
             var fade = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration)
             {
                 EasingFunction = CreateEnterEasing()
@@ -2643,6 +2654,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             if (border == null || !IsSeparateSegment(border)) return;
 
+            _enteringUnits.Remove(border);
             border.BeginAnimation(UIElement.OpacityProperty, null);
             border.Opacity = 1;
             if (border.RenderTransform is ScaleTransform scale)
@@ -2680,6 +2692,32 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 double opacity = Math.Min(1.0, Math.Max(0.0, element.Opacity));
                 if (opacity <= 0.01) continue;
                 sum += footprint * opacity;
+            }
+            return sum;
+        }
+
+        /// <summary>入场中的独立方形还没被眼睛看见的那部分跨度（按不透明度加权）。</summary>
+        /// <remarks>
+        /// 展开时方形的排布是瞬时回来的，但背景要从 0 淡入一整段。跟随只按布局量跨度的话，
+        /// 展开第一帧就多算整个方形（58px → 整条栏心跳 29px，就是用户"展开会闪"那一下）。
+        /// 这里把它还没显形的那部分扣掉：展开第一帧跨度不变，淡入过程中平滑把这块让出来。
+        /// </remarks>
+        internal static double GetEnteringVisualExtent(bool vertical)
+        {
+            if (_enteringUnits.Count == 0) return 0;
+
+            double sum = 0;
+            foreach (var pair in _enteringUnits)
+            {
+                var element = pair.Key;
+                if (element == null) continue;
+
+                double footprint = pair.Value;
+                if (footprint <= 0.5) continue;
+
+                double opacity = Math.Min(1.0, Math.Max(0.0, element.Opacity));
+                if (opacity >= 0.999) continue;
+                sum += footprint * (1.0 - opacity);
             }
             return sum;
         }

@@ -323,6 +323,7 @@ namespace Ink_Canvas
             // 退场中的独立方形仍然画着，只是排布被让出去了：按不透明度折算回来，
             // 跨度才是眼睛看到的那个宽度——收起第一帧就不会少掉半个方形（见 ToolbarRegistry.GetExitingVisualExtent）
             extent += ToolbarRegistry.GetExitingVisualExtent(vertical);
+        extent -= ToolbarRegistry.GetEnteringVisualExtent(vertical);
 
             if (extent <= 0.5 || double.IsNaN(extent) || double.IsInfinity(extent)) return false;
 
