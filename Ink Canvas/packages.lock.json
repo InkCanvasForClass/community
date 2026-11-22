@@ -382,7 +382,7 @@
       "inkcanvas.controls": {
         "type": "Project",
         "dependencies": {
-          "InkCanvasForClass.UI.WPF.Modern": "[*, )",
+          "InkCanvasForClass.UI.WPF.Modern": "[0.11.0-icc.7df536a, )",
           "iNKORE.UI.WPF": "[*, )"
         }
       },
