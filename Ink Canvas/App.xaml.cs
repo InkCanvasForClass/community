@@ -182,6 +182,93 @@ namespace Ink_Canvas
         private static int _exitFuseArmed;
 
         /// <summary>
+        /// 托盘图标固定 GUID：所有构建/安装路径共用同一个图标标识。
+        /// H.NotifyIcon 的 Create() 会先按该 GUID 删除旧图标再注册，
+        /// 因此被强杀/崩溃留下的幽灵图标会在下次启动时被清掉，不会越积越多。
+        /// </summary>
+        private static readonly Guid TrayIconFixedId = new Guid("C3A0F1D4-6B7E-4E2A-9D6C-5F1B8A2E7C93");
+
+        /// <summary>
+        /// 统一托盘图标身份并清理上一次运行留下的幽灵图标。
+        /// 旧版本用 exe 路径哈希作为 GUID，升级后首次启动时按旧算法再删一次，
+        /// 避免旧图标与新图标并存；之后所有版本都使用固定 GUID。
+        /// </summary>
+        private void InitializeTrayIconIdentity()
+        {
+            if (_taskbar == null) return;
+
+            try
+            {
+                // 旧版本（按 exe 路径哈希生成 GUID）的残留图标
+                TryDeleteTrayIconById(H.NotifyIcon.Core.TrayIcon.CreateUniqueGuidForProcessPath());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"清理旧版托盘图标失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            // H.NotifyIcon 在 Create() 里也会先按 Id 删除再注册；这里提前删一次，
+            // 让上一次被强杀留下的固定 GUID 图标在软件启动阶段立即消失。
+            TryDeleteTrayIconById(TrayIconFixedId);
+            _taskbar.Id = TrayIconFixedId;
+        }
+
+        // 与 NOTIFYICONDATAW 布局一致；用 IntPtr 代替 HWND/HICON，x86/x64 都能得到正确大小。
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct TrayNotifyIconData
+        {
+            public uint cbSize;
+            public IntPtr hWnd;
+            public uint uID;
+            public uint uFlags;
+            public uint uCallbackMessage;
+            public IntPtr hIcon;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szTip;
+            public uint dwState;
+            public uint dwStateMask;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+            public string szInfo;
+            public uint uVersion;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            public string szInfoTitle;
+            public uint dwInfoFlags;
+            public Guid guidItem;
+            public IntPtr hBalloonIcon;
+        }
+
+        private const uint NIM_DELETE = 0x00000002;
+        private const uint NIF_GUID = 0x00000020;
+
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool Shell_NotifyIcon(uint dwMessage, ref TrayNotifyIconData lpData);
+
+        /// <summary>
+        /// 按 GUID 删除通知区域图标，用于启动时清理被强杀/崩溃留下的幽灵图标。
+        /// 以 NIF_GUID 注册的图标可以在任意进程中删除；图标不存在时返回 false，无副作用。
+        /// </summary>
+        private static bool TryDeleteTrayIconById(Guid id)
+        {
+            try
+            {
+                var data = new TrayNotifyIconData
+                {
+                    cbSize = (uint)Marshal.SizeOf(typeof(TrayNotifyIconData)),
+                    uFlags = NIF_GUID,
+                    guidItem = id,
+                    szTip = string.Empty,
+                    szInfo = string.Empty,
+                    szInfoTitle = string.Empty
+                };
+                return Shell_NotifyIcon(NIM_DELETE, ref data);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 删除通知区域图标。TaskbarIcon 只有显式 Dispose 才会向 Shell 发送 NIM_DELETE，
         /// 否则进程退出后图标会残留在通知区域（幽灵图标），鼠标划过才消失。
         /// 供正常退出（App_Exit）与不经过 Application.Exit 的强制退出路径共用。
@@ -1745,6 +1832,7 @@ namespace Ink_Canvas
             }
 
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
+            InitializeTrayIconIdentity();
 
             StartArgs = e.Args;
 
