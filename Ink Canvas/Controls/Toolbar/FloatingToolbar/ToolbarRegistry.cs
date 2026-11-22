@@ -2053,17 +2053,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         // 段内容显隐前后各量一次跨度：胶囊背景要跟着内容平滑变宽/变窄
                         bool wasSegmentVisible = border.Visibility == Visibility.Visible;
                         double beforeExtent = vertical ? border.ActualHeight : border.ActualWidth;
-                        // 整段是"从无到有"时，让胶囊长大当出场，段内按钮不再各自动画
-                        bool suppressBefore = _suppressChildEnterAnimation;
-                        if (!wasSegmentVisible) _suppressChildEnterAnimation = true;
-                        try
-                        {
-                            UpdatePanelVisibility(sp, context);
-                        }
-                        finally
-                        {
-                            _suppressChildEnterAnimation = suppressBefore;
-                        }
+                        // 不要在这里抑制子组件的出场动画：
+                        // 抑制会让段内每个按钮的缩放/透明度/滑入全部跳过，
+                        // 结果是整段出现时只剩胶囊在长，组件"啪"地直接到位。
+                        // 整段长大与组件各自出场是叠加效果，本来就该同时发生。
+                        UpdatePanelVisibility(sp, context);
                         bool anyVisible = HasVisibleLeafContent(sp);
                         AnimateSegmentTransition(border, vertical, beforeExtent, wasSegmentVisible, anyVisible);
                     }
@@ -2072,21 +2066,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         // 同上：胶囊背景的跨度补间
                         bool wasSegmentVisible = border.Visibility == Visibility.Visible;
                         double beforeExtent = vertical ? border.ActualHeight : border.ActualWidth;
-                        bool suppressBefore = _suppressChildEnterAnimation;
-                        if (!wasSegmentVisible) _suppressChildEnterAnimation = true;
-                        try
+                        foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
                         {
-                            foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
+                            if (gridChild is StackPanel sp2 && sp2.Tag as string == ContentPanelTag)
                             {
-                                if (gridChild is StackPanel sp2 && sp2.Tag as string == ContentPanelTag)
-                                {
-                                    UpdatePanelVisibility(sp2, context);
-                                }
+                                UpdatePanelVisibility(sp2, context);
                             }
-                        }
-                        finally
-                        {
-                            _suppressChildEnterAnimation = suppressBefore;
                         }
                         bool anyVisible = false;
                         foreach (var gridChild in grid.Children.OfType<FrameworkElement>())
@@ -2324,12 +2309,39 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 }
             }
 
+            double scale = ResolveToolbarScaleFactor();
+
             if (double.IsNaN(extent) || double.IsInfinity(extent) || extent <= 0)
             {
-                return FallbackEnterSlideDistance;
+                return FallbackEnterSlideDistance * scale;
             }
 
-            return Math.Min(extent, MaxEnterSlideDistance);
+            // 上限也按倍率放大：工具栏整体缩小时上限不该跟着变小到几乎没有
+            return Math.Min(extent, MaxEnterSlideDistance) * scale;
+        }
+
+        /// <summary>
+        /// 工具栏整体的缩放倍率（设置里的"浮动栏缩放"）。
+        /// </summary>
+        /// <remarks>
+        /// 动画里的位移量是**绝对像素**，而整条工具栏会被 ViewboxFloatingBarScaleTransform
+        /// 等比缩放。若不乘这个倍率，缩放 50% 时滑入距离仍是原值（视觉上滑得远了一倍），
+        /// 缩放 200% 时又显得几乎没动——这就是"没处理缩放倍率"的具体表现。
+        /// 取不到时按 1.0 处理，不猜。
+        /// </remarks>
+        private static double ResolveToolbarScaleFactor()
+        {
+            try
+            {
+                var appearance = SettingsManager.Settings?.Appearance;
+                double value = appearance?.ViewboxFloatingBarScaleTransformValue ?? 1.0;
+                if (double.IsNaN(value) || double.IsInfinity(value) || value <= 0) return 1.0;
+                return value;
+            }
+            catch
+            {
+                return 1.0;
+            }
         }
 
         /// <summary>
