@@ -23,6 +23,10 @@ name: Sync net6 to net10
 on:
   push:
     branches: [net6]
+    # 只改同步工作流本身时不触发同步：否则修正脚本的这次提交会立刻
+    # 把 net6 历史重放一遍，把刚修好的 net10 又覆盖回去
+    paths-ignore:
+      - '.github/workflows/sync-net6-to-net10.yml'
   workflow_dispatch:
 
 permissions:
@@ -189,7 +193,22 @@ jobs:
                   }
                   for ($k = 0; $k -lt $delta; $k++) { $merged.Add($indent + '}') }
                 }
-                $merged.AddRange([string[]]$theirs)
+                # 并集是把两侧新增内容原样叠加，如果同一个序列化名两边各加了一次，
+                # 就会出现两行相同的 [JsonProperty("x")]，直接 CS0579 编译失败。
+                # ours 里已有的 key 不再从 theirs 追加一遍。
+                $oursJsonKeys = @{}
+                foreach ($line in $ours) {
+                  $jm = [regex]::Match($line, '^\s*\[JsonProperty\("([^"]+)"\)\]')
+                  if ($jm.Success) { $oursJsonKeys[$jm.Groups[1].Value] = $true }
+                }
+                foreach ($line in $theirs) {
+                  $jm = [regex]::Match($line, '^\s*\[JsonProperty\("([^"]+)"\)\]')
+                  if ($jm.Success -and $oursJsonKeys.ContainsKey($jm.Groups[1].Value)) {
+                    Write-Host "  丢弃重复的 $($line.Trim())"
+                    continue
+                  }
+                  $merged.Add($line)
+                }
               }
 
               [IO.File]::WriteAllText($path, ($merged -join "`r`n"), [Text.UTF8Encoding]::new($hasBom))
@@ -296,7 +315,28 @@ jobs:
             }
             $toApply = @($ordered | Sort-Object Time | ForEach-Object { $_.Sha })
           } else {
-            $incoming = @(git rev-list --reverse origin/net10..origin/net6)
+            # 用 watermark 记录已经同步到 net6 的哪个提交，而不是每次都用
+            # origin/net10..origin/net6。net10 的提交是 cherry-pick 出来的，
+            # 与 net6 没有相同的提交哈希；一旦 net6 历史被改写，这个区间就会
+            # 变成「全部历史」并整段重放，把 net10 上的适配实现覆盖回 net6 版本。
+            $watermark = ''
+            if (Test-Path .github/last-synced-net6.txt) {
+              $watermark = ((Get-Content .github/last-synced-net6.txt -Raw) -replace '\s', '')
+            }
+            $watermarkValid = $false
+            if ($watermark) {
+              git cat-file -e ($watermark + '^{commit}') 2>$null
+              if ($LASTEXITCODE -eq 0) {
+                git merge-base --is-ancestor $watermark origin/net6 2>$null
+                if ($LASTEXITCODE -eq 0) { $watermarkValid = $true }
+              }
+            }
+            if (-not $watermarkValid) {
+              Write-Error "::error::找不到有效的上次同步点（.github/last-synced-net6.txt 缺失或已不在 net6 历史里）。请用 resync: <sha> 手动指定要同步的提交"
+              exit 1
+            }
+            Write-Host "从上次同步点 $($watermark.Substring(0,8)) 开始增量同步"
+            $incoming = @(git rev-list --reverse ($watermark + '..origin/net6'))
             if ($incoming.Count -eq 0) {
               Write-Host "::notice::net6 没有需要同步到 net10 的新提交"
               exit 0
@@ -416,6 +456,19 @@ jobs:
           $ErrorActionPreference = "Continue"
           Write-Host "=== 升级 NuGet 包到最新稳定版 ==="
 
+          # .NET 10 SDK 的 `dotnet add package` 不带 --version 时会写成 Version="*"，
+          # 而 "*" 只解析稳定版：只有预发布版的包（如 InkCanvasForClass.UI.WPF.Modern）
+          # 会直接 NU1103。这里先从 NuGet 查出最新稳定版，再用 --version 显式钉住。
+          function Get-LatestStableVersion([string]$id) {
+            try {
+              $u = 'https://api.nuget.org/v3-flatcontainer/' + $id.ToLowerInvariant() + '/index.json'
+              $versions = @((Invoke-RestMethod -Uri $u -TimeoutSec 30).versions)
+              $stable = @($versions | Where-Object { $_ -notmatch '-' })
+              if ($stable.Count -eq 0) { return $null }
+              return $stable[$stable.Count - 1]
+            } catch { return $null }
+          }
+
           $csprojs = Get-ChildItem -Recurse -Filter "*.csproj" | Where-Object { $_.FullName -notmatch "PowerPointAddIn|IACoreHelper" }
 
           foreach ($csproj in $csprojs) {
@@ -425,41 +478,46 @@ jobs:
             $packages = $packageMatches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
 
             foreach ($pkg in $packages) {
-              Write-Host "  尝试升级 $pkg ..."
-              $output = & dotnet add $csproj.FullName package $pkg --no-restore 2>&1
+              $latest = Get-LatestStableVersion $pkg
+              if (-not $latest) {
+                Write-Host "  跳过 $pkg : 没有稳定版，保留现有固定版本"
+                continue
+              }
+              Write-Host "  尝试升级 $pkg -> $latest ..."
+              $output = & dotnet add $csproj.FullName package $pkg --version $latest --no-restore 2>&1
               $exitCode = $LASTEXITCODE
-              $outputStr = ($output | Out-String).Trim()
               if ($exitCode -eq 0) {
-                $match = [regex]::Match($outputStr, "version '([^']+)' added")
-                if ($match.Success) {
-                  Write-Host "    -> 升级到 $($match.Groups[1].Value)"
-                } else {
-                  Write-Host "    -> 已是最新或已更新"
-                }
+                Write-Host "    -> 固定为 $latest"
               } else {
+                $outputStr = ($output | Out-String).Trim()
                 $lastLine = ($outputStr -split "`n") | Where-Object { $_.Trim() } | Select-Object -Last 1
                 Write-Host "    跳过: $lastLine"
               }
             }
+          }
+          # 兜底：任何残留的通配符版本都会在 restore 阶段 NU1103，这里直接判失败
+          $starred = @(Get-ChildItem -Recurse -Filter "*.csproj" | Select-String -Pattern 'Version="\*"')
+          if ($starred.Count -gt 0) {
+            Write-Error ("::error::仍有 Version=`"*`" 的包引用: " + (($starred | ForEach-Object { $_.Path }) -join ", "))
+            exit 1
           }
           Write-Host "包升级完成"
 
       - name: Restore and build (after upgrade)
         if: steps.try_build.outcome == 'failure'
         shell: pwsh
-        continue-on-error: true
         run: |
           $ErrorActionPreference = "Continue"
           Write-Host "=== 升级后重新 restore + build ==="
           dotnet restore "Ink Canvas.sln" --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "::warning::升级后 restore 仍失败，但不阻断同步；代码仍推送，由 dotnet-desktop 工作流报告编译错误"
-            exit 0
+            Write-Error "::error::升级后 restore 仍失败，停止同步（不推送无法编译的代码）"
+            exit 1
           }
           dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64 --no-restore --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "::warning::升级后 .NET 10 编译仍失败，但不阻断同步；代码仍推送，由 dotnet-desktop 工作流报告编译错误"
-            exit 0
+            Write-Error "::error::升级后 .NET 10 编译仍失败，停止同步（不推送无法编译的代码）"
+            exit 1
           }
           Write-Host "::notice::升级后编译通过"
 
@@ -467,6 +525,16 @@ jobs:
         id: push
         shell: pwsh
         run: |
+          # 记录本次同步到的 net6 提交，下次只同步它之后的新提交
+          $newSha = ((git rev-parse origin/net6) -join '').Trim()
+          $wmPath = '.github/last-synced-net6.txt'
+          $oldSha = ''
+          if (Test-Path $wmPath) { $oldSha = ((Get-Content $wmPath -Raw) -replace '\s', '') }
+          if ($oldSha -ne $newSha) {
+            New-Item -ItemType Directory -Force .github | Out-Null
+            Set-Content -Path $wmPath -Value $newSha -NoNewline -Encoding ascii
+          }
+
           # 先提交工作区残留变更（如 TFM 修复、lock 文件等）
           git add -A
           $workdirChanges = git status --porcelain
