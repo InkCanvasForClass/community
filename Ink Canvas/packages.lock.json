@@ -2,6 +2,25 @@
   "version": 1,
   "dependencies": {
     "net10.0-windows10.0.19041": {
+      "AForge.Imaging": {
+        "type": "Direct",
+        "requested": "[2.2.5, )",
+        "resolved": "2.2.5",
+        "contentHash": "n8l7Zdsm89EFW9Uz4uCO3D428Gu4Q56YxixSMJPruen1c30R8R9Mm8AreTdoOi2XjN5id04JwFFlXYTk8pIIfw==",
+        "dependencies": {
+          "AForge": "2.2.5",
+          "AForge.Math": "2.2.5"
+        }
+      },
+      "AForge.Math": {
+        "type": "Direct",
+        "requested": "[2.2.5, )",
+        "resolved": "2.2.5",
+        "contentHash": "pmT1WobVv13vMxwXhCu8sRunxjiUHyURWS0+dsW/aBPi06xiyYIdCLHI6jph9Axb4QoLIlb85eBI6zd2EAbGIg==",
+        "dependencies": {
+          "AForge": "2.2.5"
+        }
+      },
       "CommunityToolkit.Mvvm": {
         "type": "Direct",
         "requested": "[8.4.2, )",
@@ -249,6 +268,11 @@
           "DirectShowLib.Net": "3.0.0",
           "System.Data.DataSetExtensions": "4.5.0"
         }
+      },
+      "AForge": {
+        "type": "Transitive",
+        "resolved": "2.2.5",
+        "contentHash": "clkumhM9DggqIzEXAHgVLeWO4arG5YfoPr7J4jfjJx35AoeEIJSSm49J25bwp/9mXQYLwi7y1Wunc8qgYJsGxg=="
       },
       "AvalonEdit": {
         "type": "Transitive",
