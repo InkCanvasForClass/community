@@ -70,8 +70,11 @@ namespace Ink_Canvas.Helpers
         private VisualCanvas _visualCanvas;
         private readonly Dictionary<Color, SolidColorBrush> _brushCache =
             new Dictionary<Color, SolidColorBrush>();
-        private readonly Dictionary<(Color Color, long ThicknessBits), Pen> _activePenCache =
-            new Dictionary<(Color Color, long ThicknessBits), Pen>();
+        // Pressure changes can produce a nearly unique floating-point width for every segment.
+        // Quantize to 1/16 DIP so nearby widths reuse the same frozen Pen during multi-touch drawing.
+        private const double PenThicknessQuantization = 16.0;
+        private readonly Dictionary<(Color Color, int ThicknessSixteenths), Pen> _activePenCache =
+            new Dictionary<(Color Color, int ThicknessSixteenths), Pen>();
         private readonly Action _dispatcherProbeAction;
         private DispatcherOperation _dispatcherProbeOperation;
         private long _dispatcherProbeStartedAt;
@@ -186,11 +189,15 @@ namespace Ink_Canvas.Helpers
 
         private Pen GetPen(Color color, double thickness)
         {
-            var key = (color, BitConverter.DoubleToInt64Bits(thickness));
+            var thicknessSixteenths = Math.Max(
+                1,
+                (int)Math.Round(thickness * PenThicknessQuantization));
+            var key = (color, thicknessSixteenths);
             if (_activePenCache.TryGetValue(key, out var pen))
                 return pen;
 
-            pen = new Pen(GetBrush(color), thickness)
+            var quantizedThickness = thicknessSixteenths / PenThicknessQuantization;
+            pen = new Pen(GetBrush(color), quantizedThickness)
             {
                 StartLineCap = PenLineCap.Round,
                 EndLineCap = PenLineCap.Round,
