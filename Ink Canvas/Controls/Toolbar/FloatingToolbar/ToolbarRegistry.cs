@@ -45,6 +45,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static int _enterSlideSign = -1;
 
         /// <summary>
+        /// 当前这一轮显隐统一使用的滑入符号（null 表示本轮尚未开始）。
+        /// </summary>
+        /// <remarks>
+        /// 一轮显隐会遍历整棵工具栏，期间布局不断变化：先显形的元素和后面显形的元素，
+        /// 量到的"头在哪端"可能不同。若每次都重新判定，同一轮里方向会当场翻转，
+        /// 看起来就是组件先往左滑、紧接着又往右滑。
+        /// 因此每轮开头判定一次并冻结，整轮沿用。
+        /// </remarks>
+        private static int? _slideSignFrozenForRound;
+
+        /// <summary>
         /// 下一次 <see cref="UpdateVisibilityByMode"/> 是否跳过动画（重建工具栏后第一次同步用）。
         /// </summary>
         /// <remarks>
@@ -1345,8 +1356,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             bool animateThisRound = _animateVisibilityChange && !_skipAnimationOnNextSync;
             _skipAnimationOnNextSync = false;
 
-            // 方向就地按真实布局推断：折叠/换边/内容翻转之后都不会反
+            // 方向每轮只判定**一次**，之后整轮沿用同一个符号。
+            // 之前这里判一次、SetAnimatedVisibility 内部又量一次，两次之间布局已随显隐改变，
+            // 于是同一轮里前半段用 -1、后半段用 +1——肉眼就是"先往左、再往右"。
             RefreshEnterSlideSign(rootPanel);
+            _slideSignFrozenForRound = _enterSlideSign;
 
             // 记录切换前各子项的位置：整段显隐后由"邻居让位"通道把它们平滑滑到新位置。
             var beforeOffsets = animateThisRound
@@ -1363,6 +1377,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 _animateVisibilityChange = animationBefore;
             }
+
+            // 本轮结束，下一轮重新判定
+            _slideSignFrozenForRound = null;
 
             if (beforeOffsets != null)
             {
@@ -2088,15 +2105,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 //    横排量宽度沿 X，竖排量高度沿 Y；符号由头部在哪端决定（_enterSlideSign）。
                 var enterSlide = GetOrCreateChannel(element, EnterChannelIndex);
                 double slideDistance = ResolveEnterSlideDistance(element, vertical);
+                // 使用本轮开头冻结的符号；没有冻结值（单点调用）才回退到当前推断
+                int slideSign = _slideSignFrozenForRound ?? _enterSlideSign;
                 // 记一行可对照的日志：方向再出错时，符号、距离、元素类型都能直接查
                 LogHelper.WriteLogToFile(
-                    $"[Toolbar] 滑入 {element.GetType().Name} 符号={_enterSlideSign} 距离={slideDistance:F1} " +
-                    $"起点={_enterSlideSign * slideDistance:F1} 朝向={(vertical ? "竖" : "横")}",
+                    $"[Toolbar] 滑入 {element.GetType().Name} 符号={slideSign} 距离={slideDistance:F1} " +
+                    $"起点={slideSign * slideDistance:F1} 朝向={(vertical ? "竖" : "横")}",
                     LogHelper.LogType.Trace);
                 // 位移走**恒定速度**：时长按距离算，且不加缓动。
                 // 缓动曲线会让同一段位移中途变速，与"速度恒定"的要求相悖。
                 var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
-                    _enterSlideSign * slideDistance, 0.0,
+                    slideSign * slideDistance, 0.0,
                     DurationForDistance(slideDistance, ToolbarItemShowDurationMs));
                 enterSlide.BeginAnimation(
                     vertical ? TranslateTransform.YProperty : TranslateTransform.XProperty,
