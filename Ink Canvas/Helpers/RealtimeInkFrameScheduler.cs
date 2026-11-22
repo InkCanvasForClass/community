@@ -371,6 +371,8 @@ namespace Ink_Canvas.Helpers
             // executing this snapshot is added to the now-empty PendingRedraws dictionary
             // and therefore belongs to the next frame.
             var completedBatch = PendingRedraws;
+            var completedEarliestVisual = PendingEarliestVisual;
+            var completedEarliestRequestedAt = PendingEarliestRequestedAt;
             PendingRedraws = PendingSnapshot;
             PendingSnapshot = completedBatch;
             PendingRedraws.Clear();
@@ -380,15 +382,15 @@ namespace Ink_Canvas.Helpers
             double frameWaitSampleMs = 0;
             // The earliest dirty request was tracked on enqueue; avoid scanning the
             // entire batch solely to select its single FrameWait telemetry sample.
-            if (PendingEarliestVisual != null && PendingEarliestRequestedAt != 0L
-                && PendingSnapshot.TryGetValue(PendingEarliestVisual, out var earliestRedraw))
+            if (completedEarliestVisual != null && completedEarliestRequestedAt != 0L
+                && PendingSnapshot.TryGetValue(completedEarliestVisual, out var earliestRedraw))
             {
-                var earliestPairKey = PendingEarliestVisual;
+                var earliestPairKey = completedEarliestVisual;
                 var earliestPairValue = earliestRedraw;
-                frameWaitSampleMs = ToMilliseconds(renderedAt - earliestPairValue.RequestedAt);
+                frameWaitSampleMs = ToMilliseconds(renderedAt - completedEarliestRequestedAt);
                 RealtimeInkPerformanceMonitor.RecordFrameWait(
                     earliestPairKey,
-                    renderedAt - earliestPairValue.RequestedAt,
+                    renderedAt - completedEarliestRequestedAt,
                     earliestPairValue.Gen0CollectionCountStart,
                     earliestPairValue.Gen1CollectionCountStart,
                     earliestPairValue.Gen2CollectionCountStart,
