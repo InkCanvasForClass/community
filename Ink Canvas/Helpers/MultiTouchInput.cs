@@ -232,14 +232,18 @@ namespace Ink_Canvas.Helpers
             {
                 if (endIndex - startIndex >= 2)
                 {
+                    // Adjacent segments share a point: carry its pressure scale forward
+                    // instead of recalculating it for both sides of every segment.
+                    var previousScale = PressureToVisualScale(points[startIndex].PressureFactor, ignorePressure);
                     for (int i = startIndex; i < endIndex - 1 && i < points.Count - 1; i++)
                     {
+                        var nextPointIndex = i + 1;
+                        var nextScale = PressureToVisualScale(points[nextPointIndex].PressureFactor, ignorePressure);
                         var startPoint = new Point(points[i].X, points[i].Y);
-                        var endPoint = new Point(points[i + 1].X, points[i + 1].Y);
-                        var s0 = PressureToVisualScale(points[i].PressureFactor, ignorePressure);
-                        var s1 = PressureToVisualScale(points[i + 1].PressureFactor, ignorePressure);
-                        var thickness = Math.Max(0.35, (drawingAttributes.Width * s0 + drawingAttributes.Width * s1) / 2.0);
+                        var endPoint = new Point(points[nextPointIndex].X, points[nextPointIndex].Y);
+                        var thickness = Math.Max(0.35, drawingAttributes.Width * (previousScale + nextScale) / 2.0);
                         dc.DrawLine(GetPen(drawingAttributes.Color, thickness), startPoint, endPoint);
+                        previousScale = nextScale;
                     }
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
