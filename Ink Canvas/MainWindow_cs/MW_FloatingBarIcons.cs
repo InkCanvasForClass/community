@@ -245,6 +245,9 @@ namespace Ink_Canvas
                 return;
 
             var scale = GetFloatingBarScaleX();
+            // 不在这里 Settle：本方法在拖动与探测里被高频调用，
+            // 一旦在里面掐断跨度补间，背景动画就永远看不到（这是上一版的真实缺陷）。
+            // 居中与换边需要的"稳定宽度"改由 ExtentSettled 回调在补间收尾后再量。
             _cachedFloatingBarWidth = GetElementWidthForFloatingBar(ViewboxFloatingBar, 200) * scale;
             var dragElement = FindDragHandleInRoot();
             _cachedFloatingBarHeadWidth = GetElementWidthForFloatingBar(dragElement, 50) * scale;
@@ -2855,6 +2858,8 @@ namespace Ink_Canvas
             if (Topmost)
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
+                // 不在这里 Settle：那会把正在进行的背景宽度补间当场掐断，动画就没了。
+                // "宽度是中间值"的问题改由逐帧居中跟随解决（OnCenterFollowFrame）。
                 ViewboxFloatingBar.UpdateLayout();
             }
             isViewboxFloatingBarMarginAnimationRunning = true;
