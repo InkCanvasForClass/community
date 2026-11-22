@@ -31,32 +31,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static Orientation _rootOrientation = Orientation.Horizontal;
 
         /// <summary>
-        /// 新组件滑入的方向：-1 从头一侧（负方向）滑入，+1 从尾一侧（正方向）滑入。
-        /// </summary>
-        /// <remarks>
-        /// 拖动头在哪一端，组件就该从哪一端被"推出来"：头在左时从左侧滑入（-1），
-        /// 头在右时从右侧滑入（+1）；竖排同理（头在上 -1、头在下 +1）。
-        /// Inkeys 的做法是让新按钮从锚点（相邻可见按钮）的位置长出来——
-        /// 锚点一侧永远是内容生长的那一端，这里用符号表达同一件事。
-        ///
-        /// 早先靠主窗口在翻转时回调设置符号，但头的实际位置还会被折叠、自动换边、
-        /// 内容翻转等多条路径改动，外部逐点同步必然漏（表现为"第一次对、第二次反"）。
-        /// 现在每次动效前就地从布局推断，见 <see cref="RefreshEnterSlideSign"/>。
-        /// </remarks>
-        private static int _enterSlideSign = -1;
-
-        /// <summary>
-        /// 当前这一轮显隐统一使用的滑入符号（null 表示本轮尚未开始）。
-        /// </summary>
-        /// <remarks>
-        /// 一轮显隐会遍历整棵工具栏，期间布局不断变化：先显形的元素和后面显形的元素，
-        /// 量到的"头在哪端"可能不同。若每次都重新判定，同一轮里方向会当场翻转，
-        /// 看起来就是组件先往左滑、紧接着又往右滑。
-        /// 因此每轮开头判定一次并冻结，整轮沿用。
-        /// </remarks>
-        private static int? _slideSignFrozenForRound;
-
-        /// <summary>
         /// 下一次 <see cref="UpdateVisibilityByMode"/> 是否跳过动画（重建工具栏后第一次同步用）。
         /// </summary>
         /// <remarks>
@@ -65,10 +39,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 首轮直接瞬时落定，之后的变化才值得有动画。
         /// </remarks>
         private static bool _skipAnimationOnNextSync;
-
-        /// <summary>整段胶囊正在"从无到有"地长出来时置位，用于抑制段内按钮各自的出场动画。</summary>
-        /// <remarks>整段长出来就是那一次的出场；再让每个按钮各滑一遍，会是两层动作叠在一起。</remarks>
-        private static bool _suppressChildEnterAnimation;
 
         /// <summary>
         /// 这个面板是不是竖排（决定组件显隐时沿哪个轴让位、沿哪个轴滑入）。
@@ -92,6 +62,82 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public static void SetVisibilityAnimationEnabled(bool enabled)
         {
             _animateVisibilityChange = enabled;
+        }
+
+        // ───────────────────────── 动画轨迹日志（排障用） ─────────────────────────
+        //
+        // 动画出问题时最贵的成本是"猜哪条分支跑了"。这里把决策点写成一行行轨迹，
+        // 默认关闭，只在程序根目录出现 toolbar_motion_trace.flag 时落盘：
+        // 用户复现一次，日志里就能读到这一轮走了哪条路径、跨度补间被谁撤销。
+        private static int _motionTraceState; // 0=未探测 1=开 2=关
+
+        private static bool MotionTraceEnabled()
+        {
+            int state = _motionTraceState;
+            if (state == 0)
+            {
+                state = 2;
+                try
+                {
+                    if (File.Exists(Path.Combine(App.RootPath, "toolbar_motion_trace.flag"))) state = 1;
+                }
+                catch
+                {
+                    // 读不到就按"关"处理：轨迹日志绝不该影响动画本身
+                }
+                _motionTraceState = state;
+            }
+            return state == 1;
+        }
+
+        // 轨迹日志攒批再落盘：LogHelper 每写一行要抓一次 StackTrace、重开一次文件、
+        // 还要扫一遍 Logs 目录算大小，实测 9~10ms/行。一次模式切换会打二十多行，
+        // 结果同步本身被日志拖到 230ms，用户看到的就是"切一下卡半秒"。
+        // 现在一行只是往缓冲里追加，整批一次写，成本从 N×9ms 变成 ~9ms。
+        private static readonly System.Text.StringBuilder _motionTracePending =
+            new System.Text.StringBuilder(4096);
+        private static bool _motionTraceFlushQueued;
+
+        internal static void MotionTrace(string message)
+        {
+            if (!MotionTraceEnabled()) return;
+            _motionTracePending.Append(DateTime.Now.ToString("HH:mm:ss.fff")).Append(" [ToolbarMotion] ").Append(message).Append('\n');
+            ScheduleMotionTraceFlush();
+        }
+
+        private static void ScheduleMotionTraceFlush()
+        {
+            if (_motionTraceFlushQueued) return;
+            _motionTraceFlushQueued = true;
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null)
+            {
+                _motionTraceFlushQueued = false;
+                FlushMotionTrace();
+                return;
+            }
+            dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background,
+                new Action(() => { _motionTraceFlushQueued = false; FlushMotionTrace(); }));
+        }
+
+        private static void FlushMotionTrace()
+        {
+            if (_motionTracePending.Length == 0) return;
+            string text = _motionTracePending.ToString();
+            _motionTracePending.Clear();
+            LogHelper.WriteLogToFile(text.TrimEnd(), LogHelper.LogType.Info);
+        }
+
+        /// <summary>日志里的元素标签：Name → ToolTip → 类型名（组件大多没有 Name）。</summary>
+        private static string Describe(FrameworkElement element)
+        {
+            if (element == null) return "<null>";
+            if (!string.IsNullOrEmpty(element.Name)) return element.Name;
+            if (element.ToolTip is string tip && tip.Length > 0)
+            {
+                return tip.Length <= 12 ? tip : tip.Substring(0, 12);
+            }
+            return element.GetType().Name;
         }
 
         /// <summary>
@@ -124,9 +170,21 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 背景宽度补间期间，工具栏的可见跨度每一帧都在变；居中若只在补间开始前
         /// 算一次，补间走完就会停在偏掉的位置。这里在补间结束时再通知一次，
         /// 跟随者重新量、重新落位，"背景变宽"与"整体居中"才对得上。
-        /// 回调只在补间收尾时发一次，不是每帧都发——每帧重算居中会打断用户拖动。
+        /// 收尾回调只发一次，不是每帧都发；逐帧的变化走 <see cref="ExtentFrame"/>。
         /// </remarks>
         public static event Action ExtentSettled;
+
+        /// <summary>
+        /// 分段胶囊的跨度**正在逐帧变化**时回调（每帧一次，收尾后不再发）。
+        /// </summary>
+        /// <remarks>
+        /// 居中跟随者需要每一帧都知道当前跨度，才能让工具栏在变宽/变窄的全过程中保持居中。
+        /// 但回调只负责**测量**：早先的版本在这个时机直接写 ViewboxFloatingBar.Margin 重新居中，
+        /// 与出场滑入的 RenderTransform、收尾落位三方同时改视觉位置，观感是"被拽到中间再跳一下"，
+        /// 整段被回退过（2f71a285）。位置补偿现在由跟随者自己在 RenderTransform 上做，
+        /// 收尾再一次性原子提交，三者不再重叠。
+        /// </remarks>
+        public static event Action ExtentFrame;
 
         private static void NotifyExtentChanged(bool vertical)
         {
@@ -140,7 +198,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
         }
 
-        /// <summary>把一个分段的跨度动画立即收尾：清动画、清固定值，回到内容自动尺寸。</summary>
+        /// <summary>把一个分段的跨度动画立即收尾：还在补间的落到终值，再清固定值回到内容自动尺寸。</summary>
         /// <remarks>
         /// 只清**被补间的那一个轴**。横排分段本身带着 Height = 58（写在 CreateContentBorder 里），
         /// 竖排分段带着 Width = 58；把两个轴一起清掉会连固定的厚度也一起丢掉，
@@ -149,8 +207,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static void SettleSegment(Border border, bool vertical)
         {
             if (border == null) return;
-            NextSegmentGeneration(border);
-            _activeSegmentTweens.Remove(border);
+
+            // 还在跑的跨度弹簧：先落到终值再落定，量宽度的一方才拿得到稳定尺寸
+            if (_extentMotions.TryGetValue(border, out var state))
+            {
+                WriteSegmentExtent(border, state.Vertical, state.HideWhenSettled ? 0.0 : state.Target);
+                FinishExtentMotion(border, state);
+                return;
+            }
 
             DependencyProperty extentProperty = vertical
                 ? FrameworkElement.HeightProperty
@@ -163,143 +227,448 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             border.ClipToBounds = false;
         }
 
+        // ───────────────────── 分段跨度：与组件同一条曲线 ─────────────────────
+        //
+        // 跨度不能是"布局自动尺寸 + 固定时长 EaseOut"：组件的位移走的是另一套节奏，
+        // 两套收尾对不上，看起来就是"背景没跟上内容"。
+        // 也不能再是弹簧：这一版按 Inkeys 工具栏的模型改成**时间驱动曲线**——
+        // 所有组件与胶囊共用同一个时长、同一条曲线（EaseOutBack，见 ApplyMotionEasing），
+        // 起与收都是同一个 Progress 的正反向播放：出现 0→1、收起 1→0，
+        // 所以收起天然是出现的严格倒放（popup 菜单同构，用户 m01345）。
+        // 每帧只写一次 Width，居中的补偿仍由跟随者订阅 ExtentFrame 逐帧做。
+
+        /// <summary>一段胶囊正在跑的跨度补间。</summary>
+        /// <remarks>
+        /// 与 popup 菜单（AnimationsHelper 里的 token.Progress）同构：只有一个自变量 Progress，
+        /// Direction 决定往哪边走。出现是 0→1、收起是 1→0，取的是同一条曲线，
+        /// 所以收起天然是出现的倒放（EaseInBack ≡ 1 - EaseOutBack(1-t)）。
+        /// 端点跨度固定不动，打断时按当前跨度反解进度再翻方向，位置连续。
+        /// </remarks>
+        private sealed class SegmentExtentMotion
+        {
+            public bool Vertical;
+
+            /// <summary>进度 = 0 那一端的跨度（收起到底时是 0）。</summary>
+            public double Start;
+
+            /// <summary>进度 = 1 那一端的跨度（完全展开时的跨度）。</summary>
+            public double Target;
+
+            /// <summary>进度 [0,1]：唯一自变量。</summary>
+            public double Progress;
+
+            /// <summary>+1 展开、−1 收起。</summary>
+            public double Direction = 1.0;
+
+            /// <summary>最近一帧写下去的跨度；反解进度与撤销时读它。</summary>
+            public double Current;
+
+            /// <summary>走到端点时把这一整段真正折叠（整段消失时用）。</summary>
+            public bool HideWhenSettled;
+
+            /// <summary>这一轮是不是收尾纠偏（只纠一次，免得两次数出微差时来回起补间）。</summary>
+            public bool Corrected;
+
+            /// <summary>总时长（秒，已按全局动画倍率换算）。</summary>
+            public double DurationSeconds;
+
+            /// <summary>回弹强度：1.1 是 Inkeys 的原值（≈4.47% 过冲）。</summary>
+            public double Back;
+
+            /// <summary>已经推进到端点（收尾那一帧据此落定）。</summary>
+            public bool Finished;
+
+            /// <summary>
+            /// 被补间轴上原来的最小跨度（独立边框段有 MinWidth/MinHeight = 58）。
+            /// 不清零的话，写下去小于 58 的宽高会被布局夹住：曲线在跑、画面不动，
+            /// 收尾那一帧才突然塌掉——"背景一下子缩短、没有动画"就是这么来的。
+            /// </summary>
+            public double SavedMin;
+
+            /// <summary>是否接管过最小跨度（收尾时要还原）。</summary>
+            public bool MinTaken;
+        }
+
+        /// <summary>某一进度下该写的跨度：两端固定，中间由 EaseOutBack 决定。</summary>
+        private static double ExtentValueAt(SegmentExtentMotion state)
+        {
+            if (state == null) return 0;
+            if (state.Progress <= 0.0) return state.Start;
+            if (state.Progress >= 1.0) return state.Target;
+            return state.Start + (state.Target - state.Start) * EaseOutBack(state.Progress, state.Back);
+        }
+
+        /// <summary>按「当前可见跨度」反解进度，供打断时接续。</summary>
+        /// <remarks>
+        /// popup 打断时靠 progress 不重置来保持连续；这里端点会换（目标变了），只能反解。
+        /// EaseOutBack 在 [0, pPeak] 上单调，二分这一段就够：过冲区（pPeak 之后）
+        /// 只占曲线尾巴的几 %，落到 pPeak 也看不出接缝。
+        /// </remarks>
+        private static double ProgressForValue(double start, double target, double value, double back)
+        {
+            double span = target - start;
+            if (Math.Abs(span) < 0.001) return 0.0;
+
+            double pPeak = 1.0 - 2.0 * back / (3.0 * (back + 1.0));
+            if (pPeak <= 0.01 || pPeak > 1.0) pPeak = 1.0;
+
+            double low = 0.0;
+            double high = pPeak;
+            for (int i = 0; i < 24; i++)
+            {
+                double mid = (low + high) * 0.5;
+                double midValue = start + span * EaseOutBack(mid, back);
+                if (span > 0 ? midValue < value : midValue > value) low = mid;
+                else high = mid;
+            }
+            return Math.Max(0.0, Math.Min(pPeak, (low + high) * 0.5));
+        }
+
+        /// <summary>补间期间把最小跨度让开，否则写下去的跨度会被布局夹回去。</summary>
+        private static void NormalizeExtentMin(Border border, SegmentExtentMotion state)
+        {
+            if (border == null || state == null || state.MinTaken) return;
+
+            if (state.Vertical)
+            {
+                state.SavedMin = border.MinHeight;
+                border.MinHeight = 0;
+            }
+            else
+            {
+                state.SavedMin = border.MinWidth;
+                border.MinWidth = 0;
+            }
+
+            state.MinTaken = true;
+        }
+
+        /// <summary>补间结束：把借走的最小跨度还回去（多组件胶囊本来是 0，还回 0 无害）。</summary>
+        private static void RestoreExtentMin(Border border, SegmentExtentMotion state)
+        {
+            if (border == null || state == null || !state.MinTaken) return;
+
+            state.MinTaken = false;
+            if (state.Vertical) border.MinHeight = state.SavedMin;
+            else border.MinWidth = state.SavedMin;
+        }
+
+        /// <summary>每个分段最多一条跨度补间；后发起的直接替换前者，所以不需要代际号。</summary>
+        private static readonly Dictionary<Border, SegmentExtentMotion> _extentMotions =
+            new Dictionary<Border, SegmentExtentMotion>();
+
+        /// <summary>所有分段共用的一只表：一次渲染回调里把它们一起推进。</summary>
+        private static readonly System.Diagnostics.Stopwatch _extentMotionClock =
+            new System.Diagnostics.Stopwatch();
+
+        private static TimeSpan _extentMotionLastFrame;
+        private static bool _extentMotionHooked;
+
+        /// <summary>逐帧遍历用的快照：每帧 new 一个 List 会在长动画里持续产生垃圾。</summary>
+        private static readonly List<Border> _extentFrameBorders = new List<Border>();
+        private static readonly List<SegmentExtentMotion> _extentFrameStates = new List<SegmentExtentMotion>();
+
+        /// <summary>逐帧成本采样：用来定位"展开/收起时掉帧"到底花在哪一段。</summary>
+        private static readonly System.Diagnostics.Stopwatch _extentFrameCostWatch =
+            new System.Diagnostics.Stopwatch();
+        private static int _extentFrameSamples;
+        private static double _extentFrameTotalMs;
+        private static double _extentFrameWorstMs;
+        private static double _extentFrameWorstGapMs;
+
+        private static bool IsExtentMoving(Border border)
+        {
+            return border != null && _extentMotions.ContainsKey(border);
+        }
+
+        private static void WriteSegmentExtent(Border border, bool vertical, double extent)
+        {
+            if (border == null) return;
+            if (double.IsNaN(extent) || double.IsInfinity(extent) || extent < 0) extent = 0;
+
+            // 只写被补间的那一个轴：另一个轴的固定厚度是构造时写死的
+            if (vertical) border.Height = extent;
+            else border.Width = extent;
+        }
+
         /// <summary>
-        /// 按根面板的子项排列顺序推断滑入方向：拖动头排在内容之前则为 -1，排在其后则为 +1。
+        /// 用弹簧把分段的跨度驱动到 <paramref name="to"/>，与组件位移同一档、同一倍速。
+        /// </summary>
+        /// <param name="hideWhenSettled">收尾时把这一整段折叠（整段消失的倒放）。</param>
+        /// <remarks>
+        /// 打断即接续：同一分段只允许一条跨度弹簧在跑，新的一轮直接替换旧的，
+        /// 起点由调用方给（通常就是当前可见跨度）。替换即意味着旧的不会再写值，
+        /// 因此不需要"代际号"那套守卫——那个字典早就成了只增不减的状态泄漏源。
+        /// </remarks>
+        /// <summary>跨度补间的内部入口：显式给进度与方向。</summary>
+        private static void BeginExtentMotion(
+            Border border, bool vertical, double startExtent, double endExtent,
+            double progress, double direction, bool hideWhenSettled,
+            double seconds, double backAmount)
+        {
+            if (border == null) return;
+
+            if (double.IsNaN(startExtent) || double.IsInfinity(startExtent)) startExtent = 0;
+            if (double.IsNaN(endExtent) || double.IsInfinity(endExtent)) endExtent = 0;
+            if (startExtent < 0) startExtent = 0;
+            if (endExtent < 0) endExtent = 0;
+            if (progress < 0) progress = 0;
+            if (progress > 1) progress = 1;
+
+            DependencyProperty extentProperty = vertical
+                ? FrameworkElement.HeightProperty
+                : FrameworkElement.WidthProperty;
+
+            // 摘掉可能残留的尺寸动画与固定值，再把跨度钉到当前进度对应的值
+            border.BeginAnimation(extentProperty, null);
+            if (_extentMotions.TryGetValue(border, out var previous))
+            {
+                _extentMotions.Remove(border);
+                RestoreExtentMin(border, previous);
+            }
+
+            var state = new SegmentExtentMotion
+            {
+                Vertical = vertical,
+                Start = startExtent,
+                Target = endExtent,
+                Progress = progress,
+                Direction = direction >= 0 ? 1.0 : -1.0,
+                HideWhenSettled = hideWhenSettled,
+                DurationSeconds = Math.Max(0.01, seconds),
+                Back = double.IsNaN(backAmount) ? 0.0 : backAmount,
+            };
+            state.Current = ExtentValueAt(state);
+            if (state.Progress <= 0.0 && state.Direction < 0) state.Finished = true;
+            if (state.Progress >= 1.0 && state.Direction > 0) state.Finished = true;
+
+            NormalizeExtentMin(border, state);
+            _extentMotions[border] = state;
+            WriteSegmentExtent(border, vertical, state.Current);
+            MotionTrace($"跨度补间开始 {Describe(border)} 进度={state.Progress:F2} 方向={state.Direction:F0} 端点={startExtent:F1}/{endExtent:F1} 当前={state.Current:F1}（收起={hideWhenSettled} 时长={state.DurationSeconds * 1000:F0}ms 回弹={state.Back:F2}）");
+            EnsureExtentMotionHook();
+
+            // 起点即终点：不空跑一帧，直接收尾
+            if (Math.Abs(endExtent - startExtent) < 0.5) FinishExtentMotion(border, state);
+        }
+
+        /// <summary>
+        /// 跨度补间的唯一入口：给出「收起到底」与「完全展开」两端跨度，说明这次往哪边走。
         /// </summary>
         /// <remarks>
-        /// 只看**顺序**，不量坐标。两个原因：
-        ///
-        /// 一、几何判据在这套布局里是退化的。根面板是自适应内容尺寸的 StackPanel，
-        /// 它的跨度就等于内容跨度，"内容重心 vs 面板中点"两边同时移动，
-        /// 比较结果只剩浮点噪声——这正是"第一次对、第二次反"的直接来源。
-        ///
-        /// 二、几何判据会被动画污染。TransformToAncestor 包含 RenderTransform，
-        /// 而动画倍率 0.1x 时一次出场要 2.2 秒，第二次触发几乎必然落在第一次动画中途，
-        /// 量到的位置带着在飞的位移，判据自然翻转。
-        ///
-        /// 排列顺序既是 StackPanel 排布的唯一依据，又完全不受变换影响，
-        /// 换边、折叠、内容翻转之后都仍然成立。
+        /// 出现与收起用同一对端点、同一条曲线：出现进度 0→1，收起 1→0，
+        /// 所以收起就是出现的严格倒放（与 popup 菜单一致，用户 m01345）。
+        /// 中途打断时端点换成新的、进度按当前跨度反解、只翻方向，不重置时钟。
         /// </remarks>
-        private static void RefreshEnterSlideSign(Panel panel)
+        private static void RunExtentMotion(
+            Border border, bool vertical, double collapsedExtent, double expandedExtent,
+            bool collapsing, bool hideWhenSettled, double seconds = 0, double back = double.NaN)
         {
-            if (panel == null) return;
+            if (border == null) return;
 
-            var head = FindDragHandle(panel);
-            if (head == null) return;
+            var profile = ResolveMotionProfile();
+            double durationSeconds = seconds > 0 ? seconds : profile.Seconds;
+            double backAmount = double.IsNaN(back) ? profile.Back : back;
 
-            bool vertical = IsVerticalPanel(panel);
-
-            // 量"拖动头"与"内容整体"在排布方向上的真实位置。
-            // 之前用子项索引判断，但主窗口在换边/折叠时会 rootChildren.Clear() 再重排，
-            // 同一根面板上头会从索引 0 跳到索引 7（日志里两种取值都出现过），
-            // 索引根本不能代表"头在哪一端"，位置才是排布的真实结果。
-            double headPos;
-            try
+            double progress;
+            if (_extentMotions.TryGetValue(border, out var previous) && previous != null && !previous.Finished)
             {
-                var offset = head.TransformToAncestor(panel).Transform(new Point(0, 0));
-                headPos = vertical ? offset.Y : offset.X;
+                progress = ProgressForValue(collapsedExtent, expandedExtent, previous.Current, backAmount);
             }
-            catch
+            else
             {
+                progress = collapsing ? 1.0 : 0.0;
+            }
+
+            BeginExtentMotion(border, vertical, collapsedExtent, expandedExtent, progress,
+                collapsing ? -1.0 : 1.0, hideWhenSettled, durationSeconds, backAmount);
+        }
+
+        private static void EnsureExtentMotionHook()
+        {
+            if (_extentMotionHooked) return;
+            _extentMotionHooked = true;
+            _extentMotionClock.Restart();
+            _extentMotionLastFrame = TimeSpan.Zero;
+            CompositionTarget.Rendering += OnExtentMotionFrame;
+        }
+
+        private static void UnhookExtentMotionHook()
+        {
+            if (!_extentMotionHooked) return;
+            _extentMotionHooked = false;
+            CompositionTarget.Rendering -= OnExtentMotionFrame;
+            _extentMotionClock.Stop();
+
+            if (_extentFrameSamples > 0)
+            {
+                MotionTrace($"跨度逐帧统计 帧数={_extentFrameSamples} 最差处理={_extentFrameWorstMs:F1}ms 平均处理={_extentFrameTotalMs / _extentFrameSamples:F1}ms 最差帧间隔={_extentFrameWorstGapMs:F1}ms");
+                _extentFrameSamples = 0;
+                _extentFrameTotalMs = 0;
+                _extentFrameWorstMs = 0;
+                _extentFrameWorstGapMs = 0;
+            }
+        }
+
+        /// <summary>每帧推进一次所有分段的跨度补间（一个渲染回调，所有分段共用）。</summary>
+        private static void OnExtentMotionFrame(object sender, EventArgs e)
+        {
+            if (_extentMotions.Count == 0)
+            {
+                UnhookExtentMotionHook();
                 return;
             }
 
-            double contentMin = double.MaxValue;
-            double contentMax = double.MinValue;
-            CollectContentExtent(panel, panel, vertical, ref contentMin, ref contentMax);
-            if (contentMin > contentMax) return;
+            double frameSeconds = (_extentMotionClock.Elapsed - _extentMotionLastFrame).TotalSeconds;
+            _extentMotionLastFrame = _extentMotionClock.Elapsed;
+            if (frameSeconds <= 0 || double.IsNaN(frameSeconds)) return;
+            // 曲线按时间推进：一帧超过 0.25s 说明确实卡了，允许它跳过去，
+            // 但再大的间隔（挂起、断点）不该让整段动画"凭空完成"，夹一下。
+            if (frameSeconds > 0.25) frameSeconds = 0.25;
 
-            // 头贴着内容前沿（左/上）→ 内容向另一侧生长 → 从负方向滑入
-            // 头贴着内容尾沿（右/下）→ 内容向前导侧生长 → 从正方向滑入
-            double distToStart = Math.Abs(headPos - contentMin);
-            double distToEnd = Math.Abs(headPos - contentMax);
-            _enterSlideSign = distToStart <= distToEnd ? -1 : 1;
+            _extentFrameCostWatch.Restart();
 
-            // 记一行日志：方向出问题时可以直接对照，不必再靠猜
-            LogHelper.WriteLogToFile(
-                $"[Toolbar] 滑入方向 = {_enterSlideSign}（头={headPos:F1} 内容 {contentMin:F1}..{contentMax:F1} " +
-                $"到前沿={distToStart:F1} 到后沿={distToEnd:F1}）",
-                LogHelper.LogType.Trace);
-        }
-
-        /// <summary>测量可见内容在排布方向上占据的区间。</summary>
-        /// <remarks>
-        /// 用"内容占用的两端"而不是"子项索引"：索引会被重排打乱，位置不会。
-        /// 也不用"重心 vs 面板中点"——根面板自适应内容宽度，那个比较恒等于噪声。
-        /// </remarks>
-        private static void CollectContentExtent(
-            Panel root, FrameworkElement current, bool vertical, ref double min, ref double max)
-        {
-            if (current == null || current.Visibility != Visibility.Visible) return;
-
-            bool isContent = current.Tag as string == InjectedTag || IsContentBorder(current);
-            if (isContent && current != root)
+            _extentFrameBorders.Clear();
+            _extentFrameStates.Clear();
+            foreach (var pair in _extentMotions)
             {
-                try
+                _extentFrameBorders.Add(pair.Key);
+                _extentFrameStates.Add(pair.Value);
+            }
+
+            List<Border> settled = null;
+            for (int i = 0; i < _extentFrameBorders.Count; i++)
+            {
+                var border = _extentFrameBorders[i];
+                var state = _extentFrameStates[i];
+
+                // 曲线是时间驱动的：进度由真实经过的秒数算，掉帧只是少画几帧，
+                // 不会像弹簧那样"跨一大步然后回弹过冲"。
+                // 与 popup 同构：progress 每帧按 direction * dt / duration 推进，越界钉到端点。
+                double step = state.DurationSeconds > 0 ? frameSeconds / state.DurationSeconds : 1.0;
+                state.Progress += state.Direction * step;
+                if (state.Progress >= 1.0)
                 {
-                    var t = current.TransformToAncestor(root);
-                    var p0 = t.Transform(new Point(0, 0));
-                    var p1 = t.Transform(new Point(
-                        vertical ? 0 : current.ActualWidth,
-                        vertical ? current.ActualHeight : 0));
-                    double a = vertical ? p0.Y : p0.X;
-                    double b = vertical ? p1.Y : p1.X;
-                    if (a > b) { var tmp = a; a = b; b = tmp; }
-                    if (a < min) min = a;
-                    if (b > max) max = b;
+                    state.Progress = 1.0;
+                    if (state.Direction > 0) state.Finished = true;
                 }
-                catch
+                else if (state.Progress <= 0.0)
                 {
-                    // 尚未进入视觉树
+                    state.Progress = 0.0;
+                    if (state.Direction < 0) state.Finished = true;
                 }
+
+                state.Current = ExtentValueAt(state);
+                WriteSegmentExtent(border, state.Vertical, state.Current);
+
+                if (!state.Finished) continue;
+
+                (settled ?? (settled = new List<Border>())).Add(border);
             }
 
-            if (current is Panel pnl)
+            // 跨度这一帧变过了：居中跟随者据此逐帧补偿（它只测量，位置由它自己在
+            // RenderTransform 上写，这里绝不动 Margin——那正是 2f71a285 回退掉的做法）
+            try
             {
-                foreach (var child in pnl.Children.OfType<FrameworkElement>())
+                ExtentFrame?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 跨度逐帧回调失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            // 这一帧的处理成本：与"距上一帧隔了多久"一起记账，收尾时汇总一行。
+            // 前者是我们自己的开销，后者是用户看到的最差帧间隔。
+            double frameCostMs = _extentFrameCostWatch.Elapsed.TotalMilliseconds;
+            _extentFrameSamples++;
+            _extentFrameTotalMs += frameCostMs;
+            if (frameCostMs > _extentFrameWorstMs) _extentFrameWorstMs = frameCostMs;
+            if (frameSeconds * 1000.0 > _extentFrameWorstGapMs) _extentFrameWorstGapMs = frameSeconds * 1000.0;
+
+            if (settled == null)
+            {
+                if (_extentMotions.Count == 0) UnhookExtentMotionHook();
+                return;
+            }
+
+            foreach (var border in settled)
+            {
+                // 这一帧里被新一轮接管了：交给新状态收尾
+                if (!_extentMotions.TryGetValue(border, out var state)) continue;
+                FinishExtentMotion(border, state);
+            }
+
+            if (_extentMotions.Count == 0) UnhookExtentMotionHook();
+        }
+
+        /// <summary>跨度补间收尾：收起型的真正折叠，其余交还自动尺寸并通知落位。</summary>
+        private static void FinishExtentMotion(Border border, SegmentExtentMotion state)
+        {
+            if (border == null || state == null) return;
+
+            if (_extentMotions.TryGetValue(border, out var current) && ReferenceEquals(current, state))
+            {
+                _extentMotions.Remove(border);
+            }
+            if (_extentMotions.Count == 0) UnhookExtentMotionHook();
+
+            MotionTrace($"跨度补间收尾 {Describe(border)} 进度={state.Progress:F2} 当前={state.Current:F1} 端点={state.Start:F1}/{state.Target:F1} 收起={state.HideWhenSettled}");
+
+            if (state.HideWhenSettled)
+            {
+                // 收完才 Collapsed：段内组件还画在胶囊里，一起被裁掉
+                ApplySegmentSettled(border, state.Vertical, false);
+                RestoreExtentMin(border, state);
+                return;
+            }
+
+            DependencyProperty extentProperty = state.Vertical
+                ? FrameworkElement.HeightProperty
+                : FrameworkElement.WidthProperty;
+
+            border.BeginAnimation(extentProperty, null);
+            border.ClearValue(extentProperty);
+            RestoreExtentMin(border, state);
+
+            // 收尾纠偏：补间是按「量出来的目标」收的，而清掉固定尺寸后真实落位未必是这个数
+            // （DesiredSize 与排布实排能差几 px）。落定前量一次真值，差得多就用 120ms
+            // 单调曲线补过去，用户就看不到「最后几 px 啪一下」。只纠一次，防止来回抖。
+            if (!state.Corrected)
+            {
+                double settledExtent = ReadLaidOutExtent(border, state.Vertical);
+                if (settledExtent > 0 && Math.Abs(settledExtent - state.Current) > 0.5)
                 {
-                    CollectContentExtent(root, child, vertical, ref min, ref max);
+                    MotionTrace($"跨度收尾纠偏 {Describe(border)} {state.Current:F1} → {settledExtent:F1}（补 120ms）");
+                    border.ClipToBounds = false;
+                    border.Opacity = 1;
+                    BeginExtentMotion(border, state.Vertical, state.Current, settledExtent,
+                        progress: 0.0, direction: 1.0, hideWhenSettled: false,
+                        seconds: 0.12, backAmount: 0.0);
+                    if (_extentMotions.TryGetValue(border, out var correction) && correction != null)
+                    {
+                        correction.Corrected = true;
+                    }
+                    return;
                 }
             }
-            else if (current is Border br && br.Child is FrameworkElement bc)
-            {
-                CollectContentExtent(root, bc, vertical, ref min, ref max);
-            }
-            else if (current is ContentControl cc && cc.Content is FrameworkElement cce)
-            {
-                CollectContentExtent(root, cce, vertical, ref min, ref max);
-            }
+
+            border.ClipToBounds = false;
+            border.Opacity = 1;
+            // 跨度已经稳定：让居中/换边重新量一次（这时量到的才是最终宽度）
+            NotifyExtentChanged(state.Vertical);
         }
 
-        /// <summary>供主窗口在重建、换边、复位后主动刷新一次滑入方向。</summary>
-        public static void RefreshEnterSlideDirection(Panel rootPanel)
+        /// <summary>撤掉一条跨度补间但不落定（交给调用方接续）。</summary>
+        private static void StopExtentMotion(Border border, bool trace = true)
         {
-            RefreshEnterSlideSign(rootPanel);
-        }
-
-        /// <summary>这个子项是不是分段胶囊（内容分段的 Border 或独立分段的 Border）。</summary>
-        private static bool IsContentBorder(object child)
-        {
-            return child is Border border && border.Tag as string == ContentBorderTag;
-        }
-
-        /// <summary>
-        /// 找根面板里的拖动头：既不是分段胶囊，也不是选择框画布。
-        /// </summary>
-        /// <remarks>
-        /// 不按名字或类型硬认：选择框画布没有标签、也不是 Border，
-        /// 这里按"排除已知成员"的写法把它跳过去，剩下的第一个就是拖动头。
-        /// </remarks>
-        private static FrameworkElement FindDragHandle(Panel panel)
-        {
-            foreach (var child in panel.Children.OfType<FrameworkElement>())
+            if (border == null) return;
+            if (_extentMotions.TryGetValue(border, out var state))
             {
-                if (IsContentBorder(child)) continue;
-                if (child is System.Windows.Controls.Canvas) continue;
-                if (child.Tag as string == InjectedTag) continue;
-                return child;
+                _extentMotions.Remove(border);
+                RestoreExtentMin(border, state);
+                if (trace) MotionTrace($"跨度补间撤销 {Describe(border)} 停在 {state.Current:F1}");
             }
-            return null;
+            if (_extentMotions.Count == 0) UnhookExtentMotionHook();
         }
 
         private static List<IToolbarItem> _items;
@@ -1333,6 +1702,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
 
             SetHidingRuleset(wrapper, ruleset);
+            // 方形胶囊不参与跨度动画（宽 = 高，固定）
+            SetSeparateSegment(wrapper, true);
             return wrapper;
         }
 
@@ -1340,6 +1711,26 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             element.Visibility = Visibility.Visible;
         }
+
+        /// <summary>这个 Border 是不是"独立边框段"（一个组件一个方形胶囊，见 WrapInSeparateBorder）。</summary>
+        /// <remarks>
+        /// 独立段是固定方形（横向时宽 = 高 = 58，竖向时高 = 宽 = 58），
+        /// 跨度永远由布局决定、两个方向都不参与补间（用户 m01461：
+        /// 「独立边框的背景宽是固定宽=高的」）。
+        /// 收起时的倒放只剩段内组件自己的位移/透明度/缩放，方形背景等它们退完再一起折。
+        /// </remarks>
+        public static readonly DependencyProperty SeparateSegmentProperty =
+            DependencyProperty.RegisterAttached("SeparateSegment", typeof(bool), typeof(ToolbarRegistry),
+                new PropertyMetadata(false));
+
+        public static void SetSeparateSegment(FrameworkElement element, bool value)
+            => element.SetValue(SeparateSegmentProperty, value);
+
+        public static bool GetSeparateSegment(FrameworkElement element)
+            => (bool)element.GetValue(SeparateSegmentProperty);
+
+        private static bool IsSeparateSegment(Border border)
+            => border != null && GetSeparateSegment(border);
 
         public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPPTMode)
         {
@@ -1354,16 +1745,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             // 重建后的第一次同步：组件是按"全可见"建出来的，这次纠正必须瞬时落定，
             // 否则启动瞬间会看到图标冒出来又缩回去。
-            bool animateThisRound = _animateVisibilityChange && !_skipAnimationOnNextSync;
+            bool skippingFirstSync = _skipAnimationOnNextSync;
+            bool animateThisRound = _animateVisibilityChange && !skippingFirstSync;
             _skipAnimationOnNextSync = false;
 
-            // 方向每轮只判定**一次**，之后整轮沿用同一个符号。
-            // 之前这里判一次、SetAnimatedVisibility 内部又量一次，两次之间布局已随显隐改变，
-            // 于是同一轮里前半段用 -1、后半段用 +1——肉眼就是"先往左、再往右"。
-            RefreshEnterSlideSign(rootPanel);
-            _slideSignFrozenForRound = _enterSlideSign;
+            var syncCostWatch = System.Diagnostics.Stopwatch.StartNew();
+            MotionTrace($"同步开始 放动画={animateThisRound} 开关={_animateVisibilityChange} 首轮跳过={skippingFirstSync} 标注中={isAnnotating} PPT={isPPTMode} 用户收起={_isContentCollapsedByUser}");
 
-            // 记录切换前各子项的位置：整段显隐后由"邻居让位"通道把它们平滑滑到新位置。
+            // 记下切换前的排布：显隐之后所有组件都按 FLIP 从旧位置滑到新位置，
+            // 新出现的组件则以"左邻的旧位置"为起点，看起来就是从邻居身下钻出来。
             var beforeOffsets = animateThisRound
                 ? CaptureChildOffsets(rootPanel)
                 : null;
@@ -1379,8 +1769,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 _animateVisibilityChange = animationBefore;
             }
 
-            // 本轮结束，下一轮重新判定
-            _slideSignFrozenForRound = null;
+            MotionTrace($"同步结束 耗时={syncCostWatch.Elapsed.TotalMilliseconds:F1}ms 退场中={_exiting.Count} 跨度补间={_extentMotions.Count}");
 
             if (beforeOffsets != null)
             {
@@ -1396,6 +1785,49 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 记的是完整坐标而不是单个数：横排工具栏的兄弟只沿 X 移动、竖排只沿 Y 移动，
         /// 具体取哪个分量由调用方按面板朝向决定。
         /// </remarks>
+        /// <summary>
+        /// 量元素相对 <paramref name="ancestor"/> 的**布局位置**（不含元素自身的 RenderTransform）。
+        /// </summary>
+        /// <remarks>
+        /// 不能用 TransformToAncestor：那条链会把元素身上正在跑的位移补间一起算进去。
+        /// 动画中途再同步一次时，量到的就是中间态，FLIP 的 delta 会算成反向的碎值，
+        /// 组件于是被打断着重跑一遍（日志里同一元素先 Δ=-84、又 Δ=31）。
+        /// 这里逐级累加 <see cref="VisualTreeHelper.GetOffset(Visual)"/>，只反映布局排出来的位置，
+        /// 让"切换前在哪、切换后在哪"用同一个坐标系比较。
+        /// </remarks>
+        private static bool TryMeasureLayoutPosition(
+            FrameworkElement element, Visual ancestor, out Point position)
+        {
+            position = default;
+            if (element == null || ancestor == null) return false;
+
+            try
+            {
+                double x = 0;
+                double y = 0;
+                for (var node = (DependencyObject)element; node != null; node = VisualTreeHelper.GetParent(node))
+                {
+                    if (ReferenceEquals(node, ancestor))
+                    {
+                        position = new Point(x, y);
+                        return true;
+                    }
+                    if (node is Visual visual)
+                    {
+                        var offset = VisualTreeHelper.GetOffset(visual);
+                        x += offset.X;
+                        y += offset.Y;
+                    }
+                }
+            }
+            catch
+            {
+                // 尚未进入视觉树
+            }
+
+            return false;
+        }
+
         private static Dictionary<FrameworkElement, Point> CaptureChildOffsets(Panel panel)
         {
             var result = new Dictionary<FrameworkElement, Point>();
@@ -1410,14 +1842,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             foreach (var child in panel.Children.OfType<FrameworkElement>())
             {
                 if (child.Visibility != Visibility.Visible || result.ContainsKey(child)) continue;
-                try
+                if (TryMeasureLayoutPosition(child, panel, out var offset))
                 {
-                    result[child] = child.TransformToAncestor(panel).Transform(new Point(0, 0));
+                    result[child] = offset;
                 }
-                catch
-                {
-                    // 尚未进入视觉树
-                }
+            }
+
+            // 正在倒放收起的组件不算"切换前就在场"：它此刻的位置是动画中间态，
+            // 记下来会让下一轮把它当成老住户，倒放就失去了起点。
+            if (_exiting.Count > 0)
+            {
+                foreach (var pending in _exiting.Keys) result.Remove(pending);
             }
             return result;
         }
@@ -1431,28 +1866,41 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static void CollectVisibleLayoutElements(
             Panel root, FrameworkElement current, Dictionary<FrameworkElement, Point> sink)
         {
+            CollectVisibleLayoutElements(root, current, sink, null);
+        }
+
+        /// <summary>
+        /// 收集会移动的组件；<paramref name="order"/> 非空时顺带按排布顺序记一遍，
+        /// 供 FLIP 找"左邻是谁"——光有位置字典分不出谁在谁左边。
+        /// </summary>
+        private static void CollectVisibleLayoutElements(
+            Panel root, FrameworkElement current, Dictionary<FrameworkElement, Point> sink,
+            List<FrameworkElement> order)
+        {
             if (current == null || current.Visibility != Visibility.Visible) return;
 
-            // 记录"真正会移动的组件"：带注入标记的那些（按钮/分隔线/分组面板）。
+            // 记录"真正会移动的组件"：带注入标记的那些（按钮/分隔线）。
             // 不用类型判断：ToolbarImageButton 是 UserControl（属 ContentControl），
             // 按类型排除会把所有按钮漏掉。
             // 也不做视觉树深搜：那会在每次显隐时产生数百次查询，得不偿失。
-            if (current.Tag as string == InjectedTag && current != root)
+            //
+            // **分组容器是例外**：带注入标记的 Panel 只是"分组内组件"的排版容器，
+            // 它自己不是组件。把它也记进来，等于让一整个分组当一个组件动——
+            // 整组的透明度/缩放会叠在内部按钮上，位移也会被算两遍
+            // （容器一层、内部按钮再一层），看到的就是"整块方块淡入"。
+            // 所以面板只递归、不记账，让内部每个分组内组件各自成为 FLIP/倒放的单位。
+            if (current.Tag as string == InjectedTag && current != root && current is not Panel)
             {
-                try
+                // 位置为 0 的元素过去被跳过（那时只看谁"挪动了"）；现在还要它当左邻锚点，
+                // 所以顺序照记，只是不进位置字典以免污染位移计算。
+                order?.Add(current);
+                if (TryMeasureLayoutPosition(current, root, out var point)
+                    && (point.X > 0.01 || point.Y > 0.01))
                 {
-                    var point = current.TransformToAncestor(root).Transform(new Point(0, 0));
-                    if (point.X > 0.01 || point.Y > 0.01)
-                    {
-                        sink[current] = point;
-                    }
-                }
-                catch
-                {
-                    // 尚未进入视觉树
+                    sink[current] = point;
                 }
 
-                // 带标记的分组面板内部还有按钮，继续往下收
+                // 分组容器内部还有组件，继续往下收
             }
 
             // 继续向下递归
@@ -1460,21 +1908,21 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 foreach (var child in panel.Children.OfType<FrameworkElement>())
                 {
-                    CollectVisibleLayoutElements(root, child, sink);
+                    CollectVisibleLayoutElements(root, child, sink, order);
                 }
             }
             else if (current is Border border && border.Child is FrameworkElement borderChild)
             {
-                CollectVisibleLayoutElements(root, borderChild, sink);
+                CollectVisibleLayoutElements(root, borderChild, sink, order);
             }
             else if (current is ContentControl contentControl && contentControl.Content is FrameworkElement content)
             {
-                CollectVisibleLayoutElements(root, content, sink);
+                CollectVisibleLayoutElements(root, content, sink, order);
             }
         }
 
         /// <summary>
-        /// 让子项从"切换前的位置"平滑滑到"切换后的新位置"。
+        /// 让每个组件从"切换前的位置"滑到"切换后的新位置"；新出现的组件从左邻的旧位置钻出。
         /// </summary>
         /// <remarks>
         /// 布局一旦重算，子项会瞬间跳到新位置。要让它看起来是滑过去的，
@@ -1483,52 +1931,53 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 位移写 RenderTransform（合成层），不触发布局，比动画 Margin 便宜得多。
         /// 必须等布局跑完才能量到新位置，所以排到 Loaded 优先级执行。
         ///
+        /// **新出现的组件不另算一套滑入**：它的起点就是左邻（切换前就在场的那个）的旧位置，
+        /// 于是它从邻居身下"抽"出来。两者共用同一条曲线、同一个时钟，
+        /// 走两格与走一格在同样时长内完成——"远的快、近的慢、同时收尾"不需要额外参数。
+        ///
         /// 横排工具栏沿 X 让位、竖排沿 Y 让位：捕获时两个分量都记了，
         /// 这里按面板朝向只取对应的那一个。另一个分量本来就不该变，参与计算只会引入噪声。
         /// </remarks>
         private static void AnimateChildrenToNewOffsets(
             Panel panel, Dictionary<FrameworkElement, Point> beforeOffsets)
         {
-            if (panel == null || beforeOffsets == null || beforeOffsets.Count == 0) return;
+            // 这里不再因 beforeOffsets 为空而提前返回：收起倒放只依赖"谁在退场"，
+            // 面板刚被清空时正是它最需要跑的时候。
+            if (panel == null || beforeOffsets == null) return;
 
             bool vertical = IsVerticalPanel(panel);
-            DependencyProperty axisProperty = vertical
-                ? TranslateTransform.YProperty
-                : TranslateTransform.XProperty;
 
             panel.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    foreach (var kvp in beforeOffsets)
+                    // 第一遍：段内的组件。按"切换后"的排布顺序遍历，新组件才能找到自己的左邻是谁。
+                    var leaves = new List<FrameworkElement>();
+                    CollectVisibleLayoutElements(panel, panel, new Dictionary<FrameworkElement, Point>(), leaves);
+
+                    // 倒放收起先跑：它要读"切换前的位置"，而下面的让位会在同一帧里改写通道值。
+                    AnimateExitingElements(panel, leaves, beforeOffsets, vertical);
+
+                    // 这一遍是收起还是展开：决定让位用曲线的哪一侧（见 ApplyFlipOffsets）。
+                    // 判据是"有没有组件在退场"——收起必然产生退场计划，展开不产生。
+                    bool collapsing = _exiting.Count > 0;
+
+                    ApplyFlipOffsets(panel, leaves, beforeOffsets, vertical, anchorForNewcomer: true, ownZIndex: true, collapsing: collapsing);
+
+                    // 第二遍：根面板的直接子项（拖动头、独立边框、分段胶囊）。
+                    // 它们不参与"从邻居身下钻出"——新分段由胶囊自己从 0 长出来负责，
+                    // 这里只补位置平移，否则拖动头会"啪"地横移一段。
+                    //
+                    // 但**内部已经自己补过位移的外壳必须跳过**：外壳带着内容走一次、
+                    // 内容自己再走一次，同一段路就走成两倍，组件会从比邻位远一倍的地方飞进来。
+                    var rootChildren = new List<FrameworkElement>();
+                    foreach (var child in panel.Children.OfType<FrameworkElement>())
                     {
-                        var child = kvp.Key;
-                        if (child == null || child.Visibility != Visibility.Visible) continue;
-
-                        Point newOffset;
-                        try
-                        {
-                            newOffset = child.TransformToAncestor(panel).Transform(new Point(0, 0));
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-
-                        // 横排取 X、竖排取 Y，两者只有一个会真的变
-                        double delta = vertical
-                            ? kvp.Value.Y - newOffset.Y
-                            : kvp.Value.X - newOffset.X;
-                        if (Math.Abs(delta) < 1.0) continue;
-
-                        // 用独立的"邻居让位"通道，不与出场滑入抢同一个 TranslateTransform
-                        var translate = GetOrCreateChannel(child, SiblingChannelIndex);
-
-                        // 让位也走弹簧：距离越短走完越快（速度由物理决定），
-                        // 且打断时自动带着当前位移与速度重定向，不会硬切回起点。
-                        StartChannelSpring(
-                            translate, vertical, delta, 0.0, ResolveSpringSpecForDistance(Math.Abs(delta)));
+                        if (child.Visibility != Visibility.Visible) continue;
+                        if (HasAnimatedDescendant(child, leaves)) continue;
+                        rootChildren.Add(child);
                     }
+                    ApplyFlipOffsets(panel, rootChildren, beforeOffsets, vertical, anchorForNewcomer: false, ownZIndex: false, collapsing: collapsing);
                 }
                 catch (Exception ex)
                 {
@@ -1537,32 +1986,732 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
-        /// <summary>邻居组件滑到新位置的时长（毫秒），与按钮出场同长。</summary>
-        /// <remarks>
-        /// 新组件出现时，右边所有组件要向右让出"它的宽度"，
-        /// 而新组件自己也要从 -宽度 滑到 0——两者走的是同一段距离，
-        /// 时长必须一致，否则看起来是一前一后收尾。
-        /// </remarks>
-        private const int ToolbarSiblingSlideMs = ToolbarItemShowDurationMs;
-
-
-
         /// <summary>
-        /// 用弹簧驱动一条位移动画通道（恒速由物理决定，打断可带着动量续跑）。
+        /// 元素自身、或它的后代里，是否有已经在补位移动画的组件。
         /// </summary>
         /// <remarks>
-        /// 为什么不再用 DoubleAnimation + 固定时长：
-        /// 固定时长意味着 32px 的按钮和 308px 的整条工具栏用同样的时间收尾，
-        /// 短距离会显得凝滞、长距离会显得一闪而过——这就是"时间恒定"的毛病。
-        /// 弹簧的收敛时间天然随距离变化：距离短收敛快，距离长收敛久，
-        /// 而**最大速度**由 ω₀ 决定、与距离无关，观感才是"速度恒定"。
-        ///
-        /// 中断处理也不需要手工做：这里每帧从通道当前值重新起解，
-        /// 因此被下一次显隐打断时会从"正在显示的位置"继续，不会跳回起点。
-        /// 每个元素每条通道只允许一条弹簧在跑，后发起的接管前者（同优先级）。
+        /// 用来避免"外壳 + 内部"对同一段位移各补一次：渲染位移会沿视觉树累加，
+        /// 两层各补一次就等于把距离翻倍，看起来像从屏幕外甩进来。
         /// </remarks>
-        private static void StartChannelSpring(
-            TranslateTransform translate, bool vertical, double from, double to, SpringSpec spec)
+        private static bool HasAnimatedDescendant(FrameworkElement element, List<FrameworkElement> animated)
+        {
+            if (element == null || animated == null) return false;
+            foreach (var candidate in animated)
+            {
+                if (candidate == null) continue;
+                if (ReferenceEquals(candidate, element)) return true;
+                if (element.IsAncestorOf(candidate)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 给一串按排布顺序排列的元素叠加 FLIP 反向位移，再交给曲线补回 0。
+        /// </summary>
+        /// <param name="anchorForNewcomer">
+        /// 切换前不在场的元素是否从"左邻的旧位置"起步。段内为 true；
+        /// 根面板为 false——新分段自己从 0 宽长出来，不该再横移一段。
+        /// </param>
+        /// <param name="ownZIndex">
+        /// 是否按排布顺序压低 z 序。WPF 里后添加的子项盖在上面，
+        /// 不压低的话新组件会盖住左邻，"从底下抽出来"就变成"浮在上面出现"。
+        /// </param>
+        /// <param name="collapsing">
+        /// 这一遍是收起还是展开。决定用曲线的哪一侧：展开是 EaseOutBack（冲出去再回落），
+        /// 收起是它的时间反演 EaseInBack（先微微反向蓄力再冲进来）。
+        /// </param>
+        private static void ApplyFlipOffsets(
+            Panel panel,
+            List<FrameworkElement> ordered,
+            Dictionary<FrameworkElement, Point> beforeOffsets,
+            bool vertical,
+            bool anchorForNewcomer,
+            bool ownZIndex,
+            bool collapsing)
+        {
+            // 锚点按"最近的左邻"滚动推进，且只认切换前就在场的元素：
+            // 一串连续新出现的组件因此共用同一个起点，正好叠成一摞卡片，
+            // 再由弹簧一起甩开——这就是 (ab)(cd)e 那种"从一处扇出"的观感。
+            var anchors = new Dictionary<DependencyObject, double>();
+            // 已经压过 z 序的分组容器：只认第一个进容器的组件，后面的不能覆盖
+            var lowered = new HashSet<DependencyObject>();
+
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                var child = ordered[i];
+                if (child == null || child.Visibility != Visibility.Visible) continue;
+
+                // 正在倒放收起的组件归"收起"那一遍管：这里既不给它补位移，
+                // 也不让它当别人的锚点（它的位置是动画中间态）。
+                if (_exiting.ContainsKey(child)) continue;
+
+                if (ownZIndex)
+                {
+                    Panel.SetZIndex(child, -i);
+                    LowerGroupContainers(child, panel, -i, lowered);
+                }
+
+                if (!TryMeasureLayoutPosition(child, panel, out var now)) continue;
+
+                double finalPos = vertical ? now.Y : now.X;
+                bool existed = beforeOffsets.TryGetValue(child, out var before);
+                double startPos;
+
+                if (existed)
+                {
+                    startPos = vertical ? before.Y : before.X;
+                }
+                else
+                {
+                    startPos = anchorForNewcomer && anchors.TryGetValue(LayoutSlot(child, panel), out var anchorPos)
+                        ? anchorPos
+                        : finalPos;
+                }
+
+                // 只有切换前就在场的元素才配当锚点
+                if (existed)
+                {
+                    anchors[LayoutSlot(child, panel)] = startPos;
+                }
+
+                double delta = startPos - finalPos;
+                if (Math.Abs(delta) < 0.5) continue;
+
+                MotionTrace($"让位 {Describe(child)} {finalPos:F1} ← 起点 {startPos:F1}（Δ={delta:F1} 新出现={!existed}）");
+
+                // 让位与出场共用同一条位移通道：同一条曲线、同一个时钟，
+                // 所以"新组件钻出"和"邻居让开"天然同步收尾。
+                var translate = GetOrCreateChannel(child, TranslateChannelIndex);
+                StartChannelMotion(translate, vertical, delta, 0.0, collapse: collapsing);
+            }
+        }
+
+        /// <summary>
+        /// 锚点槽位：组件序列所在的段内容面板。
+        /// </summary>
+        /// <remarks>
+        /// 按 <see cref="FrameworkElement.Parent"/> 归组会看不见分组外面的左邻：
+        /// 分组里第一个组件的父级是分组面板，锚点表里没有它的历史位置，
+        /// 它就只能原地出现——"从邻居身下抽出来"在分组上恰好失效。
+        /// 改按最近的段内容面板归组，分组内外的组件共用同一条锚点链，
+        /// 一组同时出现的组件于是都从左邻那一点扇出。
+        /// </remarks>
+        private static DependencyObject LayoutSlot(FrameworkElement element, Panel panel)
+        {
+            for (var node = element?.Parent; node != null; node = System.Windows.Media.VisualTreeHelper.GetParent(node))
+            {
+                if (node == panel) break;
+                if (node is FrameworkElement fe && fe.Tag as string == ContentPanelTag) return fe;
+            }
+            return element?.Parent as DependencyObject ?? panel;
+        }
+
+        /// <summary>
+        /// 分组容器也跟着压 z 序。
+        /// </summary>
+        /// <remarks>
+        /// 叠序是逐层生效的：只压内部按钮，整个容器仍按"后添加"盖在左邻上面，
+        /// 跨分组边界时"从底下抽出来"就变成"浮在上面出现"。
+        /// 容器取它第一个组件的序位；后到的组件不覆盖（先到先得）。
+        /// </remarks>
+        private static void LowerGroupContainers(
+            FrameworkElement element, Panel panel, int zIndex, HashSet<DependencyObject> lowered)
+        {
+            for (var node = element?.Parent; node != null; node = System.Windows.Media.VisualTreeHelper.GetParent(node))
+            {
+                if (node == panel) break;
+                if (node is not FrameworkElement fe || fe.Tag as string != InjectedTag || fe is not Panel) break;
+                if (!lowered.Add(fe)) break;
+                Panel.SetZIndex(fe, zIndex);
+            }
+        }
+
+        // ───────────────────────── 收起：展开的倒放 ─────────────────────────
+
+        /// <summary>
+        /// 一个正在"倒放收起"的元素此刻的状态。
+        /// </summary>
+        /// <remarks>
+        /// 收起不能立刻把组件 Collapsed——那样它就再也画不出来了。做法是让它**还画着、但不占布局**：
+        /// 把 Margin 的右侧（竖排为下方）减去自己的尺寸，StackPanel 给它的槽位宽度就成了 0，
+        /// 后面的兄弟立刻补上来，而它仍按原尺寸绘制（WPF 默认不裁剪溢出）。
+        /// 于是"布局一瞬间到位"和"绘制还能慢慢退场"这两件事可以同时成立。
+        ///
+        /// 位移/透明度/缩放都在 FLIP 那一遍起播：只有拿到整轮排布，才知道"倒放到谁的位置去"。
+        /// 透明度和位移两条时间线都收尾后才真正 Collapsed——先收位移会让淡出被硬切掉半截。
+        /// </remarks>
+        private sealed class ExitPlan
+        {
+            public Thickness Margin;
+            public int ZIndex;
+            public bool Vertical;
+            /// <summary>整段胶囊收起（由胶囊自己补间跨度），不是段内组件。</summary>
+            public bool Segment;
+            public bool FadeDone;
+            public bool SlideDone;
+            /// <summary>独立方形的背景动画（淡出 + 缩回）是否已经收尾。</summary>
+            public bool UnitDone;
+            /// <summary>独立边框段：这一个正方形背景 + 里面那一个组件，整体当成一个组件来倒放。</summary>
+            public bool SeparateUnit;
+        }
+
+        private static readonly Dictionary<FrameworkElement, ExitPlan> _exiting =
+            new Dictionary<FrameworkElement, ExitPlan>();
+
+        /// <summary>把元素的排布尺寸压到 0：让出布局，但仍然绘制。</summary>
+        private static Thickness ZeroFootprintMargin(Thickness margin, FrameworkElement element, bool vertical)
+        {
+            var size = element.DesiredSize;
+            if (vertical)
+            {
+                return new Thickness(margin.Left, margin.Top, margin.Right, margin.Bottom - size.Height);
+            }
+            return new Thickness(margin.Left, margin.Top, margin.Right - size.Width, margin.Bottom);
+        }
+
+        /// <summary>
+        /// 开始一次"倒放收起"。返回 false 表示这次没有动画可放，调用方应立即落定。
+        /// </summary>
+        private static bool TryBeginHide(FrameworkElement element, bool vertical)
+        {
+            if (element == null) return false;
+            // 本轮不放动画（启动纠正 / 全局关动画）：绝不能留下零宽幻影——
+            // 那种状态只有 FLIP 那一遍会来收尾，而这遍根本不会跑。
+            if (!_animateVisibilityChange)
+            {
+                MotionTrace($"不倒放 {Describe(element)}：本轮关动画");
+                return false;
+            }
+            // 已经在收：不要重复起（重复压 Margin 会把它的位置一路推出去）
+            if (_exiting.ContainsKey(element)) return true;
+            // 父级已经收起来了（整段一起收的那条路径）：没有倒放可放，直接落定
+            if (!element.IsVisible)
+            {
+                MotionTrace($"不倒放 {Describe(element)}：父级已不可见");
+                return false;
+            }
+
+            var size = element.DesiredSize;
+            if (size.Width <= 0.5 || size.Height <= 0.5)
+            {
+                MotionTrace($"不倒放 {Describe(element)}：尺寸 {size.Width:F1}x{size.Height:F1}");
+                return false;
+            }
+
+            _exiting[element] = new ExitPlan
+            {
+                Margin = element.Margin,
+                ZIndex = Panel.GetZIndex(element),
+                Vertical = vertical,
+            };
+
+            // 先让出布局：工具栏尺寸与邻居位置这一帧就要到位。
+            // 绘制留到 FLIP 那一遍再倒放，那时才知道该退到哪儿。
+            element.Margin = ZeroFootprintMargin(element.Margin, element, vertical);
+            // 压到最底层：倒放是"缩回邻居身下"，不该压在邻居上面
+            Panel.SetZIndex(element, -1000);
+            return true;
+        }
+
+        /// <summary>结束一次收起：还原排布与图层，可选择顺便折叠。</summary>
+        private static void FinishHide(FrameworkElement element, bool collapse)
+        {
+            if (element == null) return;
+            if (!_exiting.TryGetValue(element, out var plan)) return;
+            _exiting.Remove(element);
+
+            element.BeginAnimation(UIElement.OpacityProperty, null);
+            element.Opacity = 1;
+            ResetMotionChannels(element);
+            element.Margin = plan.Margin;
+            Panel.SetZIndex(element, plan.ZIndex);
+            if (!collapse) return;
+            element.Visibility = Visibility.Collapsed;
+
+            // 分组里最后一个组件收完了，容器空了就该真折叠：
+            // 它始终占着 3px 左边距，留着会在工具栏中间留下一道缝、胶囊也多算 3px
+            SettleGroupContainers(element);
+
+            // 独立边框段：段内最后一个组件退完了，方形背景这才跟着折
+            TryFinishSeparateSegmentHide(element);
+        }
+
+        /// <summary>
+        /// 给所有正在收起的段内组件起播倒放：位移退到左邻身下，同时淡出并缩回。
+        /// </summary>
+        /// <remarks>
+        /// 终点取"左边最近一个仍在场的组件的**新**位置"，而不是它自己的旧位置：
+        /// 出场时它是从那个邻居的**旧**位置钻出来的，取新位置才是同一条路径的反向。
+        /// abcde→ace 的几何校核：b 从 50 退回 4、d 从 142 退回 50，
+        /// 正好是它们出场路程（46px、92px）的反向。
+        /// </remarks>
+        private static void AnimateExitingElements(
+            Panel panel,
+            List<FrameworkElement> ordered,
+            Dictionary<FrameworkElement, Point> beforeOffsets,
+            bool vertical)
+        {
+            if (panel == null || ordered == null || _exiting.Count == 0) return;
+
+            double anchor = double.NaN; // 左边最近的"仍在场"组件的新位置
+
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                var child = ordered[i];
+                if (child == null) continue;
+
+                if (!_exiting.ContainsKey(child))
+                {
+                    // 量不到（尚未进入视觉树）时沿用上一个锚点
+                    if (TryMeasureLayoutPosition(child, panel, out var point))
+                    {
+                        anchor = vertical ? point.Y : point.X;
+                    }
+                    continue;
+                }
+
+                var plan = _exiting[child];
+                if (plan.Segment) continue; // 整段收起由胶囊自己补间跨度
+
+                if (!child.IsVisible)
+                {
+                    FinishHide(child, collapse: true);
+                    continue;
+                }
+
+                if (!TryMeasureLayoutPosition(child, panel, out var arrangedPoint))
+                {
+                    FinishHide(child, collapse: true);
+                    continue;
+                }
+                double arranged = vertical ? arrangedPoint.Y : arrangedPoint.X;
+
+                // 切换前的位置：倒放的起点。
+                double from = arranged;
+                if (beforeOffsets != null && beforeOffsets.TryGetValue(child, out var before))
+                {
+                    from = vertical ? before.Y : before.X;
+                }
+
+                // 整段一起收起时没有"还活着的左邻"可当锚点：这一段的起点就是所有人的终点。
+                // 每个组件从自己的格子退回同一个点，走的格数不同、弹簧相同，
+                // 于是"远的快、近的慢、同时收尾"——就是用户要的"bc 各自拆开退回 a"。
+                bool segmentExit = IsInsideExitingSegment(child);
+                double target = segmentExit ? arranged : (double.IsNaN(anchor) ? from : anchor);
+                double startOffset = from - arranged;
+                double endOffset = target - arranged;
+
+                MotionTrace($"倒放 {Describe(child)} from={from:F1} arranged={arranged:F1} 锚点={(double.IsNaN(anchor) ? "-" : anchor.ToString("F1"))} 终点={target:F1} 整段={segmentExit} 位移={startOffset:F1}→{endOffset:F1}");
+
+                var duration = AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs);
+
+                // 1. 透明度：1 → 0。若它还在淡入途中，就从当前值接着走，不跳变。
+                var fade = new System.Windows.Media.Animation.DoubleAnimation(child.Opacity, 0.0, duration)
+                {
+                    EasingFunction = CreateExitEasing()
+                };
+                fade.Completed += (_, _) =>
+                {
+                    if (_exiting.TryGetValue(child, out var current)) current.FadeDone = true;
+                    TryFinishReversedHide(child);
+                };
+                child.BeginAnimation(UIElement.OpacityProperty, fade);
+
+                // 2. 缩放：1 → 出场起点（0.82），绕自身中心缩回去
+                var scale = GetOrCreateScaleTransform(child);
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(scale.ScaleX, ToolbarItemShowStartScale, duration)
+                    {
+                        EasingFunction = CreateExitEasing()
+                    });
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty,
+                    new System.Windows.Media.Animation.DoubleAnimation(scale.ScaleY, ToolbarItemShowStartScale, duration)
+                    {
+                        EasingFunction = CreateExitEasing()
+                    });
+
+                // 3. 位移：同一条通道、同一条曲线的反演，所以"退回去"就是"钻出来"的倒放
+                var translate = GetOrCreateChannel(child, TranslateChannelIndex);
+                StartChannelMotion(
+                    translate, vertical, startOffset, endOffset, collapse: true,
+                    onSettled: () =>
+                    {
+                        if (_exiting.TryGetValue(child, out var current)) current.SlideDone = true;
+                        TryFinishReversedHide(child);
+                    });
+            }
+        }
+
+        /// <summary>透明度与位移都收尾了才真正折叠。</summary>
+        private static void TryFinishReversedHide(FrameworkElement element)
+        {
+            if (element == null) return;
+            if (!_exiting.TryGetValue(element, out var plan)) return;
+            if (plan.Segment || !plan.FadeDone || !plan.SlideDone) return;
+            FinishHide(element, collapse: true);
+        }
+
+        /// <summary>
+        /// 整段消失：让胶囊自己从当前跨度缩回 0 再折叠。
+        /// </summary>
+        /// <remarks>
+        /// 这是"整段出现时从 0 长出来"的倒放。曾经因两个原因放弃过：
+        /// 补间被打断后 Completed 里的 Collapsed 再也不执行（代际守卫提前 return），
+        /// 以及段内内容已瞬时收起、屏幕上只剩一个挂着的空壳。
+        /// 现在两条都堵住了：收起被打断时新的一轮会从**当前跨度**接管（见 AnimateBorderExtentToFit），
+        /// 段内内容也不再提前折叠，而是跟着胶囊一起被裁掉。
+        /// </remarks>
+        private static bool TryBeginSegmentHide(Border border, bool vertical)
+        {
+            if (border == null) return false;
+            // 已经在收：让当前的补间跑完，别重开
+            if (_exiting.ContainsKey(border)) return true;
+            if (!_animateVisibilityChange || border.Visibility != Visibility.Visible)
+            {
+                MotionTrace($"整段收起跳过 {Describe(border)}：关动画={!_animateVisibilityChange} 可见={border.Visibility == Visibility.Visible}");
+                return false;
+            }
+
+            DependencyProperty extentProperty = vertical
+                ? FrameworkElement.HeightProperty
+                : FrameworkElement.WidthProperty;
+
+            // 屏幕上此刻的跨度：正在长的时候取补间写下去的那个值。
+            // ActualWidth 会落后一帧，只读它会让收起的第一帧往回跳（"起步几百px"）。
+            double currentExtent = vertical ? border.ActualHeight : border.ActualWidth;
+            if (_extentMotions.TryGetValue(border, out var liveExtent) && liveExtent != null && !liveExtent.Finished)
+            {
+                currentExtent = Math.Max(currentExtent, liveExtent.Current);
+            }
+            if (currentExtent <= 1.0)
+            {
+                MotionTrace($"整段收起跳过 {Describe(border)}：当前跨度只有 {currentExtent:F1}");
+                return false;
+            }
+
+            // 段内组件**不**在这里被撤销倒放：它们各自躺在 _exiting 里，
+            // FLIP 那一遍会把每个组件从旧位置拉回这一段的起点（"各自拆开退回 a"）。
+            // 这里曾经调 RestoreExitingLeaves —— 那正好把刚起播的倒放全部撤销，
+            // 于是整段收起时组件是一整块被裁掉，而不是一个个退回去。
+            MotionTrace($"整段收起开始 {Describe(border)} 当前跨度={currentExtent:F1} 段内退场组件={CountExitingInside(border)}");
+
+            try
+            {
+                _exiting[border] = new ExitPlan
+                {
+                    Margin = border.Margin,
+                    ZIndex = Panel.GetZIndex(border),
+                    Vertical = vertical,
+                    Segment = true,
+                };
+
+                border.BeginAnimation(extentProperty, null);
+                border.ClearValue(extentProperty);
+                border.BeginAnimation(UIElement.OpacityProperty, null);
+                // 胶囊**不**跟着淡出：收起就是"把背景缩回去"。这里曾经写过 0.35→0 的淡出，
+                // 画面上的观感正是"组件在倒放、背景却没动画、凭空没了"。
+                border.Opacity = 1;
+                // 固定尺寸的按钮会画到胶囊外，缩的时候必须裁
+                border.ClipToBounds = true;
+
+                // 与出场同一条曲线、反着走：出场弹出来，收起就弹回去，收完才 Collapsed
+                RunExtentMotion(border, vertical, collapsedExtent: 0.0, expandedExtent: currentExtent,
+                    collapsing: true, hideWhenSettled: true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 分段收起补间失败: {ex.Message}", LogHelper.LogType.Warning);
+                ApplySegmentSettled(border, vertical, false);
+                return true;
+            }
+        }
+
+        /// <summary>段内正在倒放收起的组件个数（只用于轨迹日志）。</summary>
+        private static int CountExitingInside(Border border)
+        {
+            if (border == null || _exiting.Count == 0) return 0;
+
+            int count = 0;
+            foreach (var pair in _exiting)
+            {
+                if (pair.Value.Segment || pair.Key == border) continue;
+                if (border.IsAncestorOf(pair.Key)) count++;
+            }
+            return count;
+        }
+
+        /// <summary>这个组件是不是"整段一起收起"里的一员：它的某个祖先分段正在收。</summary>
+        private static bool IsInsideExitingSegment(FrameworkElement element)
+        {
+            if (element == null || _exiting.Count == 0) return false;
+
+            foreach (var pair in _exiting)
+            {
+                if (!pair.Value.Segment) continue;
+                if (pair.Key != null && pair.Key != element && pair.Key.IsAncestorOf(element)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>收起被"又要显示"打断：还原排布，把跨度补间交还给内容补间。</summary>
+        private static void CancelSegmentHide(Border border)
+        {
+            if (border == null) return;
+            if (!_exiting.TryGetValue(border, out var plan)) return;
+            _exiting.Remove(border);
+            border.BeginAnimation(FrameworkElement.MarginProperty, null);
+            border.Margin = plan.Margin;
+            Panel.SetZIndex(border, plan.ZIndex);
+            ResetSegmentUnitVisual(border);
+            // 缩到一半的跨度弹簧也撤掉：接下来的跨度补间会从当前可见值接管，
+            // 留着一个"收到 0 就折叠"的弹簧会把刚长出来的段又收掉。
+            StopExtentMotion(border);
+        }
+
+        /// <summary>独立边框段的收起：方形背景自己淡出缩回，排布让出去，等段内组件退完再折。</summary>
+        /// <remarks>
+        /// 方形胶囊的跨度是布局给的常数（宽 = 高 = 58），不去补间它（用户 m01461），
+        /// 但它自己也是「组件的一部分」：背景要有淡出 + 缩回，不能等组件退完后凭空消失（用户 m01615）。
+        /// 排布让出量一旦瞬间归零，居中跟随当帧就少掉整个方形——栏心跳半个方形（用户 m01612），
+        /// 所以让出去的那块由 <see cref="GetExitingVisualExtent"/> 按不透明度折算归还给跟随。
+        /// 段内组件的倒放与背景淡出同时起播、同一时长，都收完才折方形。
+        /// </remarks>
+        private static bool BeginSeparateSegmentHide(Border border, bool vertical)
+        {
+            if (border == null) return false;
+            if (_exiting.ContainsKey(border)) return true;
+            if (!_animateVisibilityChange || border.Visibility != Visibility.Visible)
+            {
+                MotionTrace($"独立段收起跳过 {Describe(border)}：关动画={!_animateVisibilityChange} 可见={border.Visibility == Visibility.Visible}");
+                return false;
+            }
+
+            try
+            {
+                _exiting[border] = new ExitPlan
+                {
+                    Margin = border.Margin,
+                    ZIndex = Panel.GetZIndex(border),
+                    Vertical = vertical,
+                    Segment = true,
+                    SeparateUnit = true,
+                };
+
+                border.ClipToBounds = false;
+
+                // 让出排布但继续绘制：邻居这一帧就补上来，方形垫在最底层、自己慢慢淡出
+                border.Margin = ZeroFootprintMargin(border.Margin, border, vertical);
+                Panel.SetZIndex(border, -1000);
+
+                MotionTrace($"独立段收起开始 {Describe(border)} 宽={border.ActualWidth:F1} 高={border.ActualHeight:F1} 段内退场组件={CountExitingInside(border)}");
+
+                // 背景自己的退场动作：淡出 + 缩回。收尾后才置 UnitDone 并尝试折掉
+                AnimateSegmentUnitExit(border, vertical);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 独立段收起失败: {ex.Message}", LogHelper.LogType.Warning);
+                ApplySegmentSettled(border, vertical, false);
+                return true;
+            }
+        }
+
+        /// <summary>段内组件全退回了：把仍画着的独立方形一起折掉。</summary>
+        private static void TryFinishSeparateSegmentHide(FrameworkElement element)
+        {
+            if (element == null || _exiting.Count == 0) return;
+
+            DependencyObject node = VisualTreeHelper.GetParent(element);
+            while (node != null)
+            {
+                if (node is Border border && _exiting.TryGetValue(border, out var plan)
+                    && plan != null && plan.Segment)
+                {
+                    if (!plan.UnitDone || CountExitingInside(border) > 0) return;
+                    MotionTrace($"独立段收起收尾 {Describe(border)}：组件与背景都收完了，折掉方形");
+                    ApplySegmentSettled(border, plan.Vertical, false);
+                    return;
+                }
+                node = VisualTreeHelper.GetParent(node);
+            }
+        }
+
+        /// <summary>独立方形出现：排布瞬时落定（邻居交给 FLIP），背景自己从 0 淡入、从 0.82 长到 1。</summary>
+        /// <remarks>
+        /// 以前这里是"方形瞬间在位、图标自己弹出"，展开侧根本没有背景动作，
+        /// 收起侧也就无从倒放——用户 m01615 要的正是"组件 + 组件背景当成一个组件"，两边同一套动作。
+        /// 排布不在这里补间：展开时邻居的让位由 FLIP 负责，再叠一条排布动画会和它互相抵消。
+        /// </remarks>
+        private static void BeginSeparateSegmentShow(Border border, bool vertical)
+        {
+            ApplySegmentSettled(border, vertical, true);
+            if (!_animateVisibilityChange) return;
+            AnimateSegmentUnitEnter(border, vertical);
+        }
+
+        /// <summary>独立方形的背景退场：淡出 + 缩回 0.82，与段内组件同一条曲线、同一时长。</summary>
+        private static void AnimateSegmentUnitExit(Border border, bool vertical)
+        {
+            var profile = ResolveMotionProfile();
+            var duration = TimeSpan.FromSeconds(profile.Seconds);
+            var scale = EnsureSegmentUnitScale(border);
+
+            border.BeginAnimation(UIElement.OpacityProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+
+            double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
+            scale.ScaleX = 1.0;
+            scale.ScaleY = 1.0;
+
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(fromOpacity, 0.0, duration)
+            {
+                EasingFunction = CreateExitEasing()
+            };
+            fade.Completed += (_, _) =>
+            {
+                if (_exiting.TryGetValue(border, out var plan)) plan.UnitDone = true;
+                TryFinishSeparateSegmentHide(border);
+            };
+            border.BeginAnimation(UIElement.OpacityProperty, fade);
+
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(1.0, ToolbarItemShowStartScale, duration)
+                {
+                    EasingFunction = CreateExitEasing()
+                });
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(1.0, ToolbarItemShowStartScale, duration)
+                {
+                    EasingFunction = CreateExitEasing()
+                });
+
+            MotionTrace($"独立段收起 背景倒放 {Describe(border)} 1→0 + 缩放 1→{ToolbarItemShowStartScale:F2} 时长={profile.Seconds * 1000:F0}ms");
+        }
+
+        /// <summary>独立方形的背景入场：0 → 1 淡入、0.82 → 1 长回原尺寸。</summary>
+        private static void AnimateSegmentUnitEnter(Border border, bool vertical)
+        {
+            var profile = ResolveMotionProfile();
+            var duration = TimeSpan.FromSeconds(profile.Seconds);
+            var scale = EnsureSegmentUnitScale(border);
+
+            border.BeginAnimation(UIElement.OpacityProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+
+            scale.ScaleX = ToolbarItemShowStartScale;
+            scale.ScaleY = ToolbarItemShowStartScale;
+            border.Opacity = 0.0;
+
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration)
+            {
+                EasingFunction = CreateEnterEasing()
+            };
+            fade.Completed += (_, _) => ResetSegmentUnitVisual(border);
+            border.BeginAnimation(UIElement.OpacityProperty, fade);
+
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1.0, duration)
+                {
+                    EasingFunction = CreateEnterEasing()
+                });
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty,
+                new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1.0, duration)
+                {
+                    EasingFunction = CreateEnterEasing()
+                });
+
+            MotionTrace($"独立段展开 背景入场 {Describe(border)} 0→1 + 缩放 {ToolbarItemShowStartScale:F2}→1 时长={profile.Seconds * 1000:F0}ms");
+        }
+
+        /// <summary>独立方形自己的缩放通道（不是组件那条位置通道）。</summary>
+        private static ScaleTransform EnsureSegmentUnitScale(Border border)
+        {
+            if (border.RenderTransform is ScaleTransform existing) return existing;
+
+            var scale = new ScaleTransform(1, 1);
+            border.RenderTransform = scale;
+            border.RenderTransformOrigin = new Point(0.5, 0.5);
+            return scale;
+        }
+
+        /// <summary>把独立方形的背景视觉归位：撤销淡出/缩放，摘掉残留动画。</summary>
+        private static void ResetSegmentUnitVisual(Border border)
+        {
+            if (border == null || !IsSeparateSegment(border)) return;
+
+            border.BeginAnimation(UIElement.OpacityProperty, null);
+            border.Opacity = 1;
+            if (border.RenderTransform is ScaleTransform scale)
+            {
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                scale.ScaleX = 1;
+                scale.ScaleY = 1;
+            }
+        }
+
+        /// <summary>退场中的独立方形还画着的跨度（按当前不透明度加权）。</summary>
+        /// <remarks>
+        /// 独立方形的排布在收起开始就被让出去了，但它还要淡出一整段。居中跟随只看布局跨度的话，
+        /// 收起第一帧就少掉整个方形（58px → 整条栏心跳 29px，用户 m01612 的"瞬间往右闪"）。
+        /// 把这块按不透明度折算回去，跨度就是连续的：开始一帧不掉、淡出中平滑减少、折掉时正好归零。
+        /// </remarks>
+        internal static double GetExitingVisualExtent(bool vertical)
+        {
+            if (_exiting.Count == 0) return 0;
+
+            double sum = 0;
+            foreach (var pair in _exiting)
+            {
+                var plan = pair.Value;
+                var element = pair.Key;
+                if (plan == null || element == null || !plan.SeparateUnit) continue;
+                if (element.Visibility != Visibility.Visible) continue;
+
+                double footprint = vertical
+                    ? plan.Margin.Bottom - element.Margin.Bottom
+                    : plan.Margin.Right - element.Margin.Right;
+                if (footprint <= 0.5) continue;
+
+                double opacity = Math.Min(1.0, Math.Max(0.0, element.Opacity));
+                if (opacity <= 0.01) continue;
+                sum += footprint * opacity;
+            }
+            return sum;
+        }
+
+        /// <summary>每条位移通道当前挂着的那条动画的逐帧回调，用来在打断时把它摘掉。</summary>
+        /// <remarks>
+        /// 没有这张表时，每次 StartChannelMotion 都往 CompositionTarget.Rendering 上挂一个新的闭包，
+        /// 而旧的闭包要等自己收敛才退订。显隐一旦被快速打断，两条弹簧就会同时往同一条通道写值，
+        /// 互相把对方的位置覆盖掉——观感是抖动加走错方向，而且从代码上完全看不出来。
+        /// </remarks>
+        private static readonly Dictionary<TranslateTransform, EventHandler> _channelMotions =
+            new Dictionary<TranslateTransform, EventHandler>();
+
+        /// <summary>
+        /// 用一条时间曲线驱动位移动画通道（Inkeys 同款：固定时长 + 回弹）。
+        /// </summary>
+        /// <remarks>
+        /// 为什么不再是弹簧：
+        /// 弹簧的收敛时间由 ω 与距离共同决定，1 格（46px）约 213ms、2 格约 246ms，
+        /// 而透明度与缩放是固定时长——同一批次里几套节奏错开收尾，观感就是"各动各的"。
+        /// Inkeys 的做法正好相反：所有值共享**一个时长**，位置走 EaseOutBack（出现）
+        /// 或它的时间反演 EaseInBack（收起），于是整批同帧起、同帧收；
+        /// "远的快、近的慢"不是靠物理，而是同一个时长里走得更远。
+        ///
+        /// 打断：先摘掉上一条，起点改成通道的当前值，
+        /// 因此被下一次显隐打断时会从"正在显示的位置"继续，不会跳回起点。
+        /// 每个元素每条通道只允许一条动画在跑，后发起的接管前者。
+        /// 收敛时回调 onSettled，供"等位移走完再落定"的一次性收尾使用。
+        /// </remarks>
+        private static void StartChannelMotion(
+            TranslateTransform translate, bool vertical, double from, double to, bool collapse,
+            Action onSettled = null)
         {
             if (translate == null) return;
 
@@ -1576,82 +2725,167 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (vertical) translate.Y = current;
             else translate.X = current;
 
-            // 起始值以调用方给的 from 为准；若管道上已有更近的值（被打断），沿用它
-            double start = from;
-            if (!double.IsNaN(current) && Math.Abs(current - to) > 0.01 && Math.Abs(current - from) > 0.01)
+            // 接管：打断时把上一条弹簧摘掉，否则两条闭包会同时往同一条通道写值
+            bool interrupted = false;
+            if (_channelMotions.TryGetValue(translate, out var previous))
             {
-                // 通道当前值离目标更近，说明上一轮还没跑完：从当前位置接着走
-                start = current;
+                if (previous != null) CompositionTarget.Rendering -= previous;
+                _channelMotions.Remove(translate);
+                interrupted = true;
             }
+
+            // 起点：新起的通道用调用方给的 from；被打断的从"正在显示的位置"接着走，
+            // 不能退回 from，否则会先跳回起点再跑一遍。
+            double start = interrupted && !double.IsNaN(current) ? current : from;
+            if (double.IsNaN(start)) start = from;
 
             if (Math.Abs(start - to) < 0.5)
             {
                 if (vertical) translate.Y = to;
                 else translate.X = to;
+                onSettled?.Invoke();
                 return;
             }
 
-            var solver = new SpringSolver(spec, start, 0);
+            var profile = ResolveMotionProfile();
+            double distance = to - start;
             var clock = System.Diagnostics.Stopwatch.StartNew();
-            TimeSpan last = TimeSpan.Zero;
+            double elapsed = 0;
             EventHandler onFrame = null;
 
             onFrame = (_, _) =>
             {
-                double frameSeconds = (clock.Elapsed - last).TotalSeconds;
-                last = clock.Elapsed;
+                double frameSeconds = clock.Elapsed.TotalSeconds - elapsed;
                 if (frameSeconds <= 0) return;
+                elapsed += frameSeconds;
 
-                solver.Advance(to, frameSeconds);
-                if (vertical) translate.Y = solver.Position;
-                else translate.X = solver.Position;
+                double progress = profile.Seconds <= 0 ? 1.0 : Math.Min(1.0, elapsed / profile.Seconds);
+                double value = start + distance * ApplyMotionEasing(collapse, progress, profile.Back);
+                if (vertical) translate.Y = value;
+                else translate.X = value;
 
-                if (Math.Abs(solver.Position - to) < spec.PositionTolerance &&
-                    Math.Abs(solver.Velocity) < spec.VelocityTolerance)
+                if (progress < 1.0) return;
+
+                if (vertical) translate.Y = to;
+                else translate.X = to;
+                CompositionTarget.Rendering -= onFrame;
+                if (_channelMotions.TryGetValue(translate, out var running) && ReferenceEquals(running, onFrame))
                 {
-                    if (vertical) translate.Y = to;
-                    else translate.X = to;
-                    CompositionTarget.Rendering -= onFrame;
+                    _channelMotions.Remove(translate);
                 }
+                onSettled?.Invoke();
             };
 
+            _channelMotions[translate] = onFrame;
             CompositionTarget.Rendering += onFrame;
         }
 
+        /// <summary>停掉一条通道上的动画（不改通道的值）。</summary>
+        private static void StopChannelMotion(TranslateTransform translate)
+        {
+            if (translate == null) return;
+            if (_channelMotions.TryGetValue(translate, out var handler))
+            {
+                if (handler != null) CompositionTarget.Rendering -= handler;
+                _channelMotions.Remove(translate);
+            }
+        }
+
+        /// <summary>一次曲线补间的参数：时长（秒）与回弹强度。</summary>
+        private struct MotionProfile
+        {
+            public double Seconds;
+            public double Back;
+        }
+
         /// <summary>
-        /// 按位移距离挑一档弹簧：短距离用更快的档，避免长距离参数让小位移显得拖泥带水。
+        /// 取这一批动画的时长与回弹强度（全组件、胶囊共用同一份：同帧起、同帧收）。
         /// </summary>
         /// <remarks>
-        /// 阈值取 120px：工具栏单体按钮约 44px、调色盘约 84px、整段约 300px 以上，
-        /// 正好把"小件"和"整段"分开，两者手感各自合适。
+        /// 基准取自 Inkeys 工具栏：400ms、back = 1.1（≈4.47% 过冲）。
+        /// 设置里的手感预设不再改"弹簧刚度"，而是改**这一批的节奏**：
+        /// 柔和更慢、回弹更小；灵敏更快、回弹更大。时长照旧吃全局动画倍率
+        /// （透明度、缩放、位移、胶囊四者都用这一份，所以永远不会出现两套节奏）。
         /// </remarks>
-        private static SpringSpec ResolveSpringSpecForDistance(double distance)
+        private static MotionProfile ResolveMotionProfile()
         {
             var appearance = SettingsManager.Settings?.Appearance;
             int preset = appearance?.ToolbarMotionPreset ?? 1;
-            var userSpec = SpringSpec.FromPreset(preset);
 
-            // 小位移不额外加速：保持用户选的手感，只把"整段"交给同一档即可。
-            // 保留这个分叉是为了以后能按距离微调，而不是现在就凭感觉改数字。
-            return userSpec;
+            double baseMilliseconds = MotionCurveBaseMilliseconds;
+            double back = MotionBackOvershoot;
+            switch (preset)
+            {
+                case 0:
+                    baseMilliseconds = MotionCurveBaseMilliseconds * 1.2;
+                    back = 0.9;
+                    break;
+                case 2:
+                    baseMilliseconds = MotionCurveBaseMilliseconds * 0.8;
+                    back = 1.4;
+                    break;
+            }
+
+            var scaled = AnimationSpeed.ScaleMilliseconds(baseMilliseconds);
+            return new MotionProfile
+            {
+                // 0.1x 时 400ms 会变成 4s，仍然可用；只是别让 0 时长把进度除成 NaN
+                Seconds = Math.Max(0.01, scaled.TotalSeconds),
+                Back = back,
+            };
         }
+
+        /// <summary>出现用的位置曲线：EaseOutBack，冲过终点 4.47% 再落回（Inkeys 原值 back=1.1）。</summary>
+        private static double EaseOutBack(double progress, double back)
+        {
+            double t = progress - 1.0;
+            return 1.0 + (back + 1.0) * t * t * t + back * t * t;
+        }
+
+        /// <summary>收起用的位置曲线：EaseOutBack 的时间反演，先朝反方向蓄力再冲进来。</summary>
+        private static double EaseInBack(double progress, double back)
+        {
+            return (back + 1.0) * progress * progress * progress - back * progress * progress;
+        }
+
+        /// <summary>透明度/缩放：出现用 EaseOutSine（先快后慢）。</summary>
+        private static double EaseOutSine(double progress)
+        {
+            return Math.Sin(progress * Math.PI / 2.0);
+        }
+
+        /// <summary>透明度/缩放：收起用 EaseInSine（先慢后快），是上面那条的时间反演。</summary>
+        private static double EaseInSine(double progress)
+        {
+            return 1.0 - Math.Cos(progress * Math.PI / 2.0);
+        }
+
+        /// <summary>按"展开/收起"选位置的曲线：收起就是展开的倒放。</summary>
+        private static double ApplyMotionEasing(bool collapse, double progress, double back)
+        {
+            if (progress <= 0) return 0.0;
+            if (progress >= 1.0) return 1.0;
+            return collapse ? EaseInBack(progress, back) : EaseOutBack(progress, back);
+        }
+
         /// <summary>出场缩放使用的通道。</summary>
         private const int ScaleChannelIndex = 0;
 
-        /// <summary>出场滑入使用的位移通道。</summary>
-        private const int EnterChannelIndex = 1;
-
-        /// <summary>邻居让位使用的位移通道。</summary>
-        private const int SiblingChannelIndex = 2;
+        /// <summary>位移通道：出场钻出与邻居让位共用这一条。</summary>
+        private const int TranslateChannelIndex = 1;
 
         /// <summary>
-        /// 取得（必要时重建）组件的三条动画通道。
+        /// 取得（必要时重建）组件的两条动画通道。
         /// </summary>
         /// <remarks>
-        /// 三条通道必须各自独立：
-        ///   [0] 出场缩放    [1] 出场滑入    [2] 邻居让位
-        /// 它们会同时发生（新组件滑入并缩放，同时后面的按钮让位），
+        ///   [0] 缩放    [1] 位移
+        /// 两者会同时发生（新组件淡入并缩放，同时从邻居身下钻出），
         /// 共用一个变换会互相覆盖，只剩最后写进去的那条生效。
+        ///
+        /// 位移只留一条是有意的：出场钻出和邻居让位在几何上是同一件事——
+        /// 都是从"切换前的排布"滑向"切换后的排布"，区别只在于新组件没有旧位置、
+        /// 借用左邻的。拆成两条通道意味着同一方向上有两段位移叠加，
+        /// 那正是之前"先往左再往右"的来源。
         ///
         /// 缩放排在位移之前是有意的：变换按顺序依次作用，
         /// 缩放若排在位移之后，平移量会被一起缩放，量出来的位置就对不上了。
@@ -1661,37 +2895,29 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static TransformGroup EnsureChannelGroup(FrameworkElement element)
         {
             if (element.RenderTransform is TransformGroup group
-                && group.Children.Count > SiblingChannelIndex
+                && group.Children.Count > TranslateChannelIndex
                 && group.Children[ScaleChannelIndex] is ScaleTransform
-                && group.Children[EnterChannelIndex] is TranslateTransform
-                && group.Children[SiblingChannelIndex] is TranslateTransform)
+                && group.Children[TranslateChannelIndex] is TranslateTransform)
             {
                 return group;
             }
 
-            // 沿用旧通道上的值：按类型扫一遍，不依赖下标，兼容上一版只有两条位移通道的组
-            double enterX = 0, siblingX = 0, scale = 1;
-            bool enterSeen = false, siblingSeen = false;
+            // 沿用旧通道上的值：按类型扫一遍，不依赖下标。
+            // 兼容上一版三通道的组（缩放 + 出场滑入 + 邻居让位）：取最后一条位移，
+            // 那是"当前排布位置"对应的真实偏移，出场滑入那份是临时动画量。
+            double translateX = 0, scale = 1;
             if (element.RenderTransform is TransformGroup old)
             {
                 foreach (var child in old.Children)
                 {
-                    if (child is TranslateTransform translate)
-                    {
-                        if (!enterSeen) { enterX = translate.X; enterSeen = true; }
-                        else if (!siblingSeen) { siblingX = translate.X; siblingSeen = true; }
-                    }
-                    else if (child is ScaleTransform existingScale)
-                    {
-                        scale = existingScale.ScaleX;
-                    }
+                    if (child is TranslateTransform translate) translateX = translate.X;
+                    else if (child is ScaleTransform existingScale) scale = existingScale.ScaleX;
                 }
             }
 
             var rebuilt = new TransformGroup();
             rebuilt.Children.Add(new ScaleTransform(scale, scale));
-            rebuilt.Children.Add(new TranslateTransform(enterX, 0));
-            rebuilt.Children.Add(new TranslateTransform(siblingX, 0));
+            rebuilt.Children.Add(new TranslateTransform(translateX, 0));
             element.RenderTransform = rebuilt;
 
             // 缩放绕自身中心，否则组件会从左上角"胀"出来而不是原地长大
@@ -1722,7 +2948,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         ///
         /// 做法沿用「一次布局 + 一次补间」：先清残留动画与固定值，UpdateLayout
         /// 拿到内容变化后的新尺寸；差不足 1 就不动，否则把跨度钉回旧值，
-        /// 用与按钮出场同时长同曲线的补间推到新值，结束后 ClearValue 交还自动尺寸。
+        /// 交给跨度弹簧推到新值（与组件同档，会一起过冲），结束后 ClearValue 交还自动尺寸。
         ///
         /// 段内按钮的位置瞬跳由"邻居让位"通道补偿；段外兄弟（含拖动头）的位置
         /// 跟着钉住的旧跨度走，随补间自然滑动，正好省掉对它们的额外补偿。
@@ -1730,11 +2956,81 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 整段刚出现（出场动画已覆盖整段）或刚隐藏（瞬时收起的取舍）时跳过。
         /// 关掉动画开关时直接跳过，保持瞬时切换。横排补宽度，竖排补高度。
         /// </remarks>
+        /// <summary>量分段在排布之后真正占的跨度；量不到返回 0。</summary>
+        /// <remarks>
+        /// 这是唯一可信的目标值来源：Measure(∞) 拿到的是 DesiredSize，而 DesiredSize 与
+        /// 布局实排并不是同一个数——实测展开时量出 721 而实排 718、收起时量出 637 而实排 381
+        /// （子项间距与内边距只在排列阶段才算进去）。拿 DesiredSize 当补间目标，
+        /// 收尾清掉固定尺寸后就会啪地跳回真值：末帧几 px 的跳变、收起时几百 px 的跳变
+        /// 都是这一个偏差造成的。
+        /// UpdateLayout 只重排这一段所在的子树，而且只在每次过渡的起点与收尾跑，不是逐帧。
+        /// </remarks>
+        private static double ReadLaidOutExtent(Border border, bool vertical)
+        {
+            if (border == null) return 0;
+            try
+            {
+                // 改 Margin 不会把缓存的 DesiredSize 标脏，先标脏再强制排版，读到的才是新排布
+                if (border.Child is FrameworkElement content) content.InvalidateMeasure();
+                border.InvalidateMeasure();
+                border.UpdateLayout();
+                double extent = vertical ? border.ActualHeight : border.ActualWidth;
+                if (double.IsNaN(extent) || double.IsInfinity(extent) || extent < 0) return 0;
+                return extent;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>目标跨度：优先用真实排布值，量不到再退回 DesiredSize。</summary>
+        private static double MeasureSettledExtent(Border border, bool vertical)
+        {
+            double laidOut = ReadLaidOutExtent(border, vertical);
+            return laidOut > 0 ? laidOut : MeasureNaturalExtent(border, vertical);
+        }
+
+        /// <summary>量分段在内容自然排布下的跨度；量不到返回 0。</summary>
+        /// <remarks>
+        /// 用 <see cref="UIElement.Measure(Size)"/> 而不是 window.UpdateLayout：
+        /// 后者会把整棵可视化树重排一遍，每次内容变化都付一次整窗布局的钱，
+        /// 展开/收起那半秒的掉帧主要就是从这里来的。这里只量这一段。
+        /// </remarks>
+        private static double MeasureNaturalExtent(Border border, bool vertical)
+        {
+            if (border == null) return 0;
+            try
+            {
+                // 先标脏再量：子项"让出布局"是靠改 Margin 实现的，WPF 不会因此把内容面板
+                // 缓存的 DesiredSize 标脏（实测：之后 Measure(∞) 直接早退，读到的还是
+                // 收缩前的跨度 721，于是"目标没变"、整段胶囊一路不缩，收尾时再一下跳过去）。
+                if (border.Child is FrameworkElement content) content.InvalidateMeasure();
+                border.InvalidateMeasure();
+                border.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                double extent = vertical ? border.DesiredSize.Height : border.DesiredSize.Width;
+                if (double.IsNaN(extent) || double.IsInfinity(extent) || extent < 0) return 0;
+                return extent;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         private static void AnimateBorderExtentToFit(Border border, bool vertical, double beforeExtent, bool wasVisible)
         {
-            if (border == null || !_animateVisibilityChange) return;
+            if (border == null || !_animateVisibilityChange)
+            {
+                MotionTrace($"跨度补间跳过 {Describe(border)}：关动画或空");
+                return;
+            }
             // 整段刚出现（出场动画已覆盖）或刚隐藏（瞬时收起的取舍）时不做跨度补间
-            if (!wasVisible || border.Visibility != Visibility.Visible) return;
+            if (!wasVisible || border.Visibility != Visibility.Visible)
+            {
+                MotionTrace($"跨度补间跳过 {Describe(border)}：原本可见={wasVisible} 当前可见={border.Visibility == Visibility.Visible}");
+                return;
+            }
 
             DependencyProperty extentProperty = vertical
                 ? FrameworkElement.HeightProperty
@@ -1742,63 +3038,60 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             try
             {
-                // 打断支持：若上一轮跨度补间还在飞，就从它**当前所在的那个值**接上，
-                // 而不是退回切换前的旧值。否则中途被打断会先跳回起点再走——看着像抽搐。
-                double liveExtent = vertical ? border.ActualHeight : border.ActualWidth;
-                bool wasAnimating = _activeSegmentTweens.Contains(border);
-                double startExtent = wasAnimating && liveExtent > 0 ? liveExtent : beforeExtent;
+                // 屏幕上此刻的跨度：优先取上一轮最后写下去的值。
+                // 不能只读 ActualWidth：刚写完 Width 还没跑布局，ActualWidth 还是旧跨度，
+                // 读它就会得出"起点 == 目标"，于是先撤销再跳过，宽度瞬跳过去。
+                SegmentExtentMotion previous = null;
+                bool carried = _extentMotions.TryGetValue(border, out previous) && previous != null;
+                double liveExtent = carried ? previous.Current : beforeExtent;
+                if (liveExtent <= 0)
+                {
+                    liveExtent = vertical ? border.ActualHeight : border.ActualWidth;
+                }
 
-                // 先摘掉上一轮可能残留的尺寸动画与固定值（中途被打断也能从这里平滑重启）
-                int generation = NextSegmentGeneration(border);
+                // 量目标跨度必须先把补间写下去的固定尺寸摘掉，否则 Measure 只会读到它。
+                // 摘掉到写回之间不跑布局，下一帧就会写回当前值，看不到中间态。
                 border.BeginAnimation(extentProperty, null);
                 border.ClearValue(extentProperty);
+                // 目标跨度必须是「排布之后真正占多少」，不能是 DesiredSize（见 MeasureSettledExtent）
+                double settledExtent = MeasureSettledExtent(border, vertical);
 
-                // 强制一次布局：内容显隐后的新尺寸这时才量得到
-                border.UpdateLayout();
-                double targetExtent = vertical ? border.ActualHeight : border.ActualWidth;
+                double collapsedExtent = Math.Min(liveExtent, settledExtent);
+                double expandedExtent = Math.Max(liveExtent, settledExtent);
 
-                // 新旧尺寸差不多就不必补间
-                if (targetExtent <= 0 || startExtent <= 0 ||
-                    Math.Abs(targetExtent - startExtent) < 1.0)
+                // 两端都没变：让上一轮原样跑完——不摘状态、不翻方向、不重置时钟。
+                // 一次模式切换往往连着跑好几遍同步，这里要是每遍都"从当前位置重新起一轮"，
+                // 曲线就被反复从 0 进度重放，看到的正是"背景粘住不动、最后一下窜到位"。
+                if (carried && previous != null && !previous.Finished
+                    && Math.Abs(previous.Start - collapsedExtent) < 1.0
+                    && Math.Abs(previous.Target - expandedExtent) < 1.0)
                 {
+                    WriteSegmentExtent(border, vertical, previous.Current);
+                    EnsureExtentMotionHook();
+                    MotionTrace($"跨度补间接续 {Describe(border)} 进度={previous.Progress:F2} 当前={previous.Current:F1} 端点={previous.Start:F1}/{previous.Target:F1}（端点未变 继续跑）");
                     return;
                 }
 
-                // 跨度退回起点（布局已算出新值，写死尺寸会立刻生效），
-                // 再用补间推到新值：视觉上就是胶囊背景慢慢变宽/变窄
-                if (vertical) border.Height = startExtent;
-                else border.Width = startExtent;
-
-                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                if (settledExtent <= 0 || liveExtent <= 0 || Math.Abs(settledExtent - liveExtent) < 0.5)
                 {
-                    From = startExtent,
-                    To = targetExtent,
-                    // 被打断时按剩余距离缩短时长：从半途接上却仍按整段时长走会显得拖沓
-                    Duration = ScaleDurationForRemaining(
-                        startExtent, targetExtent, beforeExtent, ToolbarWidthTransitionMs),
-                    EasingFunction = new System.Windows.Media.Animation.CubicEase
-                    {
-                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                    }
-                };
-
-                // 结束后解除固定尺寸，交还内容自动尺寸（否则之后内容变化会被旧值卡住）
-                // 代际守卫：被打断的旧动画仍会触发 Completed，不能让它清掉新动画的值
-                _activeSegmentTweens.Add(border);
-                animation.Completed += (_, _) =>
-                {
-                    // 注意：清理必须无守卫地执行。之前把 Remove 放在代际守卫 return 之后，
-                    // 动画一被打断就永远清不掉，_activeSegmentTweens 只增不减，
-                    // 于是之后每次都被误判成"正在动画"——这是确定性故障，不是偶发。
-                    _activeSegmentTweens.Remove(border);
-                    if (!IsCurrentSegmentGeneration(border, generation)) return;
-                    border.BeginAnimation(extentProperty, null);
-                    border.ClearValue(extentProperty);
-                    // 补间收尾后通知跟随者重新落位：居中要跟着**最终**宽度走
+                    if (carried) StopExtentMotion(border, trace: false);
+                    MotionTrace($"跨度补间跳过 {Describe(border)}：当前={liveExtent:F1} 目标={settledExtent:F1}（差 {(settledExtent - liveExtent):F1}）");
+                    WriteSegmentExtent(border, vertical, liveExtent);
+                    border.ClipToBounds = false;
                     NotifyExtentChanged(vertical);
-                };
+                    return;
+                }
 
-                border.BeginAnimation(extentProperty, animation);
+                // 只换端点、进度由 RunExtentMotion 按当前跨度反解，方向由两端谁大谁小决定：
+                // 变长 = 进度 0→1，变短 = 进度 1→0——同一条 EaseOutBack，后者就是前者的时间反演，
+                // 与组件位移同一时长同一条曲线，于是胶囊的过冲与组件的过冲同时发生、同时收住。
+                // 内容变化时胶囊跟着内容走，不裁剪：裁掉就看不到"背景跟着内容一起长"。
+                border.ClipToBounds = false;
+                RunExtentMotion(border, vertical,
+                    collapsedExtent,
+                    expandedExtent,
+                    collapsing: settledExtent < liveExtent - 0.5,
+                    hideWhenSettled: false);
             }
             catch (Exception ex)
             {
@@ -1819,8 +3112,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         ///
         /// 出现：先显示并量出内容应有的跨度，再把跨度钉到 0 补间到该值；
         /// 期间打开 ClipToBounds，否则固定尺寸的按钮会画到胶囊外。
-        /// 段内的按钮不再各自播出场动画（由 _suppressChildEnterAnimation 抑制）：
-        /// 整段长出来本身就是那一次的出场。
+        /// 段内按钮同时各播一次淡入与缩放：整段变宽是"外壳"那层的动作，
+        /// 淡入是"东西终于有了"那层的动作，两层叠着才不显得空。
         ///
         /// 消失：段内按钮已瞬时折叠，这里把空胶囊从当前跨度收到 0，收完才 Collapsed。
         /// 钉住的是旧跨度，布局跑完时邻居仍在原位，位移差约为 0，
@@ -1838,14 +3131,40 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ? FrameworkElement.HeightProperty
                 : FrameworkElement.WidthProperty;
 
+            MotionTrace($"分段过渡 {Describe(border)} 内容可见={shouldShow} 原本可见={wasVisible} 之前跨度={beforeExtent:F1} 实际跨度={(vertical ? border.ActualHeight : border.ActualWidth):F1}");
+
             if (!_animateVisibilityChange)
             {
+                // 关动画也要把倒放留下的中间态收干净：跨度弹簧、裁剪、图层与排布
+                CancelSegmentHide(border);
+                StopExtentMotion(border);
                 border.BeginAnimation(extentProperty, null);
                 border.ClearValue(extentProperty);
                 border.BeginAnimation(UIElement.OpacityProperty, null);
                 border.Opacity = 1;
                 border.ClipToBounds = false;
                 border.Visibility = shouldShow ? Visibility.Visible : Visibility.Collapsed;
+                if (!shouldShow) CollapseSegmentLeaves(border.Child as FrameworkElement);
+                return;
+            }
+
+            // 又要它显示：若上一轮收起还没收完，先撤掉收起状态，
+            // 让下面的跨度补间从**当前跨度**接着长回去（不跳回 0）。
+            if (shouldShow) CancelSegmentHide(border);
+
+            // 独立边框段：胶囊是固定方形（宽 = 高），两个方向都不碰跨度。
+            // 展开侧它在位（图标自己弹出来），收起侧按倒放就是"图标先退回去、
+            // 方形背景最后才收"——不缩宽、不淡出（用户 m01461）。
+            if (IsSeparateSegment(border))
+            {
+                if (shouldShow)
+                {
+                    BeginSeparateSegmentShow(border, vertical);
+                }
+                else
+                {
+                    BeginSeparateSegmentHide(border, vertical);
+                }
                 return;
             }
 
@@ -1856,28 +3175,28 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return;
             }
 
-            // 隐藏：**瞬时收起**。
+            // 隐藏：倒放收起——胶囊从当前跨度缩回 0，段内组件跟着一起被裁掉，收完才 Collapsed。
             //
-            // 这里曾经试过"把跨度补间到 0，收完再 Collapsed"，结果是两类确定性故障：
-            //   1. 补间一旦被打断（0.1x 倍率下一次要 2.2 秒，几乎必然被打断），
-            //      代际守卫会让 Completed 提前 return，Collapsed 就**再也不会执行**，
-            //      分段卡在 Visible + 宽度 0。下一轮把 Visibility 当真值读，判据从此全错——
-            //      这正是"第一次正常、隐藏异常、之后全异常"的机制。
-            //   2. 段内内容在 UpdatePanelVisibility 里已经瞬时收起，屏幕上剩下一个**空壳胶囊**，
-            //      按距离算时长会挂着两秒，本身就是明显的观感缺陷。
-            //
-            // 收起必须立刻让出布局空间：工具栏尺寸等不起，这是取舍不是遗漏。
-            // "背景跟着内容变宽"由上面那条内容增减分支负责，那条不涉及 Visibility。
+            // 这里曾经是"瞬时收起"，因为试过补间到 0 之后踩到两类确定性故障：
+            //   1. 补间被打断（0.1x 倍率下一次要 2.2 秒，几乎必然被打断）时代际守卫让 Completed
+            //      提前 return，Collapsed 再也不会执行，分段卡在 Visible + 宽度 0；
+            //      下一轮把 Visibility 当真值读，判据从此全错。
+            //   2. 段内内容已经瞬时收起，屏幕上只剩一个空壳胶囊，按距离算时长会挂两秒。
+            // 现在两条都堵住了：段内组件不再提前折叠（改成幻影排布、跟着胶囊一起被裁），
+            // 打断时由新的一轮从当前跨度接管（CancelSegmentHide + AnimateBorderExtentToFit）。
             if (!shouldShow)
             {
+                if (TryBeginSegmentHide(border, vertical)) return;
                 ApplySegmentSettled(border, vertical, false);
                 return;
             }
 
-            // 从无到有：从 0 跨度长到目标值，恒定速度
+            // 从无到有：从 0 跨度弹到目标值（与组件同一条弹簧，过冲与收尾一起走）
             try
             {
-                int generation = NextSegmentGeneration(border);
+                // 被打断时从当前可见跨度接着长，不退回 0
+                bool wasSpringing = IsExtentMoving(border);
+                StopExtentMotion(border);
                 border.BeginAnimation(extentProperty, null);
                 border.ClearValue(extentProperty);
                 border.BeginAnimation(UIElement.OpacityProperty, null);
@@ -1893,8 +3212,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     return;
                 }
 
-                // 被打断时从当前可见跨度接着长，不退回 0
-                double growFrom = _activeSegmentTweens.Contains(border) && beforeExtent > 0 && beforeExtent < targetExtent
+                double growFrom = wasSpringing && beforeExtent > 0 && beforeExtent < targetExtent
                     ? beforeExtent
                     : 0.0;
 
@@ -1906,25 +3224,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 // 裁剪溢出，否则固定尺寸的按钮会画到胶囊外
                 border.ClipToBounds = true;
-                if (vertical) border.Height = growFrom;
-                else border.Width = growFrom;
-
-                var grow = new System.Windows.Media.Animation.DoubleAnimation(
-                    growFrom, targetExtent,
-                    DurationForDistance(targetExtent - growFrom, ToolbarWidthTransitionMs));
-
-                _activeSegmentTweens.Add(border);
-                grow.Completed += (_, _) =>
-                {
-                    if (!IsCurrentSegmentGeneration(border, generation)) return;
-                    ApplySegmentSettled(border, vertical, true);
-                };
-                border.BeginAnimation(extentProperty, grow);
-
-                // 同时淡入；全透明会让胶囊先"空"一帧，0.35 起更实
-                border.BeginAnimation(UIElement.OpacityProperty,
-                    new System.Windows.Media.Animation.DoubleAnimation(
-                        0.35, 1.0, DurationForDistance(targetExtent - growFrom, ToolbarWidthTransitionMs)));
+                RunExtentMotion(border, vertical, collapsedExtent: growFrom, expandedExtent: targetExtent,
+                    collapsing: false, hideWhenSettled: false);
             }
             catch (Exception ex)
             {
@@ -1945,8 +3246,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             if (border == null) return;
 
-            _activeSegmentTweens.Remove(border);
-            NextSegmentGeneration(border);
+            // 收起倒放没走完就落定（被打断、异常）：排布与图层也要一起还原
+            if (_exiting.TryGetValue(border, out var exitPlan))
+            {
+                _exiting.Remove(border);
+                border.Margin = exitPlan.Margin;
+                Panel.SetZIndex(border, exitPlan.ZIndex);
+            }
+
+            // 独立方形的背景动画（淡出/缩回）也要归位，别把 0 不透明度带进下一次显示
+            ResetSegmentUnitVisual(border);
+
+            // 跨度交给这里落定：还在跑的弹簧必须撤掉，否则它下一帧又把固定值写回来
+            StopExtentMotion(border);
 
             DependencyProperty extentProperty = vertical
                 ? FrameworkElement.HeightProperty
@@ -1954,32 +3266,79 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             border.BeginAnimation(extentProperty, null);
             border.ClearValue(extentProperty);
+
+            // 取消「整段淡出」时可能正停在半透明上：直接跳到 1 会闪一下。
+            // 只有真在显示、并且确实淡到一半时才补一段短淡入，其余一律瞬时置 1。
+            double opacityNow = border.Opacity;
             border.BeginAnimation(UIElement.OpacityProperty, null);
-            border.Opacity = 1;
+            if (shown && _animateVisibilityChange && opacityNow > 0.01 && opacityNow < 0.99)
+            {
+                var refade = new System.Windows.Media.Animation.DoubleAnimation(
+                    opacityNow, 1.0, AnimationSpeed.ScaleMilliseconds((int)(ToolbarItemShowDurationMs * 0.3)));
+                refade.EasingFunction = CreateEnterEasing();
+                border.BeginAnimation(UIElement.OpacityProperty, refade);
+            }
+            else
+            {
+                border.Opacity = 1;
+            }
+
             border.ClipToBounds = false;
             border.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+
+            // 段落下之后把段内状态收干净：收起动画期间组件被故意留成 Visible，
+            // 段一旦 Collapsed、这个中间态就必须清掉，否则下一次显示时
+            // 它们会被当成"本来就在场"，出场动画和 FLIP 起点全都没了。
+            if (!shown) CollapseSegmentLeaves(border.Child as FrameworkElement);
 
             NotifyExtentChanged(vertical);
         }
 
-        /// <summary>
-        /// 按"还剩多长距离"折算补间时长：被打断的动画从半途接上时，
-        /// 若仍按整段时长走，前半段会显得拖沓（距离短了、时间没短）。
-        /// </summary>
-        /// <remarks>
-        /// 距离比取自"本次起点到终点"占"原始全程"的比例，下限 30%：
-        /// 太短的时长会让收尾看起来像硬切，失掉过渡的意义。
-        /// </remarks>
-        private static TimeSpan ScaleDurationForRemaining(
-            double startExtent, double targetExtent, double fullExtent, int baseMilliseconds)
+        /// <summary>把段内还留成 Visible 的注入组件收干净（只碰 Tag==InjectedTag 的组件）。</summary>
+        private static void CollapseSegmentLeaves(FrameworkElement element)
         {
-            var baseDuration = AnimationSpeed.ScaleMilliseconds(baseMilliseconds);
-            double fullDistance = Math.Abs(fullExtent - targetExtent);
-            double remaining = Math.Abs(startExtent - targetExtent);
-            if (fullDistance < 1.0 || remaining >= fullDistance) return baseDuration;
+            if (element == null) return;
 
-            double ratio = Math.Max(0.3, remaining / fullDistance);
-            return TimeSpan.FromMilliseconds(baseDuration.TotalMilliseconds * ratio);
+            if (element.Tag as string == InjectedTag)
+            {
+                // 分组容器不是组件：把里面的组件逐个收干净，容器自己最后才折。
+                // 直接把容器 Collapsed 会把还留成 Visible 的组件留在里面，
+                // 下次显示时它们"本来就在场"，出场动画和 FLIP 起点全没了。
+                if (element is Panel groupContainer)
+                {
+                    foreach (UIElement child in groupContainer.Children)
+                    {
+                        CollapseSegmentLeaves(child as FrameworkElement);
+                    }
+                    if (HasVisibleLeafContent(groupContainer) || HasExitingDescendant(groupContainer)) return;
+                    groupContainer.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                if (_exiting.ContainsKey(element)) FinishHide(element, collapse: true);
+                else if (element.Visibility == Visibility.Visible) element.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            if (element is Panel panel)
+            {
+                foreach (UIElement child in panel.Children)
+                {
+                    CollapseSegmentLeaves(child as FrameworkElement);
+                }
+                return;
+            }
+
+            if (element is Border border)
+            {
+                CollapseSegmentLeaves(border.Child as FrameworkElement);
+                return;
+            }
+
+            if (element is ContentControl contentControl)
+            {
+                CollapseSegmentLeaves(contentControl.Content as FrameworkElement);
+            }
         }
 
         /// <summary>分段胶囊当前动画的代际号：每次发起新动效都自增，用来作废旧动画的收尾回调。</summary>
@@ -1989,36 +3348,20 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// 就会把**新**动画刚钉住的跨度清掉——表现是背景抽搐一下再跳到位。
         /// 代际守卫让只有"当前这一轮"的回调才有权收尾。
         /// </remarks>
-        private static readonly Dictionary<Border, int> _segmentGenerations = new Dictionary<Border, int>();
-
-        /// <summary>当前正在做跨度补间的分段。用来判断"能否打断接续"以及"居中是否需要逐帧跟随"。</summary>
+        /// <summary>是否还有分段的跨度补间在跑（居中据此决定要不要逐帧跟随）。</summary>
         /// <remarks>
-        /// 早先用 _segmentGenerations.ContainsKey 当"正在动画"的判据——但那个字典只增不减，
-        /// 一旦补间过一次就永远为真，于是之后每次显隐都会误判成"被打断"，
-        /// 从当前值接着走而不是从切换前的真实值起步，观感就是抽风。
-        /// 这里用显式的活动集合，补间收尾即移除。
+        /// 判据就是 _extentMotions 本身。这里曾经有一对"活动集合 + 代际号"的守卫：
+        /// 代际号字典只增不减、补间过一次就永远判成"被打断"；活动集合又因为 Completed 里的
+        /// 守卫提前 return 而清不掉，两个都是确定性的状态泄漏。跨度改成"同一分段只允许
+        /// 一条补间、后发起的直接替换"之后，它们都不需要了。
         /// </remarks>
-        private static readonly HashSet<Border> _activeSegmentTweens = new HashSet<Border>();
+        public static bool IsExtentAnimating => _extentMotions.Count > 0;
 
-        /// <summary>是否还有分段的跨度补间在飞（居中据此决定要不要逐帧跟随）。</summary>
-        public static bool IsExtentAnimating => _activeSegmentTweens.Count > 0;
-
-        private static int NextSegmentGeneration(Border border)
-        {
-            int next = _segmentGenerations.TryGetValue(border, out var current) ? current + 1 : 1;
-            _segmentGenerations[border] = next;
-            return next;
-        }
-
-        private static bool IsCurrentSegmentGeneration(Border border, int generation)
-        {
-            return _segmentGenerations.TryGetValue(border, out var current) && current == generation;
-        }
-
-        /// <summary>分段胶囊跨度补间的时长（毫秒），与按钮出场同长。</summary>
-        private const int ToolbarWidthTransitionMs = ToolbarItemShowDurationMs;
-
-        private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context)
+        /// <param name="ancestorsHidden">
+        /// 上层分组是否已经判成隐藏。分组容器自己不再动画，而是把条件往下传，
+        /// 由每个分组内组件各自出场/倒放。
+        /// </param>
+        private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context, bool ancestorsHidden = false)
         {
             if (panel == null) return;
 
@@ -2030,22 +3373,35 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 if (child.Tag as string == InjectedTag)
                 {
                     var ruleset = GetHidingRuleset(child);
-                    if (ruleset == null)
+                    bool shouldHide = ruleset != null && EvaluateRuleset(ruleset, context);
+
+                    // 分组容器（带注入标记的 Panel）不是组件：它只负责排版，
+                    // 把"分组这一层的条件"往下传，显隐与动画交给每个分组内组件。
+                    // 面板自己也 SetAnimatedVisibility 的话，整组会作为一个方块淡入淡出，
+                    // 收起时也只会整组退回，看不出哪个组件退到哪儿去。
+                    if (child is Panel groupContainer)
                     {
-                        SetAnimatedVisibility(child, Visibility.Visible, _animateVisibilityChange, vertical);
+                        bool hiddenBelow = ancestorsHidden || shouldHide;
+                        if (!hiddenBelow)
+                        {
+                            if (groupContainer.Visibility != Visibility.Visible)
+                            {
+                                groupContainer.Visibility = Visibility.Visible;
+                            }
+                            RevealGroupContainers(groupContainer);
+                        }
+                        UpdatePanelVisibility(groupContainer, context, hiddenBelow);
+                        // 容器只做落定：里面还有活着的子组件就不能折，
+                        // 折了会把正在倒放的组件一起切掉
+                        SettleGroupContainers(groupContainer);
+                        continue;
                     }
-                    else
-                    {
-                        bool shouldHide = EvaluateRuleset(ruleset, context);
-                        SetAnimatedVisibility(child,
-                            shouldHide ? Visibility.Collapsed : Visibility.Visible,
-                            _animateVisibilityChange,
-                            vertical);
-                    }
-                    if (child is Panel innerPanel)
-                    {
-                        UpdatePanelVisibility(innerPanel, context);
-                    }
+
+                    SetAnimatedVisibility(
+                        child,
+                        ancestorsHidden || shouldHide ? Visibility.Collapsed : Visibility.Visible,
+                        _animateVisibilityChange,
+                        vertical);
                 }
                 if (child is Border border && border.Tag as string == ContentBorderTag)
                 {
@@ -2097,11 +3453,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// </summary>
         /// <remarks>
         /// 直接赋值 Visibility 会让按钮瞬间出现，观感生硬；这里给按钮加一段
-        /// 位移 + 透明度 + 缩放的过渡，三者同长同曲，一起收尾。
+        /// 淡入 + 缩放的过渡，两者同长同曲，一起收尾。
         ///
-        /// 位移距离取组件自身的跨度（横排是宽度、竖排是高度），方向由拖动头
-        /// 所在一端决定（_enterSlideSign）：从头部一侧滑到 0，
-        /// 看起来才是"被从那一端推出来"，而不是凭空冒出。
+        /// 位置**不在这里算**：新组件的起点取决于"左邻是谁"，只有拿到整轮排布才说得清，
+        /// 所以交给 FLIP 那一遍统一处理（见 <see cref="AnimateChildrenToNewOffsets"/>）。
+        /// 方法里再滑一次的话，两层位移会沿视觉树叠加、互相抵消，就成了旧版那种方向鬼畜。
         ///
         /// 只有"由隐藏→显示"才播动画：<see cref="UpdatePanelVisibility"/> 会在每次模式变化时
         /// 遍历全部子项，若对每次赋值都播动画，已经在屏幕上的按钮会不断重播、整体发虚。
@@ -2118,11 +3474,21 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             if (element == null) return;
 
+            // 收起到一半又要它显示：撤掉倒放、还原完整排布，再按"从无到有"重新出场。
+            // 先按一次 Collapsed 是为了统一走进下面那条 becameVisible 分支。
+            if (target == Visibility.Visible && _exiting.TryGetValue(element, out var pending) && !pending.Segment)
+            {
+                FinishHide(element, collapse: false);
+                element.Visibility = Visibility.Collapsed;
+            }
+
             bool becameVisible = target == Visibility.Visible && element.Visibility != Visibility.Visible;
             bool becameHidden = target != Visibility.Visible && element.Visibility == Visibility.Visible;
 
             if (!animate)
             {
+                // 动画被关掉：正在倒放的收起也要立刻落定，否则它永远占着零宽幻影排布
+                if (_exiting.ContainsKey(element)) FinishHide(element, collapse: false);
                 element.BeginAnimation(UIElement.OpacityProperty, null);
                 element.Opacity = 1;
                 ResetMotionChannels(element);
@@ -2133,15 +3499,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (becameVisible)
             {
                 element.Visibility = Visibility.Visible;
+                // 分组容器空着时是折叠的（不留 3px 缝），组件要出场先把它撑开，
+                // 否则组件虽然 Visible，父级 Collapsed 时根本不会渲染、也就没有动画
+                RevealGroupContainers(element);
 
-                // 整段胶囊正在长出来：按钮跟着显形即可，不必再各自滑入
-                if (_suppressChildEnterAnimation) return;
+                MotionTrace($"组件出场 {Describe(element)}：淡入+缩放 {ToolbarItemShowStartOpacity:F2}→1 / {ToolbarItemShowStartScale:F2}→1");
 
                 var duration = AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs);
 
-                // 1. 透明度：半透明 → 不透明。
-                // 不从 0 起是有意的：全透明会让按钮先"空"一下再显形，
-                // 而此刻右边正有邻居在让位，两者叠加会显得整条工具栏在闪。
+                // 1. 透明度：无 → 有。
+                // 新组件从邻居身下抽出来，淡入就是"抽出来"这件事的可见性信号，
+                // 所以从 0 起；此处不再叠一层"半透明起步"，那会让它一开始就显形、像凭空出现。
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(
                     ToolbarItemShowStartOpacity, 1.0, duration)
                 {
@@ -2149,22 +3517,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 };
                 element.BeginAnimation(UIElement.OpacityProperty, fade);
 
-                // 2. 位移：从"拖动头所在的一侧"滑到 0，看起来是被那一端推出来的。
-                //    横排量宽度沿 X，竖排量高度沿 Y；符号由头部在哪端决定（_enterSlideSign）。
-                var enterSlide = GetOrCreateChannel(element, EnterChannelIndex);
-                double slideDistance = ResolveEnterSlideDistance(element, vertical);
-                // 使用本轮开头冻结的符号；没有冻结值（单点调用）才回退到当前推断
-                int slideSign = _slideSignFrozenForRound ?? _enterSlideSign;
-                // 记一行可对照的日志：方向再出错时，符号、距离、元素类型都能直接查
-                LogHelper.WriteLogToFile(
-                    $"[Toolbar] 滑入 {element.GetType().Name} 符号={slideSign} 距离={slideDistance:F1} " +
-                    $"起点={slideSign * slideDistance:F1} 朝向={(vertical ? "竖" : "横")}",
-                    LogHelper.LogType.Trace);
-                // 位移走弹簧：时长由"距离 + 弹簧参数"共同决定，短距离自然更快收完；
-                // 缓动曲线的固定时长会让 32px 与 308px 同速收尾，那正是"时间恒定"的毛病。
-                StartChannelSpring(
-                    enterSlide, vertical, slideSign * slideDistance, 0.0,
-                    ResolveSpringSpecForDistance(slideDistance));
+                // 2. 位置：这里**不**动。从哪冒出来由 FLIP 那一遍统一决定
+                // （起点=左邻的旧位置）；若这里再叠一层滑入，两个位移会互相抵消，
+                // 正是之前"先往左再往右"那类鬼畜的来源。
 
                 // 3. 缩放：绕自身中心从 0.82 长到 1.0。
                 // 结束时必须把值落回 1.0 并摘掉动画：残留的缩放会让
@@ -2188,7 +3543,16 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             if (becameHidden)
             {
-                // 隐藏不做过渡：收起后要立刻让出布局空间，否则工具栏尺寸会滞后于内容。
+                // 收起 = 展开的倒放（用户要求"和 popup 菜单一样倒放"）。
+                //
+                // 它先让出布局、但继续绘制：位移退到左邻身下、同时淡出并缩回 0.82，
+                // 三者都在 FLIP 那一遍起播——倒放终点取决于"切换后谁还在场"，
+                // 只有拿到整轮排布才说得清。收完才真正 Collapsed。
+                // 父级已经收起来时 IsVisible 为假，没有倒放可放，直接落定。
+                MotionTrace($"组件收起 {Describe(element)}：倒放（淡出+缩回+退回起点）");
+                if (TryBeginHide(element, vertical)) return;
+
+                MotionTrace($"组件收起 {Describe(element)}：瞬时落定");
                 element.BeginAnimation(UIElement.OpacityProperty, null);
                 element.Opacity = 1;
                 ResetMotionChannels(element);
@@ -2200,45 +3564,22 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             element.Visibility = target;
         }
 
-        /// <summary>
-        /// 按距离推算"跨度补间"的时长：与弹簧同一套节奏，而不是所有距离统一时长。
-        /// </summary>
-        /// <remarks>
-        /// 位移类动画已经交给弹簧（<see cref="StartChannelSpring"/>），收敛时间由物理决定：
-        /// 距离短收敛快、距离长收敛久，而峰值速度一致——这才是"速度恒定"。
-        /// 但分段跨度是**布局属性**，逐帧改会每帧触发整条工具栏重排，不能也用弹簧逐帧推。
-        /// 所以这里用同一档弹簧的等效节奏反算出一个时长：
-        /// 取当前手感档位的 ω₀，按其近似收敛时间随位移缩放，
-        /// 让"背景变宽"和"组件滑入"看起来是同一个速度体系里的动作。
-        ///
-        /// 上下限兜底：极短位移不要短到看不见，极长位移不要拖到发闷。
-        /// 最终再经 <see cref="AnimationSpeed"/> 按用户倍率缩放。
-        /// </remarks>
-        private static TimeSpan DurationForDistance(double distancePixels, double fallbackMilliseconds)
-        {
-            if (double.IsNaN(distancePixels) || double.IsInfinity(distancePixels) || distancePixels <= 1.0)
-            {
-                return AnimationSpeed.ScaleMilliseconds(fallbackMilliseconds);
-            }
-
-            var spec = ResolveSpringSpecForDistance(distancePixels);
-            // 弹簧近似收敛时间 ≈ 4 / (ζ·ω₀)，再按"总位移 / 参考位移"缩放；
-            // 参考位移取 44px（单个按钮），与原 220ms 的观感对齐。
-            double settleSeconds = 4.0 / Math.Max(0.1, spec.DampingRatio * spec.AngularFrequency);
-            double referenceSeconds = 4.0 / Math.Max(0.1, spec.DampingRatio * spec.AngularFrequency);
-            double scale = distancePixels / 44.0;
-            double seconds = settleSeconds * Math.Max(0.35, Math.Min(2.2, scale));
-            double milliseconds = Math.Max(90.0, Math.Min(900.0, seconds * 1000.0));
-            return AnimationSpeed.ScaleMilliseconds(milliseconds);
-        }
-
-        /// <summary>按钮出场用的一条缓动曲线（先快后慢）。</summary>
+        /// <summary>按钮出场用的缓动（SineEase EaseOut，Inkeys 同款透明度曲线）。</summary>
         /// <remarks>每条动画各取一个实例，避免多个动画共用同一个 Freezable。</remarks>
-        private static System.Windows.Media.Animation.CubicEase CreateEnterEasing()
+        private static System.Windows.Media.Animation.SineEase CreateEnterEasing()
         {
-            return new System.Windows.Media.Animation.CubicEase
+            return new System.Windows.Media.Animation.SineEase
             {
                 EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+            };
+        }
+
+        /// <summary>收起用的缓动（SineEase EaseIn）：上面那条的时间反演，读起来才是"倒放"。</summary>
+        private static System.Windows.Media.Animation.SineEase CreateExitEasing()
+        {
+            return new System.Windows.Media.Animation.SineEase
+            {
+                EasingMode = System.Windows.Media.Animation.EasingMode.EaseIn
             };
         }
 
@@ -2252,6 +3593,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 if (child is TranslateTransform translate)
                 {
+                    // 曲线在逐帧写值，不先摘掉的话归零后下一帧又会被写回去
+                    StopChannelMotion(translate);
                     translate.BeginAnimation(TranslateTransform.XProperty, null);
                     translate.BeginAnimation(TranslateTransform.YProperty, null);
                     translate.X = 0;
@@ -2275,103 +3618,36 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         }
 
         /// <summary>
-        /// 新出现的组件从拖动头所在的一侧滑进来，滑行距离就是它自己的跨度。
+        /// 一批显隐动画的时长（毫秒）。取 Inkeys 工具栏的原值 400。
+        /// 组件位移、邻居让位、透明度、缩放、胶囊跨度全都是这一个数：
+        /// 同一批里任何一处时长不同步，收尾就会一前一后，看起来像几套动画在打架。
+        /// 实际时长 = 这个数 ÷ 全局动画倍率。
         /// </summary>
-        /// <remarks>
-        /// 为什么取自身跨度：滑入方向上的邻居刚好让出同等的距离，组件滑过这段距离落位，
-        /// 看起来才是被推出来的。方向由 <see cref="RefreshEnterSlideSign"/> 按真实布局推断。
-        ///
-        /// 量宽度有个时序坑：调用这里时元素刚从 Collapsed 切到 Visible，
-        /// 布局还没跑，ActualWidth 可能还是 0。
-        /// 所以按 Width（显式尺寸）→ ActualWidth → DesiredSize 的顺序退让，
-        /// 都拿不到才退回一个固定的小位移。
-        /// </remarks>
-        private static double ResolveEnterSlideDistance(FrameworkElement element, bool vertical = false)
-        {
-            double extent = vertical ? element.Height : element.Width;
-            if (double.IsNaN(extent) || extent <= 0)
-            {
-                extent = vertical ? element.ActualHeight : element.ActualWidth;
-            }
-            if (double.IsNaN(extent) || extent <= 0)
-            {
-                extent = vertical ? element.DesiredSize.Height : element.DesiredSize.Width;
-            }
-            if (double.IsNaN(extent) || extent <= 0)
-            {
-                try
-                {
-                    element.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    extent = vertical ? element.DesiredSize.Height : element.DesiredSize.Width;
-                }
-                catch
-                {
-                    extent = 0;
-                }
-            }
+        internal const int ToolbarItemShowDurationMs = 400;
 
-            double scale = ResolveToolbarScaleFactor();
+        /// <summary>曲线补间的基准时长（毫秒，倍率换算前）。</summary>
+        private const double MotionCurveBaseMilliseconds = ToolbarItemShowDurationMs;
 
-            if (double.IsNaN(extent) || double.IsInfinity(extent) || extent <= 0)
-            {
-                return FallbackEnterSlideDistance * scale;
-            }
-
-            // 上限也按倍率放大：工具栏整体缩小时上限不该跟着变小到几乎没有
-            return Math.Min(extent, MaxEnterSlideDistance) * scale;
-        }
-
-        /// <summary>
-        /// 工具栏整体的缩放倍率（设置里的"浮动栏缩放"）。
-        /// </summary>
-        /// <remarks>
-        /// 动画里的位移量是**绝对像素**，而整条工具栏会被 ViewboxFloatingBarScaleTransform
-        /// 等比缩放。若不乘这个倍率，缩放 50% 时滑入距离仍是原值（视觉上滑得远了一倍），
-        /// 缩放 200% 时又显得几乎没动——这就是"没处理缩放倍率"的具体表现。
-        /// 取不到时按 1.0 处理，不猜。
-        /// </remarks>
-        private static double ResolveToolbarScaleFactor()
-        {
-            try
-            {
-                var appearance = SettingsManager.Settings?.Appearance;
-                double value = appearance?.ViewboxFloatingBarScaleTransformValue ?? 1.0;
-                if (double.IsNaN(value) || double.IsInfinity(value) || value <= 0) return 1.0;
-                return value;
-            }
-            catch
-            {
-                return 1.0;
-            }
-        }
-
-        /// <summary>
-        /// 按钮出场时长（毫秒）。
-        /// 对齐 Inkeys 的 0.4s 会显得慢——那是它整套 UI 的统一节奏，
-        /// 而工具栏按钮是被频繁触发的元素，这里折中取 220ms。
-        /// 组件位移、邻居让位、工具栏尺寸过渡共用这一个数：三者走的其实是同一段距离
-        /// （组件自身的宽度），时长一旦不同步，就会一前一后收尾。
-        /// </summary>
-        internal const int ToolbarItemShowDurationMs = 220;
+        /// <summary>回弹强度：1.1 是 Inkeys 的原值，峰值过冲约 4.47%。</summary>
+        private const double MotionBackOvershoot = 1.1;
 
         /// <summary>按钮出场时的起始透明度。</summary>
         /// <remarks>
-        /// 取半透明而不是全透明：全透明会让按钮先"空"一下再显形，
-        /// 与同时进行的邻居让位叠加，看起来像整条工具栏在闪。
+        /// 从全透明起步是用户明确要求的："同时 b、c 不透明 0 逐渐变 100%"。
+        /// 早期取 0.35 是为了掩盖滑入方向算错时的跳变——现在起点由 FLIP 保证连续，
+        /// 那个补丁没有存在意义了。
         /// </remarks>
-        internal const double ToolbarItemShowStartOpacity = 0.35;
+        internal const double ToolbarItemShowStartOpacity = 0.0;
 
         /// <summary>按钮出场时的起始缩放。</summary>
         internal const double ToolbarItemShowStartScale = 0.82;
 
-        /// <summary>拿不到组件宽度时退而使用的滑入距离（DIP）。</summary>
-        private const double FallbackEnterSlideDistance = 8.0;
-
-        /// <summary>滑入距离上限（DIP），防止异常宽度把组件甩到屏幕外。</summary>
-        private const double MaxEnterSlideDistance = 400.0;
-
         private static bool HasVisibleLeafContent(FrameworkElement element)
         {
+            if (element == null) return false;
+            // 正在倒放收起的组件不算在场：它在布局上已经让位，只是还在画。
+            // 不排除的话，段内最后一个组件收起时 anyVisible 永远为真，整段就永远不会收。
+            if (_exiting.ContainsKey(element)) return false;
             if (element.Visibility != Visibility.Visible) return false;
             if (element is Panel panel)
             {
@@ -2386,6 +3662,52 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return HasVisibleLeafContent(borderChild);
             }
             return true;
+        }
+
+        /// <summary>是否还有正在倒放收起的后代——它仍在绘制，只是已经不占布局。</summary>
+        private static bool HasExitingDescendant(FrameworkElement element)
+        {
+            if (element == null) return false;
+            foreach (var pair in _exiting)
+            {
+                if (pair.Value.Segment) continue;
+                var candidate = pair.Key;
+                if (candidate == null) continue;
+                if (ReferenceEquals(candidate, element) || element.IsAncestorOf(candidate)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>把分组容器的祖先链撑开：子组件要渲染，容器就不能是 Collapsed。</summary>
+        private static void RevealGroupContainers(FrameworkElement element)
+        {
+            for (var node = element?.Parent; node != null; node = System.Windows.Media.VisualTreeHelper.GetParent(node))
+            {
+                if (node is not FrameworkElement fe || fe.Tag as string != InjectedTag || fe is not Panel) return;
+                if (fe.Visibility != Visibility.Visible) fe.Visibility = Visibility.Visible;
+            }
+        }
+
+        /// <summary>
+        /// 分组容器空了就真折叠。
+        /// </summary>
+        /// <remarks>
+        /// 容器只做排版、不参与动画，但它的左边距一直占着位置：
+        /// 里面一个组件都不剩时若不折叠，工具栏中间会留一道缝、胶囊也多算 3px。
+        /// 从刚收起的组件往上走，只有"无可见叶、也无正在倒放的后代"才折——
+        /// 否则会把还没退完的邻居连同一刀切掉（Collapsed 是不渲染，不是透明）。
+        /// </remarks>
+        private static void SettleGroupContainers(FrameworkElement element)
+        {
+            for (var node = element?.Parent; node != null; node = System.Windows.Media.VisualTreeHelper.GetParent(node))
+            {
+                if (node is not FrameworkElement fe || fe.Tag as string != InjectedTag || fe is not Panel groupContainer) return;
+                if (HasVisibleLeafContent(groupContainer) || HasExitingDescendant(groupContainer)) return;
+                if (groupContainer.Visibility != Visibility.Collapsed)
+                {
+                    groupContainer.Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item, Orientation orientation = Orientation.Horizontal)
