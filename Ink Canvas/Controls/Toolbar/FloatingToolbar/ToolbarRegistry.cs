@@ -175,27 +175,88 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             var head = FindDragHandle(panel);
             if (head == null) return;
 
-            int headIndex = panel.Children.IndexOf(head);
-            if (headIndex < 0) return;
+            bool vertical = IsVerticalPanel(panel);
 
-            int firstContentIndex = -1;
-            for (int i = 0; i < panel.Children.Count; i++)
+            // 量"拖动头"与"内容整体"在排布方向上的真实位置。
+            // 之前用子项索引判断，但主窗口在换边/折叠时会 rootChildren.Clear() 再重排，
+            // 同一根面板上头会从索引 0 跳到索引 7（日志里两种取值都出现过），
+            // 索引根本不能代表"头在哪一端"，位置才是排布的真实结果。
+            double headPos;
+            try
             {
-                if (IsContentBorder(panel.Children[i]))
-                {
-                    firstContentIndex = i;
-                    break;
-                }
+                var offset = head.TransformToAncestor(panel).Transform(new Point(0, 0));
+                headPos = vertical ? offset.Y : offset.X;
             }
-            if (firstContentIndex < 0) return;
+            catch
+            {
+                return;
+            }
 
-            // 头在内容之前 → 头占前导端，组件从负方向（左/上）滑入
-            _enterSlideSign = headIndex < firstContentIndex ? -1 : 1;
+            double contentMin = double.MaxValue;
+            double contentMax = double.MinValue;
+            CollectContentExtent(panel, panel, vertical, ref contentMin, ref contentMax);
+            if (contentMin > contentMax) return;
+
+            // 头贴着内容前沿（左/上）→ 内容向另一侧生长 → 从负方向滑入
+            // 头贴着内容尾沿（右/下）→ 内容向前导侧生长 → 从正方向滑入
+            double distToStart = Math.Abs(headPos - contentMin);
+            double distToEnd = Math.Abs(headPos - contentMax);
+            _enterSlideSign = distToStart <= distToEnd ? -1 : 1;
 
             // 记一行日志：方向出问题时可以直接对照，不必再靠猜
             LogHelper.WriteLogToFile(
-                $"[Toolbar] 滑入方向 = {_enterSlideSign}（头索引 {headIndex} / 首个分段 {firstContentIndex} / 共 {panel.Children.Count} 项）",
+                $"[Toolbar] 滑入方向 = {_enterSlideSign}（头={headPos:F1} 内容 {contentMin:F1}..{contentMax:F1} " +
+                $"到前沿={distToStart:F1} 到后沿={distToEnd:F1}）",
                 LogHelper.LogType.Trace);
+        }
+
+        /// <summary>测量可见内容在排布方向上占据的区间。</summary>
+        /// <remarks>
+        /// 用"内容占用的两端"而不是"子项索引"：索引会被重排打乱，位置不会。
+        /// 也不用"重心 vs 面板中点"——根面板自适应内容宽度，那个比较恒等于噪声。
+        /// </remarks>
+        private static void CollectContentExtent(
+            Panel root, FrameworkElement current, bool vertical, ref double min, ref double max)
+        {
+            if (current == null || current.Visibility != Visibility.Visible) return;
+
+            bool isContent = current.Tag as string == InjectedTag || IsContentBorder(current);
+            if (isContent && current != root)
+            {
+                try
+                {
+                    var t = current.TransformToAncestor(root);
+                    var p0 = t.Transform(new Point(0, 0));
+                    var p1 = t.Transform(new Point(
+                        vertical ? 0 : current.ActualWidth,
+                        vertical ? current.ActualHeight : 0));
+                    double a = vertical ? p0.Y : p0.X;
+                    double b = vertical ? p1.Y : p1.X;
+                    if (a > b) { var tmp = a; a = b; b = tmp; }
+                    if (a < min) min = a;
+                    if (b > max) max = b;
+                }
+                catch
+                {
+                    // 尚未进入视觉树
+                }
+            }
+
+            if (current is Panel pnl)
+            {
+                foreach (var child in pnl.Children.OfType<FrameworkElement>())
+                {
+                    CollectContentExtent(root, child, vertical, ref min, ref max);
+                }
+            }
+            else if (current is Border br && br.Child is FrameworkElement bc)
+            {
+                CollectContentExtent(root, bc, vertical, ref min, ref max);
+            }
+            else if (current is ContentControl cc && cc.Content is FrameworkElement cce)
+            {
+                CollectContentExtent(root, cce, vertical, ref min, ref max);
+            }
         }
 
         /// <summary>供主窗口在重建、换边、复位后主动刷新一次滑入方向。</summary>
@@ -2032,11 +2093,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     $"[Toolbar] 滑入 {element.GetType().Name} 符号={_enterSlideSign} 距离={slideDistance:F1} " +
                     $"起点={_enterSlideSign * slideDistance:F1} 朝向={(vertical ? "竖" : "横")}",
                     LogHelper.LogType.Trace);
+                // 位移走**恒定速度**：时长按距离算，且不加缓动。
+                // 缓动曲线会让同一段位移中途变速，与"速度恒定"的要求相悖。
                 var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
-                    _enterSlideSign * slideDistance, 0.0, duration)
-                {
-                    EasingFunction = CreateEnterEasing()
-                };
+                    _enterSlideSign * slideDistance, 0.0,
+                    DurationForDistance(slideDistance, ToolbarItemShowDurationMs));
                 enterSlide.BeginAnimation(
                     vertical ? TranslateTransform.YProperty : TranslateTransform.XProperty,
                     slideIn);
@@ -2073,6 +2134,35 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             // 状态未变：不重复播动画
             element.Visibility = target;
+        }
+
+        /// <summary>
+        /// 组件出场/让位的**基准速度**：像素/秒。
+        /// </summary>
+        /// <remarks>
+        /// 动画应当是**速度恒定**而不是时间恒定：
+        /// 32px 宽的按钮和 308px 宽的整条工具栏，若共用同一个时长，
+        /// 前者慢得像凝滞、后者快得像闪一下，速度天差地别。
+        /// 这里统一改用"距离 ÷ 速度"算时长，跨距大小只影响时长，不影响观感节奏。
+        /// 基准值按 220ms 走完 44px 按钮反推（约 200px/s），与原单手感受接近。
+        /// </remarks>
+        private const double EnterSlidePixelsPerSecond = 200.0;
+
+        /// <summary>按距离与基准速度算出时长；距离为 0 时退化为最短时长。</summary>
+        /// <remarks>
+        /// 上下限用来兜底：距离极小时不要短到看不见，极大时不要长到拖沓。
+        /// 最终时长再经 <see cref="AnimationSpeed"/> 按用户倍率缩放。
+        /// </remarks>
+        private static TimeSpan DurationForDistance(double distancePixels, double fallbackMilliseconds)
+        {
+            if (double.IsNaN(distancePixels) || double.IsInfinity(distancePixels) || distancePixels <= 1.0)
+            {
+                return AnimationSpeed.ScaleMilliseconds(fallbackMilliseconds);
+            }
+
+            double seconds = distancePixels / EnterSlidePixelsPerSecond;
+            double milliseconds = Math.Max(90.0, Math.Min(600.0, seconds * 1000.0));
+            return AnimationSpeed.ScaleMilliseconds(milliseconds);
         }
 
         /// <summary>按钮出场用的一条缓动曲线（先快后慢）。</summary>
