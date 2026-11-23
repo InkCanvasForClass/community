@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Ink_Canvas.Helpers
 {
@@ -13,15 +11,11 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     internal static class PPTThumbnailDiskCache
     {
-        private static readonly string CacheRoot = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InkCanvasForClass", "Cache", "PPTThumbnails");
-
-        public static bool TryLoad(string presentationPath, int width, int height, int slideCount,
+        public static bool TryLoad(string presentationPath, string presentationName, int width, int height, int slideCount,
             out List<PPTSlideThumbnail> thumbnails)
         {
             thumbnails = null;
-            if (!TryGetCacheDirectory(presentationPath, width, height, slideCount, out var directory))
+            if (!TryGetCacheDirectory(presentationPath, presentationName, width, height, slideCount, out var directory))
                 return false;
 
             try
@@ -47,7 +41,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static void Save(string presentationPath, int width, int height, int slideCount,
+        public static void Save(string presentationPath, string presentationName, int width, int height, int slideCount,
             IList<PPTSlideThumbnail> thumbnails)
         {
             if (thumbnails == null || thumbnails.Count != slideCount ||
@@ -97,7 +91,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static bool TryGetCacheDirectory(string presentationPath, int width, int height,
+        private static bool TryGetCacheDirectory(string presentationPath, string presentationName, int width, int height,
             int slideCount, out string directory)
         {
             directory = null;
@@ -109,17 +103,15 @@ namespace Ink_Canvas.Helpers
                 var file = new FileInfo(fullPath);
                 if (!file.Exists || width <= 0 || height <= 0 || slideCount <= 0) return false;
 
-                // 仅对路径做哈希以生成安全、长度固定的目录名；不对 PPT 内容做哈希。
-                string identity;
-                using (var sha = SHA256.Create())
-                {
-                    var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(fullPath.ToUpperInvariant()));
-                    identity = BitConverter.ToString(bytes).Replace("-", string.Empty);
-                }
+                string autoSaveLocation = MainWindow.Settings?.Automation?.AutoSavedStrokesLocation;
+                if (string.IsNullOrWhiteSpace(autoSaveLocation) || string.IsNullOrWhiteSpace(presentationName)) return false;
 
+                // 与 PPTInkManager 使用相同的演示文稿目录标识。
+                string presentationId = presentationName + "_" + slideCount.ToString() + "_" + HashHelper.GetFileHash(fullPath);
+                string presentationInkDirectory = Path.Combine(autoSaveLocation, "Auto Saved - Presentations", presentationId);
                 string version = file.Length.ToString() + "-" + file.LastWriteTimeUtc.Ticks.ToString() +
                     "-" + slideCount.ToString() + "-" + width.ToString() + "x" + height.ToString();
-                directory = Path.Combine(CacheRoot, identity, version);
+                directory = Path.Combine(presentationInkDirectory, "Thumbnails", version);
                 return true;
             }
             catch
