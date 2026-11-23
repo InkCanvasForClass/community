@@ -72,6 +72,12 @@
   <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
     <value>加载 PPT 增强预览缩略图时显示动画。</value>
   </data>
+<data name="ThumbnailDiskCache" xml:space="preserve">
+    <value>启用缩略图磁盘缓存</value>
+  </data>
+  <data name="ThumbnailDiskCacheHint" xml:space="preserve">
+    <value>缓存已保存演示文稿的幻灯片缩略图，后续打开时可直接从磁盘读取。</value>
+  </data>
   <data name="LoadingPPT" xml:space="preserve">
     <value>正在加载PPT...</value>
   </data>
