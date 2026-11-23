@@ -1486,7 +1486,8 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     presentationPath = activePresentation.FullName;
-                    canUseDiskCache = Convert.ToInt32(activePresentation.Saved) != 0;
+                    canUseDiskCache = MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
+                                      Convert.ToInt32(activePresentation.Saved) != 0;
                 }
                 catch { }
                 if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
