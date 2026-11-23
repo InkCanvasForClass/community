@@ -1482,8 +1482,14 @@ namespace Ink_Canvas.Helpers
                 int count = slides.Count;
                 if (count <= 0) return result;
 
-                try { presentationPath = activePresentation.FullName; } catch { }
-                if (PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
+                bool canUseDiskCache = false;
+                try
+                {
+                    presentationPath = activePresentation.FullName;
+                    canUseDiskCache = Convert.ToInt32(activePresentation.Saved) == -1;
+                }
+                catch { }
+                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
                 {
                     progress?.Report(1.0);
                     return cachedThumbnails;
@@ -1525,7 +1531,7 @@ namespace Ink_Canvas.Helpers
                     progress?.Report((double)i / count);
                 }
 
-                if (result.Count == count)
+                if (canUseDiskCache && result.Count == count)
                     PPTThumbnailDiskCache.Save(presentationPath, width, height, count, result);
             }
             catch (OperationCanceledException)
