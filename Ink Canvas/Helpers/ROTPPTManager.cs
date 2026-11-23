@@ -1846,7 +1846,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     presentationPath = presentation.FullName;
-                    canUseDiskCache = Convert.ToInt32(presentation.Saved) == -1;
+                    canUseDiskCache = Convert.ToInt32(presentation.Saved) != 0;
                 }
                 catch { }
                 if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
