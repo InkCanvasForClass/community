@@ -1846,10 +1846,12 @@ namespace Ink_Canvas.Helpers
                 long presentationLength = -1;
                 long presentationLastWriteTicks = -1;
                 string presentationName = null;
+                string presentationId = null;
                 try
                 {
                     presentationPath = presentation.FullName;
                     presentationName = Convert.ToString(presentation.Name);
+                    presentationId = PPTPresentationStorage.CreatePresentationId(presentationName, count, presentationPath);
                     var presentationFile = new FileInfo(presentationPath);
                     if (presentationFile.Exists)
                     {
@@ -1909,6 +1911,7 @@ namespace Ink_Canvas.Helpers
                     var currentFile = new FileInfo(presentationPath);
                     isStillSavedRevision = canUseDiskCache &&
                         Convert.ToInt32(presentation.Saved) != 0 &&
+                        PPTPresentationStorage.CreatePresentationId(presentationName, count, presentationPath) == presentationId &&
                         currentFile.Exists && currentFile.Length == presentationLength &&
                         currentFile.LastWriteTimeUtc.Ticks == presentationLastWriteTicks;
                 }
