@@ -1825,6 +1825,7 @@ namespace Ink_Canvas.Helpers
             var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
             object slides = null;
+            string presentationPath = null;
 
             try
             {
@@ -1840,6 +1841,13 @@ namespace Ink_Canvas.Helpers
                 dynamic slideCollection = slides;
                 int count = slideCollection.Count;
                 if (count <= 0) return result;
+
+                try { presentationPath = presentation.FullName; } catch { }
+                if (PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
+                {
+                    progress?.Report(1.0);
+                    return cachedThumbnails;
+                }
 
                 tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(tempDir);
@@ -1877,6 +1885,9 @@ namespace Ink_Canvas.Helpers
 
                     progress?.Report((double)i / count);
                 }
+
+                if (result.Count == count)
+                    PPTThumbnailDiskCache.Save(presentationPath, width, height, count, result);
             }
             catch (OperationCanceledException)
             {
