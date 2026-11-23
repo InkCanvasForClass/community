@@ -1483,56 +1483,39 @@ namespace Ink_Canvas.Helpers
                 if (count <= 0) return result;
 
                 bool canUseDiskCache = false;
+                long presentationLength = -1;
+                long presentationLastWriteTicks = -1;
+                string presentationName = null;
                 try
                 {
                     presentationPath = activePresentation.FullName;
-                    canUseDiskCache = MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
-                                      Convert.ToInt32(activePresentation.Saved) != 0;
+                    presentationName = activePresentation.Name;
+                    var presentationFile = new FileInfo(presentationPath);
+                    if (presentationFile.Exists)
+                    {
+                        presentationLength = presentationFile.Length;
+                        presentationLastWriteTicks = presentationFile.LastWriteTimeUtc.Ticks;
+                        canUseDiskCache = MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
+                                          Convert.ToInt32(activePresentation.Saved) != 0;
+                    }
                 }
                 catch { }
-                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, activePresentation.Name, width, height, count, out var cachedThumbnails))
+                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, presentationName, width, height, count, out var cachedThumbnails))
                 {
                     progress?.Report(1.0);
                     return cachedThumbnails;
-                }
-
-                tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
-                Directory.CreateDirectory(tempDir);
-
-                for (int i = 1; i <= count; i++)
+                }                bool isStillSavedRevision = false;
+                try
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    Slide slide = null;
-                    try
-                    {
-                        slide = slides[i];
-                        var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
-                        slide.Export(imagePath, "PNG", width, height);
-                        cancellationToken.ThrowIfCancellationRequested();
-                        result.Add(new PPTSlideThumbnail
-                        {
-                            SlideNumber = i,
-                            PngBytes = File.ReadAllBytes(imagePath)
-                        });
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"生成PPT第{i}页缩略图失败: {ex.Message}", LogHelper.LogType.Warning);
-                    }
-                    finally
-                    {
-                        SafeReleaseComObject(slide);
-                    }
-
-                    progress?.Report((double)i / count);
+                    var currentFile = new FileInfo(presentationPath);
+                    isStillSavedRevision = canUseDiskCache &&
+                        Convert.ToInt32(activePresentation.Saved) != 0 &&
+                        currentFile.Exists && currentFile.Length == presentationLength &&
+                        currentFile.LastWriteTimeUtc.Ticks == presentationLastWriteTicks;
                 }
-
-                if (canUseDiskCache && result.Count == count)
+                catch { }
+                if (isStillSavedRevision && result.Count == count)
+                    PPTThumbnailDiskCache.Save(presentationPath, presentationName, width, height, count, result);
                     PPTThumbnailDiskCache.Save(presentationPath, activePresentation.Name, width, height, count, result);
             }
             catch (OperationCanceledException)
