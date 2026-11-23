@@ -1504,7 +1504,9 @@ namespace Ink_Canvas.Helpers
                 {
                     progress?.Report(1.0);
                     return cachedThumbnails;
-                }                bool isStillSavedRevision = false;
+                }
+
+                bool isStillSavedRevision = false;
                 try
                 {
                     var currentFile = new FileInfo(presentationPath);
