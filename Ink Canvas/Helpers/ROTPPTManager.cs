@@ -1850,7 +1850,7 @@ namespace Ink_Canvas.Helpers
                                       Convert.ToInt32(presentation.Saved) != 0;
                 }
                 catch { }
-                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, width, height, count, out var cachedThumbnails))
+                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, Convert.ToString(presentation.Name), width, height, count, out var cachedThumbnails))
                 {
                     progress?.Report(1.0);
                     return cachedThumbnails;
@@ -1894,7 +1894,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 if (canUseDiskCache && result.Count == count)
-                    PPTThumbnailDiskCache.Save(presentationPath, width, height, count, result);
+                    PPTThumbnailDiskCache.Save(presentationPath, Convert.ToString(presentation.Name), width, height, count, result);
             }
             catch (OperationCanceledException)
             {
