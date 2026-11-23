@@ -755,6 +755,8 @@ namespace Ink_Canvas.Properties
             dict["PPT_EnhancedPreviewHint"] = ("PPTStrings", "EnhancedPreviewHint");
             dict["PPT_EnhancedPreviewLoadingAnimation"] = ("PPTStrings", "EnhancedPreviewLoadingAnimation");
             dict["PPT_EnhancedPreviewLoadingAnimationHint"] = ("PPTStrings", "EnhancedPreviewLoadingAnimationHint");
+            dict["PPT_ThumbnailDiskCache"] = ("PPTStrings", "ThumbnailDiskCache");
+            dict["PPT_ThumbnailDiskCacheHint"] = ("PPTStrings", "ThumbnailDiskCacheHint");
             dict["PPT_LoadingPPT"] = ("PPTStrings", "LoadingPPT");
             dict["PPT_Enhancement"] = ("PPTStrings", "Enhancement");
             dict["PPT_EnterAnnotationOnShow"] = ("PPTStrings", "EnterAnnotationOnShow");
