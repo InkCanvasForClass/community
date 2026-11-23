@@ -2183,10 +2183,10 @@ namespace Ink_Canvas
             var touchId = e.TouchDevice.Id;
             if (_activeRealtimeTouchStrokeIds.Contains(touchId))
             {
+                if (!StrokeVisualList.TryGetValue(touchId, out var sv)) return;
                 try
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
-                    var sv = GetStrokeVisual(touchId);
                     if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p))
                         RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
@@ -2199,11 +2199,10 @@ namespace Ink_Canvas
 
             if (_activeTouchStrokeIds.Contains(touchId))
             {
-                StrokeVisual sv = null;
+                if (!StrokeVisualList.TryGetValue(touchId, out var sv)) return;
                 try
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
-                    sv = GetStrokeVisual(touchId);
                     AppendInterpolatedTouchPoints(sv, touchId, p);
                     RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }

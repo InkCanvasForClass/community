@@ -65,13 +65,17 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual
     {
         private int _lastCommittedPointCount = 0;
+        private int _lastRenderedPointCount = -1;
         private const int COMMIT_POINT_THRESHOLD = 48;
         private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
         private readonly Dictionary<Color, SolidColorBrush> _brushCache =
             new Dictionary<Color, SolidColorBrush>();
-        private readonly Dictionary<(Color Color, long ThicknessBits), Pen> _activePenCache =
-            new Dictionary<(Color Color, long ThicknessBits), Pen>();
+        // Pressure changes can produce a nearly unique floating-point width for every segment.
+        // Quantize to 1/16 DIP so nearby widths reuse the same frozen Pen during multi-touch drawing.
+        private const double PenThicknessQuantization = 16.0;
+        private readonly Dictionary<(Color Color, int ThicknessSixteenths), Pen> _activePenCache =
+            new Dictionary<(Color Color, int ThicknessSixteenths), Pen>();
         private readonly Action _dispatcherProbeAction;
         private DispatcherOperation _dispatcherProbeOperation;
         private long _dispatcherProbeStartedAt;
@@ -186,11 +190,15 @@ namespace Ink_Canvas.Helpers
 
         private Pen GetPen(Color color, double thickness)
         {
-            var key = (color, BitConverter.DoubleToInt64Bits(thickness));
+            var thicknessSixteenths = Math.Max(
+                1,
+                (int)Math.Round(thickness * PenThicknessQuantization));
+            var key = (color, thicknessSixteenths);
             if (_activePenCache.TryGetValue(key, out var pen))
                 return pen;
 
-            pen = new Pen(GetBrush(color), thickness)
+            var quantizedThickness = thicknessSixteenths / PenThicknessQuantization;
+            pen = new Pen(GetBrush(color), quantizedThickness)
             {
                 StartLineCap = PenLineCap.Round,
                 EndLineCap = PenLineCap.Round,
@@ -224,14 +232,18 @@ namespace Ink_Canvas.Helpers
             {
                 if (endIndex - startIndex >= 2)
                 {
+                    // Adjacent segments share a point: carry its pressure scale forward
+                    // instead of recalculating it for both sides of every segment.
+                    var previousScale = PressureToVisualScale(points[startIndex].PressureFactor, ignorePressure);
                     for (int i = startIndex; i < endIndex - 1 && i < points.Count - 1; i++)
                     {
+                        var nextPointIndex = i + 1;
+                        var nextScale = PressureToVisualScale(points[nextPointIndex].PressureFactor, ignorePressure);
                         var startPoint = new Point(points[i].X, points[i].Y);
-                        var endPoint = new Point(points[i + 1].X, points[i + 1].Y);
-                        var s0 = PressureToVisualScale(points[i].PressureFactor, ignorePressure);
-                        var s1 = PressureToVisualScale(points[i + 1].PressureFactor, ignorePressure);
-                        var thickness = Math.Max(0.35, (drawingAttributes.Width * s0 + drawingAttributes.Width * s1) / 2.0);
+                        var endPoint = new Point(points[nextPointIndex].X, points[nextPointIndex].Y);
+                        var thickness = Math.Max(0.35, drawingAttributes.Width * (previousScale + nextScale) / 2.0);
                         dc.DrawLine(GetPen(drawingAttributes.Color, thickness), startPoint, endPoint);
+                        previousScale = nextScale;
                     }
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
@@ -251,7 +263,10 @@ namespace Ink_Canvas.Helpers
 
             _lastCommittedPointCount = currentPointCount;
             _activeVisual = null;
-            _activePenCache.Clear();
+            // Keep the per-stroke frozen Pen cache across visual commits.
+            // Long strokes are split into DrawingVisuals, but pressure values
+            // commonly revisit the same quantized widths. Clearing here would
+            // recreate those Pens every COMMIT_POINT_THRESHOLD points.
         }
 
         /// <summary>
@@ -269,6 +284,12 @@ namespace Ink_Canvas.Helpers
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
+            // Duplicate requests can arrive while this stroke's point set is unchanged.
+            // Avoid reopening the DrawingVisual and replaying all active segments.
+            // ForceRedraw bypasses this guard for same-count point replacements.
+            if (!forceRedraw && currentPointCount == _lastRenderedPointCount)
+                return;
+
             var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var gen0CollectionCountStart = startedAt != 0L ? GC.CollectionCount(0) : -1;
             var gen1CollectionCountStart = startedAt != 0L ? GC.CollectionCount(1) : -1;
@@ -284,6 +305,7 @@ namespace Ink_Canvas.Helpers
 
                 var activeStartIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
                 DrawSegment(_activeVisual, activeStartIndex, currentPointCount);
+                _lastRenderedPointCount = currentPointCount;
 
                 if (currentPointCount - _lastCommittedPointCount >= COMMIT_POINT_THRESHOLD)
                 {
@@ -325,6 +347,7 @@ namespace Ink_Canvas.Helpers
                 _activeVisual = null;
                 _activePenCache.Clear();
                 _lastCommittedPointCount = 0;
+                _lastRenderedPointCount = -1;
             }
             else if (_activeVisual != null)
             {
