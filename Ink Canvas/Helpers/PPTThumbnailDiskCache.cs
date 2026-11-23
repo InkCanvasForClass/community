@@ -107,7 +107,7 @@ namespace Ink_Canvas.Helpers
                 if (string.IsNullOrWhiteSpace(autoSaveLocation) || string.IsNullOrWhiteSpace(presentationName)) return false;
 
                 // 与 PPTInkManager 使用相同的演示文稿目录标识。
-                string presentationId = presentationName + "_" + slideCount.ToString() + "_" + HashHelper.GetFileHash(fullPath);
+                string presentationId = presentationName + "_" + slideCount.ToString() + "_" + HashHelper.GetFileHash(presentationPath);
                 string presentationInkDirectory = Path.Combine(autoSaveLocation, "Auto Saved - Presentations", presentationId);
                 string version = file.Length.ToString() + "-" + file.LastWriteTimeUtc.Ticks.ToString() +
                     "-" + slideCount.ToString() + "-" + width.ToString() + "x" + height.ToString();
