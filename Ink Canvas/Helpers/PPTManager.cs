@@ -1506,6 +1506,42 @@ namespace Ink_Canvas.Helpers
                     return cachedThumbnails;
                 }
 
+                tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
+                Directory.CreateDirectory(tempDir);
+
+                for (int i = 1; i <= count; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    Slide slide = null;
+                    try
+                    {
+                        slide = slides[i];
+                        var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
+                        slide.Export(imagePath, "PNG", width, height);
+                        cancellationToken.ThrowIfCancellationRequested();
+                        result.Add(new PPTSlideThumbnail
+                        {
+                            SlideNumber = i,
+                            PngBytes = File.ReadAllBytes(imagePath)
+                        });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"生成PPT第{i}页缩略图失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                    finally
+                    {
+                        SafeReleaseComObject(slide);
+                    }
+
+                    progress?.Report((double)i / count);
+                }
+
                 bool isStillSavedRevision = false;
                 try
                 {
@@ -1518,7 +1554,7 @@ namespace Ink_Canvas.Helpers
                 catch { }
                 if (isStillSavedRevision && result.Count == count)
                     PPTThumbnailDiskCache.Save(presentationPath, presentationName, width, height, count, result);
-                    
+                    PPTThumbnailDiskCache.Save(presentationPath, activePresentation.Name, width, height, count, result);
             }
             catch (OperationCanceledException)
             {
