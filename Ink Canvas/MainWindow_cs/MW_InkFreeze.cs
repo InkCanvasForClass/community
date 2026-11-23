@@ -209,14 +209,14 @@ namespace Ink_Canvas
                 {
                     bool isFrozen = IsCurrentPageFrozen;
                     Freeze_Icon.Label = isFrozen ? FloatingBarStrings.FloatingBar_Unfreeze : FloatingBarStrings.FloatingBar_Freeze;
-                    Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
+                    InkResourceCache.SetGeometry(Freeze_Icon.Icon, isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry
                         : XamlGraphicsIconGeometries.FreezeIconGeometry);
 
                     var foreground = FloatBarForegroundColor;
                     var frozenColor = IsCurrentThemeDark() ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
                     if (!ToolbarRegistry.GetUseRedStyle(Freeze_Icon))
-                        Freeze_Icon.Icon.Brush = new SolidColorBrush(isFrozen ? frozenColor : foreground);
+                        Freeze_Icon.Icon.Brush = InkResourceCache.GetBrush(isFrozen ? frozenColor : foreground);
                 }
 
                 if (BoardInkFreezeBtn != null)
@@ -229,12 +229,12 @@ namespace Ink_Canvas
                         : XamlGraphicsIconGeometries.FreezeIconGeometry;
 
                     var accent = Application.Current.TryFindResource("FloatingBarAccentBrush") as Brush
-                        ?? new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                        ?? InkResourceCache.GetBrush(Color.FromRgb(37, 99, 235));
                     var normalBackground = Application.Current.TryFindResource("FloatingBarBackgroundBrush") as Brush
                         ?? Application.Current.TryFindResource("BoardFloatBarBackground") as Brush
-                        ?? new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        ?? InkResourceCache.GetBrush(Color.FromRgb(42, 42, 42));
                     var normalForeground = Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush
-                        ?? new SolidColorBrush(FloatBarForegroundColor);
+                        ?? InkResourceCache.GetBrush(FloatBarForegroundColor);
 
                     if (isFrozen)
                     {

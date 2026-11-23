@@ -46,11 +46,12 @@ namespace InkCanvas.Calibration.Tests
                 AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll, CanvasGestureTests.RunAll,
                 ChickenSoupMigrationDoesNotAddMottosWhenCustomSchemeSelectedOrPresetsEmpty,
                 ChickenSoupMigrationPreservesExistingSelectedPresets,
-                ChickenSoupMigrationMigratesLegacySourceToNewFormat };
+                ChickenSoupMigrationMigratesLegacySourceToNewFormat, InkResourceCacheTests.RunAll };
             if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
             if (Array.IndexOf(args, "--roaming-only") >= 0) tests = new Action[] { BoardRoamingTests.RunAll };
             if (Array.IndexOf(args, "--roaming-benchmark") >= 0) tests = new Action[] { BoardRoamingTests.Benchmark };
             if (Array.IndexOf(args, "--gesture-only") >= 0) tests = new Action[] { CanvasGestureTests.RunAll };
+            if (Array.IndexOf(args, "--cache-only") >= 0) tests = new Action[] { InkResourceCacheTests.RunAll };
             int gestureConfigIndex = Array.IndexOf(args, "--gesture-config");
             if (gestureConfigIndex >= 0)
             {

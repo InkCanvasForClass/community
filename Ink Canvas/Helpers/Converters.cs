@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas.Converter
@@ -204,7 +205,7 @@ namespace Ink_Canvas.Converter
             {
                 if (value is string geometryString && !string.IsNullOrEmpty(geometryString))
                 {
-                    return Geometry.Parse(geometryString);
+                    return InkResourceCache.GetGeometry(geometryString);
                 }
             }
             catch (Exception ex)

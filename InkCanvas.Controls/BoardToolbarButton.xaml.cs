@@ -41,7 +41,7 @@ namespace Ink_Canvas.Controls
             var button = (BoardToolbarButton)d;
             if (button.IconGeometryInternal != null && e.NewValue is string geometry && !string.IsNullOrEmpty(geometry))
             {
-                button.IconGeometryInternal.Geometry = Geometry.Parse(geometry);
+                InkResourceCache.SetGeometry(button.IconGeometryInternal, geometry);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Ink_Canvas.Controls
             var button = (BoardToolbarButton)d;
             if (button.IconGeometryInternal != null && e.NewValue is Brush brush)
             {
-                button.IconGeometryInternal.Brush = brush;
+                InkResourceCache.SetBrush(button.IconGeometryInternal, brush);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Ink_Canvas.Controls
             UpdateCornerRadius(Position);
             if (!string.IsNullOrEmpty(IconGeometry))
             {
-                IconGeometryInternal.Geometry = Geometry.Parse(IconGeometry);
+                InkResourceCache.SetGeometry(IconGeometryInternal, IconGeometry);
             }
         }
 
