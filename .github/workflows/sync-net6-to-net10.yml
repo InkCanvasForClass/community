@@ -9,11 +9,16 @@ name: Sync net6 to net10
 #   1. 提交信息里写 `resync: <sha1> <sha2> ...`（也接受 re-sync / sync-commits / 重新同步）时，
 #      只重新同步这几个提交，忽略 net6-only 标记。用于修正历史后单独补同步
 #   2. 其余情况按提交顺序 cherry-pick `origin/net10..origin/net6` 区间内所有非 net6-only 提交
-#   3. 冲突自动解决：csproj 取 net10 的包升级 + 应用 net6 的包变更、lock 文件删除、
-#      sync 工作流取 net6、其他文件取 net6
-#   4. 删除旧 packages.lock.json，先尝试 restore + build
-#   5. build 失败 → 升级所有 NuGet 包到最新稳定版 → 重新 restore + build
-#   6. 编译通过才推送，否则中止报警
+#   3. 冲突处理：
+#      - 有明确规则的文件自动解决：csproj 合并包引用、lock 文件删除、
+#        sync 工作流取 net6、Settings 系列取并集、resx 按 <data> 取并集
+#      - 其它文件（含绝大多数 .cs）不再整文件取 net6，而是做三方合并并保留
+#        `<<<<<<<` / `=======` / `>>>>>>>` 冲突标记
+#   4. 出现人工冲突 → 把带标记的结果提交到 `sync/manual-<sha>` 分支并开 draft PR，
+#      等待人工解决；不推送 net10、不更新同步水位（水位写进该分支，合并后自动生效）
+#   5. 无冲突 → 删除旧 packages.lock.json，先尝试 restore + build
+#   6. build 失败 → 升级所有 NuGet 包到最新稳定版（只升不降）→ 重新 restore + build
+#   7. 编译通过才推送，否则中止报警
 #
 # 为什么不再用 merge + revert：
 #   net6-only 的提交常被后续 net6 提交改写，merge 到 net10 后再 `git revert` 必然冲突；
@@ -31,6 +36,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   actions: write
 
 concurrency:
@@ -64,11 +70,70 @@ jobs:
         shell: pwsh
         env:
           ERROR_ACTION_PREFERENCE: Continue
+          GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Continue'
 
           function Get-ConflictFiles {
             @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
+          }
+
+          # 对单个冲突文件做三方合并，保留 `<<<<<<<` / `=======` / `>>>>>>>` 标记。
+          # 返回 $true 表示仍有需要人工判断的冲突。
+          function Write-MergeConflictFile {
+            param([string]$Path)
+
+            # --temp 的输出格式是 "<临时文件名>\t<原路径>"，必须只取 tab 前的文件名
+            $oursTmp   = ((git checkout-index --stage=2 --temp -- $Path 2>$null | Select-Object -Last 1) -split "`t")[0]
+            $baseTmp   = ((git checkout-index --stage=1 --temp -- $Path 2>$null | Select-Object -Last 1) -split "`t")[0]
+            $theirsTmp = ((git checkout-index --stage=3 --temp -- $Path 2>$null | Select-Object -Last 1) -split "`t")[0]
+            # [IO.File] 用进程工作目录解析相对路径，与 PowerShell 位置可能不同，统一转成绝对路径
+            if ($oursTmp -and (Test-Path -LiteralPath $oursTmp)) { $oursTmp = (Get-Item -LiteralPath $oursTmp).FullName }
+            if ($baseTmp -and (Test-Path -LiteralPath $baseTmp)) { $baseTmp = (Get-Item -LiteralPath $baseTmp).FullName }
+            if ($theirsTmp -and (Test-Path -LiteralPath $theirsTmp)) { $theirsTmp = (Get-Item -LiteralPath $theirsTmp).FullName }
+
+            try {
+              # 增删冲突（某一侧不存在）：没有可合并的内容，交给人工按存在的版本处理
+              if (-not $oursTmp -or -not $theirsTmp) {
+                # 两侧都不存在说明已经没有冲突阶段（例如合并已成功），无需人工处理
+                if (-not $oursTmp -and -not $theirsTmp) { return $false }
+                if ($oursTmp) { git checkout --ours -- $Path 2>$null }
+                elseif ($theirsTmp) { git checkout --theirs -- $Path 2>$null }
+                git add -- $Path 2>$null
+                Write-Host "  增删冲突，已保留存在的一侧，需人工确认: $Path"
+                return $true
+              }
+              if (-not $baseTmp) {
+                # add/add 冲突没有共同祖先，用一个空文件当 base
+                $baseTmp = Join-Path $env:TEMP ('mcf-base-' + [guid]::NewGuid().ToString('N'))
+                New-Item -ItemType File -Force $baseTmp | Out-Null
+              }
+
+              $mergedLines = @(& git merge-file -p --diff3 `
+                -L 'net10 (ours)' -L 'net6 (base)' -L 'net6 (incoming)' `
+                $oursTmp $baseTmp $theirsTmp)
+              $hasConflict = ($LASTEXITCODE -ne 0)
+
+              $hasBom = $false
+              $ob = [IO.File]::ReadAllBytes($oursTmp)
+              if ($ob.Length -ge 3 -and $ob[0] -eq 0xEF -and $ob[1] -eq 0xBB -and $ob[2] -eq 0xBF) { $hasBom = $true }
+              # 二进制文件不能做文本三方合并，保留 ours 并交给人工
+              if ($ob -contains 0) {
+                git checkout --ours -- $Path 2>$null
+                git add -- $Path 2>$null
+                Write-Host "  二进制冲突，已保留 net10 版本，需人工确认: $Path"
+                return $true
+              }
+              $text = (($mergedLines -join "`r`n") + "`r`n")
+              [IO.File]::WriteAllText((Resolve-Path $Path).Path, $text, [Text.UTF8Encoding]::new($hasBom))
+              git add -- $Path
+              return $hasConflict
+            } finally {
+              # checkout-index --temp 产生的临时文件不会自动删除，留在工作区会被 git add -A 带上
+              foreach ($tmp in @($oursTmp, $theirsTmp, $baseTmp)) {
+                if ($tmp -and (Test-Path -LiteralPath $tmp)) { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }
+              }
+            }
           }
 
           # 解决 cherry-pick 冲突。返回 $true 表示全部解决，可以 commit --no-edit 收尾。
@@ -265,22 +330,29 @@ jobs:
               git add -- $path
             }
 
-            # 5) 其他文件：优先取 net6 版本，保证新功能/修复能同步过来
+            # 5) 其他文件（含绝大多数 .cs）：不再整文件取 net6。
+            #    整文件覆盖会把 net10 独有的实现/成员一起删掉，所以这里做三方合并，
+            #    保留冲突标记，交给人工在 PR 里解决。
             $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" -and $_ -notmatch "\.resx$" -and ($_ -notmatch $unionPattern) }
             foreach ($path in $otherConflicts) {
-              Write-Host "解决其他冲突（取 net6 版本）: $path"
-              git checkout --theirs -- $path 2>$null
-              if ($LASTEXITCODE -eq 0) {
-                git add -- $path
-              } else {
-                git checkout --ours -- $path 2>$null
-                git add -- $path 2>$null
+              Write-Host "保留合并冲突（三方合并）: $path"
+              if (Write-MergeConflictFile -Path $path) {
+                $script:manualConflictFiles.Add($path)
               }
             }
 
+            # 前面自动规则没处理干净的残留冲突，同样保留标记而不是覆盖
             $remaining = Get-ConflictFiles
-            if ($remaining.Count -gt 0) {
-              Write-Error ("::error::仍有未解决的冲突: " + ($remaining -join ", "))
+            foreach ($path in $remaining) {
+              Write-Host "保留合并冲突（自动规则未处理）: $path"
+              if (Write-MergeConflictFile -Path $path) {
+                $script:manualConflictFiles.Add($path)
+              }
+            }
+
+            $stillUnmerged = Get-ConflictFiles
+            if ($stillUnmerged.Count -gt 0) {
+              Write-Error ("::error::以下文件仍处于未合并状态: " + ($stillUnmerged -join ", "))
               return $false
             }
             return $true
@@ -356,9 +428,11 @@ jobs:
           }
 
           # ===== 2. 逐个 cherry-pick =====
+          $script:manualConflictFiles = [System.Collections.Generic.List[string]]::new()
           foreach ($sha in $toApply) {
             $subject = ((git log -1 --format='%h %s' $sha) | Out-String).Trim()
             Write-Host "==> 同步 $subject"
+            $script:manualConflictFiles.Clear()
 
             # 合并提交需要 -m 才能 cherry-pick
             $isMerge = ((git rev-list --parents -n1 $sha) -split ' ').Count -gt 2
@@ -396,6 +470,60 @@ jobs:
               Write-Error "::error::$subject 冲突解决后仍无法提交"
               exit 1
             }
+
+            # 有需要人工判断的冲突：把带标记的提交推到独立分支并开 draft PR，
+            # 不推送 net10，也不让整条同步链失败。
+            if ($script:manualConflictFiles.Count -gt 0) {
+              $shortSha = ((git rev-parse --short $sha) | Out-String).Trim()
+              $branch = "sync/manual-$shortSha"
+
+              # 水位写进这个提交：PR 合并后自动生效，后续 net6 提交从 $sha 之后继续
+              Set-Content -Path .github/last-synced-net6.txt -Value $sha
+              git add -- .github/last-synced-net6.txt
+              git commit --amend --no-edit
+
+              git push origin ("HEAD:refs/heads/" + $branch) --force
+              if ($LASTEXITCODE -ne 0) {
+                Write-Error "::error::推送冲突分支 $branch 失败"
+                exit 1
+              }
+
+              $fileList = ($script:manualConflictFiles | Sort-Object -Unique | ForEach-Object { '- ' + $_ }) -join "`n"
+              $bodyLines = @(
+                "自动同步在 cherry-pick ``$subject``（``$sha``）时出现无法安全自动解决的冲突。",
+                "",
+                "已按三方合并保留 ``<<<<<<< `` / ``=======`` / ``>>>>>>>`` 标记并推送到本分支，请人工解决。",
+                "",
+                "涉及文件：",
+                $fileList,
+                "",
+                "处理步骤：",
+                "1. ``git fetch origin && git checkout $branch``",
+                "2. 解决冲突标记，保留 net10 与 net6 双方必需的实现",
+                '3. ``dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64`` 确认通过',
+                "4. 提交并推送本分支，然后把本 PR 转为正式并合并",
+                "",
+                "合并后 ``.github/last-synced-net6.txt`` 会指向 ``$sha``，net6 上它之后的提交会在下次 net6 推送或手动运行 Sync 时继续同步。"
+              )
+              $bodyPath = Join-Path $env:RUNNER_TEMP 'sync-conflict-body.md'
+              [IO.File]::WriteAllText($bodyPath, ($bodyLines -join "`n"), [Text.UTF8Encoding]::new($false))
+
+              $existing = ((gh pr list --head $branch --state open --json number --jq '.[0].number' 2>$null | Out-String).Trim())
+              if ($existing) {
+                Write-Host "::notice::更新已有的冲突 PR #$existing"
+                gh pr edit $existing --body-file $bodyPath 2>$null
+              } else {
+                gh pr create --draft --base net10 --head $branch `
+                  --title "chore(sync): net6 → net10 冲突待人工修复（$shortSha）" `
+                  --body-file $bodyPath
+              }
+
+              "manual=true" >> $env:GITHUB_OUTPUT
+              "branch=$branch" >> $env:GITHUB_OUTPUT
+              Write-Host "::notice::冲突已保留在分支 $branch，等待人工解决；net10 未被修改"
+              exit 0
+            }
+
             Write-Host "冲突解决完成: $subject"
           }
 
@@ -422,6 +550,7 @@ jobs:
           }
 
       - name: Delete stale packages.lock.json
+        if: steps.sync.outputs.manual != 'true'
         shell: pwsh
         run: |
           $lockFiles = Get-ChildItem -Recurse -Filter "packages.lock.json" -ErrorAction SilentlyContinue
@@ -432,6 +561,7 @@ jobs:
 
       - name: Try restore and build (without upgrading packages)
         id: try_build
+        if: steps.sync.outputs.manual != 'true'
         shell: pwsh
         continue-on-error: true
         run: |
@@ -450,7 +580,7 @@ jobs:
           Write-Host "::notice::初次编译通过，无需升级 NuGet 包"
 
       - name: Upgrade NuGet packages to latest stable (only if first build failed)
-        if: steps.try_build.outcome == 'failure'
+        if: steps.try_build.outcome == 'failure' && steps.sync.outputs.manual != 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
@@ -504,7 +634,7 @@ jobs:
           Write-Host "包升级完成"
 
       - name: Restore and build (after upgrade)
-        if: steps.try_build.outcome == 'failure'
+        if: steps.try_build.outcome == 'failure' && steps.sync.outputs.manual != 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
@@ -523,6 +653,7 @@ jobs:
 
       - name: Commit and push
         id: push
+        if: steps.sync.outputs.manual != 'true'
         shell: pwsh
         run: |
           # 记录本次同步到的 net6 提交，下次只同步它之后的新提交
@@ -588,7 +719,16 @@ jobs:
           {
             echo "# Sync net6 → net10 Summary"
             echo ""
-            if [ "${{ job.status }}" = "success" ]; then
+            if [ "${{ steps.sync.outputs.manual }}" = "true" ]; then
+              echo "## ⚠️ 冲突已保留，等待人工解决"
+              echo ""
+              echo "**冲突分支:** \`${{ steps.sync.outputs.branch }}\`（已创建/更新 draft PR）"
+              echo "**Trigger commit:** \`${{ github.sha }}\`"
+              echo "**Run:** #${{ github.run_number }}"
+              echo ""
+              echo "冲突文件已按三方合并保留 \`<<<<<<<\` / \`=======\` / \`>>>>>>>\` 标记，"
+              echo "net10 未被修改。解决标记、编译通过并合并该 PR 后，后续 net6 提交会继续同步。"
+            elif [ "${{ job.status }}" = "success" ]; then
               echo "## ✅ Sync Successful"
               echo ""
               echo "**Trigger commit:** \`${{ github.sha }}\`"
