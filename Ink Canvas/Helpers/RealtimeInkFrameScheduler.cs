@@ -15,7 +15,8 @@ namespace Ink_Canvas.Helpers
             Force
         }
 
-        private sealed class PendingRedraw
+        // A value type avoids one heap allocation per dirty StrokeVisual per frame.
+        private struct PendingRedraw
         {
             public RedrawRequestKind Kind;
             public long RequestedAt;
@@ -24,10 +25,17 @@ namespace Ink_Canvas.Helpers
             public int Gen2CollectionCountStart;
         }
 
-        private static readonly Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
+        // Swap the two dictionaries at frame start so requests arriving during redraw
+        // are collected separately without copying every dirty visual into a list.
+        private static Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
             new Dictionary<StrokeVisual, PendingRedraw>();
-        private static readonly List<KeyValuePair<StrokeVisual, PendingRedraw>> PendingSnapshot =
-            new List<KeyValuePair<StrokeVisual, PendingRedraw>>(8);
+        private static Dictionary<StrokeVisual, PendingRedraw> PendingSnapshot =
+            new Dictionary<StrokeVisual, PendingRedraw>();
+
+        // Track the earliest request as entries arrive, avoiding a full extra scan
+        // of every dirty visual at the start of each rendering frame.
+        private static StrokeVisual PendingEarliestVisual;
+        private static long PendingEarliestRequestedAt;
 
         private static readonly Action GlobalDispatcherProbeAction = CompleteGlobalDispatcherProbe;
         private static DispatcherOperation GlobalDispatcherProbeOperation;
@@ -79,18 +87,13 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         internal static event Action<long, double> RenderingSampleAvailable;
 
-        /// <summary>
-        /// 每次 <see cref="RequestRedraw"/>/<see cref="RequestForceRedraw"/>/<see cref="Flush"/> 被调用时触发(参数为 Stopwatch 时间戳)。
-        /// HUD 用 1s 滑窗统计 tick 数,得到"墨迹入帧率":每秒钟有多少个墨迹脏标记入队。
-        /// 而不是 WPF 进程整体 CompositionTarget.Rendering 频率(屏幕刷新率)。
-        /// </summary>
-        internal static event Action<long> InkTickAvailable;
-
         // Input-side coalesce window: multiple TouchMove requests within this window
         // share one render pass without forcing another kick.
-        private const double CoalesceWindowMs = 10.0;
+        // Keep timing comparisons in Stopwatch ticks to avoid floating-point conversion
+        // on every touch sample entering the scheduler.
+        private static readonly long CoalesceWindowTicks = Stopwatch.Frequency / 100;
         // If Rendering has not run for this long while dirty, force another kick.
-        private const double StalledRenderKickMs = 24.0;
+        private static readonly long StalledRenderKickTicks = Stopwatch.Frequency * 24 / 1000;
         // Keep a short warm subscription after strokes go idle, then unbind.
         private const int IdleEmptyFrameUnbindThreshold = 2;
 
@@ -149,12 +152,13 @@ namespace Ink_Canvas.Helpers
                         0);
                 }
                 PendingRedraws.Remove(strokeVisual);
+                if (ReferenceEquals(PendingEarliestVisual, strokeVisual))
+                    RecalculatePendingEarliest();
             }
 
             UnsubscribeIfIdle();
             ExecuteRedraw(strokeVisual, requestKind);
             // Flush 也是一次墨迹入帧:笔尖起跳/收尾即应计 1 帧。
-            RaiseInkTick(Stopwatch.GetTimestamp());
         }
 
         public static void Cancel(StrokeVisual strokeVisual)
@@ -162,7 +166,9 @@ namespace Ink_Canvas.Helpers
             if (strokeVisual == null)
                 return;
 
-            PendingRedraws.Remove(strokeVisual);
+            if (PendingRedraws.Remove(strokeVisual)
+                && ReferenceEquals(PendingEarliestVisual, strokeVisual))
+                RecalculatePendingEarliest();
             UnsubscribeIfIdle();
         }
 
@@ -170,6 +176,8 @@ namespace Ink_Canvas.Helpers
         {
             PendingRedraws.Clear();
             PendingSnapshot.Clear();
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
             LastRenderingAt = 0L;
             LastKickAt = 0L;
             ActiveStrokeSessions = 0;
@@ -193,28 +201,30 @@ namespace Ink_Canvas.Helpers
                 return;
 
             var now = Stopwatch.GetTimestamp();
-            var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
 
             // 每次 RequestRedraw 调用都计 1 帧"墨迹入帧"。
             // 即便 Coalesce 窗口内重复调用命中已 dirty 路径,这里也照样入帧:
             // 每次入队都 +1，保持墨迹入帧计数语义一致。
             // 注意:真正的"墨迹帧率"计数已转移到 StrokeVisual.Redraw 入口,
             // 这里仅保留事件 raise 以便其他订阅者使用。
-            RaiseInkTick(now);
 
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
-                if (requestKind == RedrawRequestKind.Force)
+                if (requestKind == RedrawRequestKind.Force && pending.Kind != RedrawRequestKind.Force)
+                {
                     pending.Kind = RedrawRequestKind.Force;
+                    PendingRedraws[strokeVisual] = pending;
+                }
 
                 // Already dirty: re-kick only if the render loop looks stalled.
+                // A false result guarantees Rendering is already subscribed, so no
+                // per-contact EnsureRenderingSubscribed call is needed here.
                 if (ShouldForceKick(now))
                     KickRender(strokeVisual, now);
-                else
-                    EnsureRenderingSubscribed();
                 return;
             }
 
+            var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
             var wasEmpty = PendingRedraws.Count == 0;
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
@@ -227,17 +237,18 @@ namespace Ink_Canvas.Helpers
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
 
+            if (wasEmpty || PendingEarliestRequestedAt == 0L || now < PendingEarliestRequestedAt)
+            {
+                PendingEarliestVisual = strokeVisual;
+                PendingEarliestRequestedAt = now;
+            }
+
             if (wasEmpty || ShouldForceKick(now))
             {
                 // First dirty of a batch, or coalesce window expired / render stalled.
                 KickRender(strokeVisual, now);
             }
-            else
-            {
-                // Inside coalesce window: mark dirty only. The already-kicked frame
-                // (or sticky Rendering subscription) will pick it up.
-                EnsureRenderingSubscribed();
-            }
+            // Otherwise this request joins the already-subscribed rendering batch.
         }
 
         private static bool ShouldForceKick(long nowTicks)
@@ -248,12 +259,12 @@ namespace Ink_Canvas.Helpers
             // No render observed yet after a kick — wait unless stalled.
             if (LastKickAt != 0L && (LastRenderingAt == 0L || LastRenderingAt < LastKickAt))
             {
-                return ToMilliseconds(nowTicks - LastKickAt) >= StalledRenderKickMs;
+                return nowTicks - LastKickAt >= StalledRenderKickTicks;
             }
 
             // Render has run since last kick: only force a new kick after coalesce window.
             if (LastKickAt != 0L)
-                return ToMilliseconds(nowTicks - LastKickAt) >= CoalesceWindowMs;
+                return nowTicks - LastKickAt >= CoalesceWindowTicks;
 
             return true;
         }
@@ -274,8 +285,11 @@ namespace Ink_Canvas.Helpers
             if (dispatcher == null)
                 return;
 
+            // A pending probe already measures the dispatcher wait for this dirty batch.
+            // Do not abort and enqueue another Render-priority operation for every re-kick:
+            // that only churns the UI Dispatcher queue and can postpone the original probe.
             if (GlobalDispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
-                GlobalDispatcherProbeOperation.Abort();
+                return;
 
             GlobalProbeStartedAt = startedAt;
             GlobalProbeDelayMs = 0;
@@ -345,31 +359,33 @@ namespace Ink_Canvas.Helpers
             GlobalProbeDelayMs = 0;
             GlobalProbeStartedAt = 0;
 
-            PendingSnapshot.Clear();
-            KeyValuePair<StrokeVisual, PendingRedraw>? earliest = null;
-            foreach (var pair in PendingRedraws)
-            {
-                PendingSnapshot.Add(pair);
-                if (pair.Value.RequestedAt != 0L
-                    && (earliest == null || pair.Value.RequestedAt < earliest.Value.Value.RequestedAt))
-                {
-                    earliest = pair;
-                }
-            }
+            // Detach the current frame's batch in O(1). Any RequestRedraw raised while
+            // executing this snapshot is added to the now-empty PendingRedraws dictionary
+            // and therefore belongs to the next frame.
+            var completedBatch = PendingRedraws;
+            var completedEarliestVisual = PendingEarliestVisual;
+            var completedEarliestRequestedAt = PendingEarliestRequestedAt;
+            PendingRedraws = PendingSnapshot;
+            PendingSnapshot = completedBatch;
             PendingRedraws.Clear();
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
 
             double frameWaitSampleMs = 0;
-            // One FrameWait sample per render pass (earliest dirty).
-            if (earliest.HasValue)
+            // The earliest dirty request was tracked on enqueue; avoid scanning the
+            // entire batch solely to select its single FrameWait telemetry sample.
+            if (completedEarliestVisual != null && completedEarliestRequestedAt != 0L
+                && PendingSnapshot.TryGetValue(completedEarliestVisual, out var earliestRedraw))
             {
-                var earliestPair = earliest.Value;
-                frameWaitSampleMs = ToMilliseconds(renderedAt - earliestPair.Value.RequestedAt);
+                var earliestPairKey = completedEarliestVisual;
+                var earliestPairValue = earliestRedraw;
+                frameWaitSampleMs = ToMilliseconds(renderedAt - completedEarliestRequestedAt);
                 RealtimeInkPerformanceMonitor.RecordFrameWait(
-                    earliestPair.Key,
-                    renderedAt - earliestPair.Value.RequestedAt,
-                    earliestPair.Value.Gen0CollectionCountStart,
-                    earliestPair.Value.Gen1CollectionCountStart,
-                    earliestPair.Value.Gen2CollectionCountStart,
+                    earliestPairKey,
+                    renderedAt - completedEarliestRequestedAt,
+                    earliestPairValue.Gen0CollectionCountStart,
+                    earliestPairValue.Gen1CollectionCountStart,
+                    earliestPairValue.Gen2CollectionCountStart,
                     probeDelayMs,
                     renderingIntervalMs);
             }
@@ -402,6 +418,21 @@ namespace Ink_Canvas.Helpers
             {
                 // Keep a short warm window while strokes are active.
                 EnsureRenderingSubscribed();
+            }
+        }
+
+        private static void RecalculatePendingEarliest()
+        {
+            PendingEarliestVisual = null;
+            PendingEarliestRequestedAt = 0L;
+            foreach (var pair in PendingRedraws)
+            {
+                if (pair.Value.RequestedAt == 0L
+                    || (PendingEarliestRequestedAt != 0L && pair.Value.RequestedAt >= PendingEarliestRequestedAt))
+                    continue;
+
+                PendingEarliestVisual = pair.Key;
+                PendingEarliestRequestedAt = pair.Value.RequestedAt;
             }
         }
 
@@ -439,18 +470,5 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static void RaiseInkTick(long renderedAtTicks)
-        {
-            var handler = InkTickAvailable;
-            if (handler == null) return;
-            try
-            {
-                handler.Invoke(renderedAtTicks);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"RealtimeInkFrameScheduler.InkTickAvailable subscriber threw: {ex.Message}");
-            }
-        }
     }
 }

@@ -142,11 +142,16 @@ namespace Ink_Canvas
 
         private bool TryHandlePalmGroupTouch(TouchEventArgs e, bool down)
         {
+            int id = e.TouchDevice.Id;
+            // Palm-group membership is established on TouchDown. Ordinary drawing moves
+            // cannot join an existing group, so avoid settings validation and display
+            // environment capture on every input sample unless this contact is grouped.
+            if (!down && !_palmGroupDevices.ContainsKey(id)) return false;
+
             var record = Settings.Advanced.TouchCalibration;
             if (record?.UsePointGrouping != true || !record.IsValid() || !CanStartPalmEraser()) return false;
             if (!record.Environment.Matches(TouchCalibrationDisplay.Capture(this, "WPF"))) return false;
             if (_pluginCanvasGestureHandler != null) return false;
-            int id = e.TouchDevice.Id;
             var point = e.GetTouchPoint(inkCanvas).Position;
             if (down)
             {
