@@ -6,8 +6,8 @@ namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 跨进程、跨软件重启复用 PPT 幻灯片缩略图。
-    /// 使用文档路径作为稳定身份，使用文件长度和最后写入时间检测文档版本；
-    /// 不读取整个 PPT 文件计算内容哈希，避免大文件带来的额外 I/O。
+    /// 缓存保存在对应 PPT 的自动墨迹保存目录下，与 PPTInkManager 使用相同的文档目录标识；
+    /// 使用文件长度和最后写入时间检测文档版本，不读取整个 PPT 文件计算内容哈希。
     /// </summary>
     internal static class PPTThumbnailDiskCache
     {
@@ -45,7 +45,7 @@ namespace Ink_Canvas.Helpers
             IList<PPTSlideThumbnail> thumbnails)
         {
             if (thumbnails == null || thumbnails.Count != slideCount ||
-                !TryGetCacheDirectory(presentationPath, width, height, slideCount, out var directory))
+                !TryGetCacheDirectory(presentationPath, presentationName, width, height, slideCount, out var directory))
                 return;
 
             string parent = Path.GetDirectoryName(directory);
