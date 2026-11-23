@@ -559,9 +559,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                string path = presentation.FullName;
-                string hash = HashHelper.GetFileHash(path);
-                return $"{presentation.Name}_{presentation.Slides.Count}_{hash}";
+                return PPTPresentationStorage.CreatePresentationId(
+                    presentation.Name, presentation.Slides.Count, presentation.FullName);
             }
             catch (Exception ex)
             {
