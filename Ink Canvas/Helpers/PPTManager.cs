@@ -1518,7 +1518,7 @@ namespace Ink_Canvas.Helpers
                 catch { }
                 if (isStillSavedRevision && result.Count == count)
                     PPTThumbnailDiskCache.Save(presentationPath, presentationName, width, height, count, result);
-                    PPTThumbnailDiskCache.Save(presentationPath, activePresentation.Name, width, height, count, result);
+                    
             }
             catch (OperationCanceledException)
             {
