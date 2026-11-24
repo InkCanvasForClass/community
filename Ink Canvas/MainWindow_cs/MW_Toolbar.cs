@@ -636,14 +636,11 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>动画期间挂起阴影后，用来轮询"这轮动画收完了没有"。</summary>
-        private System.Windows.Threading.DispatcherTimer _floatingBarShadowRestoreTimer;
-
-        /// <summary>轮询次数：状态万一泄漏时的兜底，不能让阴影永远消失。</summary>
-        private int _floatingBarShadowRestoreTicks;
-
         /// <summary>逐帧回调是否已挂（事件是静态的，重复挂会重复触发）。</summary>
         private bool _floatingBarShadowMotionHooked;
+
+        /// <summary>恢复阴影的渲染帧回调是否已挂。</summary>
+        private bool _floatingBarShadowRestoreHooked;
 
         private void HookFloatingBarShadowMotion()
         {
@@ -659,6 +656,9 @@ namespace Ink_Canvas
         /// DropShadowEffect 挂在整棵子树的最外层：动画每帧都在改跨度，于是每帧都要把
         /// 整条栏重新栅格化、再跑一遍模糊。4K（200% 缩放）下这一笔比动画本身还贵，
         /// 而阴影在运动过程中本来就很难被注意到——所以让它在动画期间让路。
+        /// 恢复不用定时器：动画本身就跑在 <see cref="CompositionTarget.Rendering"/> 上，
+        /// 在同一处帧回调里等 <see cref="ToolbarRegistry.IsMotionActive"/> 变 false 即可，
+        /// 帧一停就摘钩，既没有轮询间隔也没有兜底时长。
         /// </remarks>
         private void SuspendFloatingBarShadowForMotion()
         {
@@ -667,27 +667,17 @@ namespace Ink_Canvas
 
             StackPanelFloatingBarRoot.Effect = null;
 
-            if (_floatingBarShadowRestoreTimer == null)
-            {
-                _floatingBarShadowRestoreTimer = new System.Windows.Threading.DispatcherTimer(
-                    TimeSpan.FromMilliseconds(120),
-                    System.Windows.Threading.DispatcherPriority.Background,
-                    (_, _) => RestoreFloatingBarShadowWhenIdle(),
-                    Dispatcher);
-            }
-
-            _floatingBarShadowRestoreTicks = 0;
-            _floatingBarShadowRestoreTimer.Stop();
-            _floatingBarShadowRestoreTimer.Start();
+            if (_floatingBarShadowRestoreHooked) return;
+            _floatingBarShadowRestoreHooked = true;
+            CompositionTarget.Rendering += RestoreFloatingBarShadowWhenIdle;
         }
 
-        private void RestoreFloatingBarShadowWhenIdle()
+        private void RestoreFloatingBarShadowWhenIdle(object sender, EventArgs e)
         {
-            // 120ms × 80 ≈ 9.6 秒后无条件恢复：动画倍率极慢时也能在合理时间内回来
-            if (ToolbarRegistry.IsMotionActive && ++_floatingBarShadowRestoreTicks < 80) return;
+            if (ToolbarRegistry.IsMotionActive) return;
 
-            _floatingBarShadowRestoreTimer?.Stop();
-            _floatingBarShadowRestoreTicks = 0;
+            CompositionTarget.Rendering -= RestoreFloatingBarShadowWhenIdle;
+            _floatingBarShadowRestoreHooked = false;
             ApplyFloatingBarShadow();
         }
 
