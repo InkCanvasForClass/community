@@ -475,6 +475,7 @@ namespace Ink_Canvas
             // Dispatcher 诊断和崩溃监控。只有确认当前进程将进入完整应用后才初始化这些运行时服务。
             Startup += App_Startup;
             SessionEnding += App_SessionEnding;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
         }
 
@@ -532,7 +533,6 @@ namespace Ink_Canvas
                 // 监控失败不影响启动
             }
 
-            DispatcherUnhandledException += App_DispatcherUnhandledException;
             UpdateCpuUsageSnapshot();
             InitializeCrashListeners();
         }
@@ -1723,7 +1723,7 @@ namespace Ink_Canvas
             }
 
             // 阶段一：在创建 MainWindow、工具栏和插件之前判断是否需要 UIAccess。
-            // 仅普通启动路径执行；更新交接、helper、fallback 和已具备 UIAccess 的进程均不重复提权。
+            // 更新模式、helper、fallback 和已具备 UIAccess 的进程均不重复提权。
             bool shouldUseUIAccess = TryGetUIAccessStartupOptions(
                 parsedSettings,
                 out bool useProcessToken);
