@@ -70,11 +70,7 @@ namespace Ink_Canvas.Helpers
                 if (writtenSlides.Count != slideCount) return;
 
                 Directory.CreateDirectory(sizeDirectory);
-                if (!Directory.Exists(directory))
-                {
-                    try { Directory.Move(tempDirectory, directory); }
-                    catch (IOException) when (Directory.Exists(directory)) { }
-                }
+                ReplaceCacheDirectory(tempDirectory, directory);
 
                 // 仅在 Thumbnails 子树内清理，绝不删除墨迹文件或 Position。
                 string presentationsRoot = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(sizeDirectory)));
@@ -87,6 +83,35 @@ namespace Ink_Canvas.Helpers
             finally
             {
                 try { if (Directory.Exists(tempDirectory)) Directory.Delete(tempDirectory, true); } catch { }
+            }
+        }
+
+        private static void ReplaceCacheDirectory(string tempDirectory, string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                Directory.Move(tempDirectory, directory);
+                return;
+            }
+
+            // A cache miss can mean that an existing revision directory is incomplete or corrupt.
+            // Move it aside, publish the complete replacement, and restore it if publication fails.
+            string backupDirectory = directory + ".old-" + Guid.NewGuid().ToString("N");
+            Directory.Move(directory, backupDirectory);
+            try
+            {
+                Directory.Move(tempDirectory, directory);
+                try { Directory.Delete(backupDirectory, true); } catch { }
+            }
+            catch
+            {
+                try
+                {
+                    if (!Directory.Exists(directory) && Directory.Exists(backupDirectory))
+                        Directory.Move(backupDirectory, directory);
+                }
+                catch { }
+                throw;
             }
         }
 
