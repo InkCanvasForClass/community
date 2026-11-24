@@ -2603,7 +2603,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             if (element == null || _exiting.Count == 0) return;
 
-            DependencyObject node = VisualTreeHelper.GetParent(element);
+            // 从元素自己开始找：方形背景淡出收尾时传入的就是方形本身，
+            // 从父级起步永远匹配不到它，只剩"段内最后一个组件先收完"这一条路能折方形。
+            DependencyObject node = element;
             while (node != null)
             {
                 if (node is Border border && _exiting.TryGetValue(border, out var plan)
@@ -2706,10 +2708,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             scale.ScaleY = ToolbarItemShowStartScale;
             border.Opacity = 0.0;
 
-            // 排布已经回来了，眼睛还没看见它：记下这块跨度，由跟随按不透明度慢慢加回去
-            double footprint = vertical
-                ? border.ActualHeight + border.Margin.Top + border.Margin.Bottom
-                : border.ActualWidth + border.Margin.Left + border.Margin.Right;
+            // 排布已经回来了，眼睛还没看见它：记下这块跨度，由跟随按不透明度慢慢加回去。
+            //
+            // 不要读 ActualWidth/DesiredSize：Visibility 刚从 Collapsed 改回 Visible，
+            // 布局还没跑过，两个值都还是收起时的 0，只剩 Margin 有值。
+            // 第一个子项 Margin 为 0 时还能靠下面的兜底捡回 58，第二个及以后的独立方形
+            // 有 3px 左边距，就会被登记成 3px——跟随把整块方形当成"已经看见"，
+            // 两个独立方形同时显示时整条栏在淡入全程偏半个方形（用户反馈）。
+            // 这里就地量一次：DesiredSize 自带 Margin，与面板实际排给它的跨度一致。
+            double footprint = MeasureSeparateUnitFootprint(border, vertical);
             if (footprint <= 0.5) footprint = 58.0;
             _enteringUnits[border] = footprint;
 
@@ -2738,10 +2745,31 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     EasingFunction = CreateEnterEasing()
                 });
 
-            MotionTrace($"独立段展开 背景入场 {Describe(border)} 0→1 + 缩放 {ToolbarItemShowStartScale:F2}→1 时长={profile.Seconds * 1000:F0}ms");
+            MotionTrace($"独立段展开 背景入场 {Describe(border)} 0→1 + 缩放 {ToolbarItemShowStartScale:F2}→1 登记跨度={footprint:F1} 时长={profile.Seconds * 1000:F0}ms");
 
             // 同收起侧：这块跨度按不透明度逐帧长回来，居中跟随要每帧拿到当前值
             EnsureExtentMotionHook();
+        }
+
+        /// <summary>量独立方形此刻占用的排布跨度（含外边距）。</summary>
+        /// <remarks>
+        /// 从隐藏切到显示的那一瞬间不能直接读尺寸：布局还没跑，ActualWidth 与 DesiredSize
+        /// 都还是收起时的 0。这里就地量一次——DesiredSize 已经包含 Margin，
+        /// 与面板最终排给它的跨度一致，固定方形和内容驱动宽度的独立段都适用。
+        /// </remarks>
+        private static double MeasureSeparateUnitFootprint(Border border, bool vertical)
+        {
+            if (border == null) return 0;
+
+            try
+            {
+                border.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                return vertical ? border.DesiredSize.Height : border.DesiredSize.Width;
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         /// <summary>独立方形自己的缩放通道（不是组件那条位置通道）。</summary>
