@@ -1547,17 +1547,27 @@ namespace Ink_Canvas.Helpers
                 bool isStillSavedRevision = false;
                 try
                 {
+                    // Re-read the live presentation identity after exporting. Save As can change
+                    // FullName/Name while the original file metadata remains unchanged.
+                    string currentPresentationPath = activePresentation.FullName;
+                    string currentPresentationName = activePresentation.Name;
+                    int currentSlideCount = activePresentation.Slides.Count;
                     var currentFile = new FileInfo(presentationPath);
                     isStillSavedRevision = canUseDiskCache &&
+                        MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
                         Convert.ToInt32(activePresentation.Saved) != 0 &&
-                        PPTPresentationStorage.CreatePresentationId(presentationName, count, presentationPath) == presentationId &&
+                        string.Equals(currentPresentationPath, presentationPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(currentPresentationName, presentationName, StringComparison.Ordinal) &&
+                        currentSlideCount == count &&
+                        PPTPresentationStorage.CreatePresentationId(currentPresentationName, currentSlideCount, currentPresentationPath) == presentationId &&
                         currentFile.Exists && currentFile.Length == presentationLength &&
                         currentFile.LastWriteTimeUtc.Ticks == presentationLastWriteTicks;
                 }
                 catch { }
                 if (isStillSavedRevision && result.Count == count)
+                {
                     PPTThumbnailDiskCache.Save(presentationPath, presentationName, width, height, count, result);
-                    PPTThumbnailDiskCache.Save(presentationPath, activePresentation.Name, width, height, count, result);
+                }
             }
             catch (OperationCanceledException)
             {
