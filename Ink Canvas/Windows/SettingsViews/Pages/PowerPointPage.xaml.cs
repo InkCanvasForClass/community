@@ -60,6 +60,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardEnablePPTButtonPageClickable.IsOn = ppt.EnablePPTButtonPageClickable;
             ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
             ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
+            ToggleSwitchPPTThumbnailDiskCache.IsChecked = ppt.EnablePPTThumbnailDiskCache;
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
@@ -228,6 +229,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked == true;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchPPTThumbnailDiskCache_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTThumbnailDiskCache = ToggleSwitchPPTThumbnailDiskCache.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
         }
 
