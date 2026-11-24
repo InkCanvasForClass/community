@@ -1551,7 +1551,7 @@ namespace Ink_Canvas.Helpers
                     // FullName/Name while the original file metadata remains unchanged.
                     string currentPresentationPath = activePresentation.FullName;
                     string currentPresentationName = activePresentation.Name;
-                    int currentSlideCount = activePresentation.Slides.Count;
+                    int currentSlideCount = slides.Count;
                     var currentFile = new FileInfo(presentationPath);
                     isStillSavedRevision = canUseDiskCache &&
                         MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
