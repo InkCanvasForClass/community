@@ -2281,6 +2281,29 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// <summary>入场中的独立方形：排布已经回来，但背景还在从 0 淡入（值是它的排布跨度）。</summary>
         private static readonly Dictionary<Border, double> _enteringUnits = new Dictionary<Border, double>();
 
+        /// <summary>
+        /// 独立方形背景动画的代际号。
+        /// </summary>
+        /// <remarks>
+        /// WPF 的 Completed 不可靠地随"BeginAnimation 被替换"一起取消：
+        /// 收起的淡出顶掉入场的淡入之后，入场那条时钟仍会到点并触发 Completed，
+        /// 把已经淡到一半的方形复位成完全不透明（日志里是 0.59 → 1.00 的突跳）。
+        /// 每次换动画就换一代，Completed 里只认自己那一代，迟到的直接丢弃。
+        /// </remarks>
+        private static readonly Dictionary<Border, int> _unitVisualGenerations = new Dictionary<Border, int>();
+
+        private static int NextUnitVisualGeneration(Border border)
+        {
+            int generation = _unitVisualGenerations.TryGetValue(border, out var current) ? current + 1 : 1;
+            _unitVisualGenerations[border] = generation;
+            return generation;
+        }
+
+        private static bool IsCurrentUnitVisualGeneration(Border border, int generation)
+        {
+            return _unitVisualGenerations.TryGetValue(border, out var current) && current == generation;
+        }
+
         /// <summary>是否还有独立方形在淡入/淡出。</summary>
         /// <remarks>
         /// 这类动画没有跨度补间（方形是固定尺寸、永远不补间），但"排布已经让出、
@@ -2823,6 +2846,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
             double fromScale = Math.Max(0.0, scale.ScaleX);
 
+            // 换一代：还在跑的入场时钟即使被这里顶掉也要到点才触发 Completed，
+            // 它不能再拿旧值去复位这一轮的视觉。
+            int generation = NextUnitVisualGeneration(border);
+
             border.BeginAnimation(UIElement.OpacityProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
@@ -2838,6 +2865,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             };
             fade.Completed += (_, _) =>
             {
+                if (!IsCurrentUnitVisualGeneration(border, generation))
+                {
+                    MotionTrace($"独立段收起 忽略迟到完成 {Describe(border)} 代={generation}（已被更新的动画取代）");
+                    return;
+                }
+
                 if (_exiting.TryGetValue(border, out var plan)) plan.UnitDone = true;
                 MotionTrace($"独立段收起 背景淡出完成 {Describe(border)} 计划还在={_exiting.ContainsKey(border)} 段内剩余={CountExitingInside(border)}");
                 TryFinishSeparateSegmentHide(border);
@@ -2895,6 +2928,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (footprint <= 0.5) footprint = 58.0;
             _enteringUnits[border] = footprint;
 
+            int generation = NextUnitVisualGeneration(border);
             var fade = new System.Windows.Media.Animation.DoubleAnimation(fromOpacity, 1.0, duration)
             {
                 EasingFunction = CreateEnterEasing()
@@ -2902,8 +2936,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             fade.Completed += (_, _) =>
             {
                 // 这条淡入可能已经被退场动画顶掉（收回→立刻再收）：Completed 仍会触发，
-                // 若此时仍在 _exiting 里，说明这次复位是"迟到的入场"在把方形拉回 1。
-                MotionTrace($"独立段展开 背景淡入完成 {Describe(border)} 仍在收起={_exiting.ContainsKey(border)} 当前:不透明度={border.Opacity:F2}");
+                // 若此时代数已过期，说明这次复位是"迟到的入场"在把方形拉回 1。
+                MotionTrace($"独立段展开 背景淡入完成 {Describe(border)} 代={generation} 仍在收起={_exiting.ContainsKey(border)} 当前:不透明度={border.Opacity:F2}");
+                if (!IsCurrentUnitVisualGeneration(border, generation))
+                {
+                    MotionTrace($"独立段展开 忽略迟到完成 {Describe(border)} 代={generation}（已被收起顶掉）");
+                    return;
+                }
+
                 ResetSegmentUnitVisual(border, "淡入完成");
 
                 // 背景完全显形：这一轮的逐帧补偿到这里一次性落到 Margin 上。
@@ -2980,6 +3020,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
 
             _enteringUnits.Remove(border);
+
+            // 视觉归位后，任何还没到点的旧淡入/淡出时钟都不许再改它
+            NextUnitVisualGeneration(border);
+
             border.BeginAnimation(UIElement.OpacityProperty, null);
             border.Opacity = 1;
 
@@ -3760,6 +3804,38 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// </remarks>
         public static bool IsMotionActive =>
             _extentMotions.Count > 0 || _channelMotions.Count > 0 || _exiting.Count > 0 || _enteringUnits.Count > 0;
+
+        /// <summary>这个组件（或它的某个祖先段）是不是正在往"隐藏"走。</summary>
+        /// <remarks>
+        /// 高光跟随者最需要这一条：收起途中按钮还 Visible、排布却已让出，
+        /// 这时量到的原点是"飞过的那一帧"，蓝色背景和指示条会被永久留在半路。
+        /// </remarks>
+        public static bool IsElementHiding(FrameworkElement element)
+        {
+            for (DependencyObject node = element; node != null; node = VisualTreeHelper.GetParent(node))
+            {
+                if (node is FrameworkElement fe && _exiting.ContainsKey(fe)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>这个组件（或它的某个祖先）此刻是不是有位移/缩放在跑。</summary>
+        public static bool IsElementMoving(FrameworkElement element)
+        {
+            for (DependencyObject node = element; node != null; node = VisualTreeHelper.GetParent(node))
+            {
+                if (!(node is FrameworkElement fe)) continue;
+                if (_exiting.ContainsKey(fe) || (fe is Border border && _enteringUnits.ContainsKey(border))) return true;
+                if (!(fe.RenderTransform is TransformGroup group)) continue;
+                foreach (var child in group.Children)
+                {
+                    if (child is TranslateTransform translate && _channelMotions.ContainsKey(translate)) return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <param name="ancestorsHidden">
         /// 上层分组是否已经判成隐藏。分组容器自己不再动画，而是把条件往下传，

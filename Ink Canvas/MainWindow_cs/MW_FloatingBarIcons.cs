@@ -5483,6 +5483,34 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>被动画挡下的高光更新：等这一轮工具栏显隐收尾后再补一次。</summary>
+        private bool _floatingBarHighlightRefreshPending;
+        private bool _floatingBarHighlightRefreshHooked;
+
+        /// <summary>挂上「显隐动画收尾后重新定位高光」（幂等，重建工具栏时不会重复挂）。</summary>
+        internal void HookFloatingBarHighlightRefresh()
+        {
+            if (_floatingBarHighlightRefreshHooked) return;
+            _floatingBarHighlightRefreshHooked = true;
+            ToolbarRegistry.ExtentSettled += OnFloatingBarHighlightMotionSettled;
+        }
+
+        private void OnFloatingBarHighlightMotionSettled()
+        {
+            if (!_floatingBarHighlightRefreshPending) return;
+            // 还有别的分段在跑就先等，等最后一段收尾时一起补
+            if (ToolbarRegistry.IsMotionActive) return;
+
+            _floatingBarHighlightRefreshPending = false;
+            if (!IsFloatingBarContentVisible())
+            {
+                HideAllSelectionHighlights();
+                return;
+            }
+
+            SetFloatingBarHighlightPosition(_currentToolMode);
+        }
+
         private void AnimateFloatingBarHighlightTo(string mode)
         {
             try
@@ -5522,6 +5550,21 @@ namespace Ink_Canvas
                 {
                     // 如果目标按钮不可见则隐藏高光
                     HideAllSelectionHighlights();
+                    return;
+                }
+
+                // 显隐动画途中按钮的排布/位移都在中间态：此刻量到的原点是"飞过的那一帧"，
+                // 蓝色背景和指示条会被留在半路（收起途中再点同一工具、动画中点头部图标都会走到这里）。
+                // 正在消失的直接隐藏；还在飞的等这一轮收尾后再定位。
+                if (ToolbarRegistry.IsElementHiding(targetButton))
+                {
+                    HideAllSelectionHighlights();
+                    return;
+                }
+
+                if (ToolbarRegistry.IsElementMoving(targetButton))
+                {
+                    _floatingBarHighlightRefreshPending = true;
                     return;
                 }
 

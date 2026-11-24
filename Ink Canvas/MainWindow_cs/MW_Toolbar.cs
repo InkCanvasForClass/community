@@ -315,6 +315,9 @@ namespace Ink_Canvas
                 // 跨度逐帧变化时让整条栏保持居中（幂等，重建工具栏时不会重复挂）
                 HookFloatingBarCenterFollow();
 
+                // 显隐动画收尾后补一次选中高光（动画途中量到的按钮位置是中间态）
+                HookFloatingBarHighlightRefresh();
+
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
 
