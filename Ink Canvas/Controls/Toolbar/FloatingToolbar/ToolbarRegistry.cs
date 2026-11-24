@@ -2231,6 +2231,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             public bool Vertical;
             /// <summary>整段胶囊收起（由胶囊自己补间跨度），不是段内组件。</summary>
             public bool Segment;
+            /// <summary>这一条倒放是否已经起播过（见 <see cref="AnimateExitingElements"/> 里的"只起一次"）。</summary>
+            public bool Started;
             public bool FadeDone;
             public bool SlideDone;
             /// <summary>独立方形的背景动画（淡出 + 缩回）是否已经收尾。</summary>
@@ -2417,6 +2419,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (panel == null || ordered == null || _exiting.Count == 0) return;
 
             double anchor = double.NaN; // 左边最近的"仍在场"组件的新位置
+            int alreadyRunning = 0;
 
             for (int i = 0; i < ordered.Count; i++)
             {
@@ -2439,6 +2442,20 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 if (!child.IsVisible)
                 {
                     FinishHide(child, collapse: true);
+                    continue;
+                }
+
+                // 这条倒放已经在跑了：保持原来那条时间线，绝不再起一遍。
+                //
+                // 之前每次模式同步都会从这里重新 BeginAnimation：淡出/缩放从"当前值"退回起点、
+                // 但时长仍然是**整段**（位移通道同理，剩余路程被摊回整段时长）。
+                // 一次切换里同步往往跑好几轮，于是一个 400ms 的退场被拉成两三倍，
+                // 0.1x 慢放下就是"图标一直半透明地原地磨蹭"。
+                // 方形背景那侧本来就有守卫（BeginSeparateSegmentHide / _enteringUnits），
+                // 组件这侧没有——两边从第一轮之后就不再同相位，这正是"背景和组件联动没写好"。
+                if (plan.Started)
+                {
+                    alreadyRunning++;
                     continue;
                 }
 
@@ -2466,7 +2483,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 MotionTrace($"倒放 {Describe(child)} from={from:F1} arranged={arranged:F1} 锚点={(double.IsNaN(anchor) ? "-" : anchor.ToString("F1"))} 终点={target:F1} 整段={segmentExit} 位移={startOffset:F1}→{endOffset:F1}");
 
-                var duration = AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs);
+                // 标记已起播：后续同步直接跳过（上面的守卫），否则会重置这条时间线
+                plan.Started = true;
+
+                // 时长与位移、胶囊跨度、独立方形背景用同一份（含手感预设与全局倍率）
+                var duration = MotionBatchDuration();
 
                 // 1. 透明度：1 → 0。若它还在淡入途中，就从当前值接着走，不跳变。
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(child.Opacity, 0.0, duration)
@@ -2502,6 +2523,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         if (_exiting.TryGetValue(child, out var current)) current.SlideDone = true;
                         TryFinishReversedHide(child);
                     });
+            }
+
+            // 这一轮有几条倒放是"接着上一轮在跑"的：数值不为 0 就说明同一次切换里
+            // 又跑了一遍同步。以前这里会把这些组件全部重新起播，背景却按守卫继续跑，
+            // 两边就此脱钩——现在它们一起被跳过，日志里应恒为 0 起播、N 条接续。
+            if (alreadyRunning > 0)
+            {
+                MotionTrace($"倒放接续：本轮跳过 {alreadyRunning} 个已在倒放的组件（不重启时间线）");
             }
         }
 
@@ -3015,7 +3044,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             // 起点：新起的通道用调用方给的 from；被打断的从"正在显示的位置"接着走，
             // 不能退回 from，否则会先跳回起点再跑一遍。
-            double start = interrupted && !double.IsNaN(current) ? current : from;
+            //
+            // 但"当前值"不等于"当前视觉位置"：调用方给的 from 其实是**这一轮布局的变化量**
+            // （收起路径是 from−arranged，让位路径是 before−after）。排布刚刚改过，
+            // 通道必须把这次位移一起吃掉，视觉位置才连续。
+            // 只拿 current 的话，正在飞行的图标一旦赶上左边有组件同时消失，
+            // 就会先向左瞬移一个身位再重新滑——"组件在飘"的另一半来源。
+            double start = from;
+            if (interrupted && !double.IsNaN(current))
+            {
+                start = current + from;
+            }
             if (double.IsNaN(start)) start = from;
 
             if (Math.Abs(start - to) < 0.5)
@@ -3118,6 +3157,20 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 Seconds = Math.Max(0.01, scaled.TotalSeconds),
                 Back = back,
             };
+        }
+
+        /// <summary>
+        /// 一批显隐动画的统一时长：组件透明度/缩放、组件位移、胶囊跨度、独立方形背景共用。
+        /// </summary>
+        /// <remarks>
+        /// 透明度和缩放以前直接取 <see cref="AnimationSpeed.ScaleMilliseconds(double)"/>（只吃全局倍率），
+        /// 位移与跨度取 <see cref="ResolveMotionProfile"/>（还吃手感预设）。预设为"柔和/灵敏"时
+        /// 两者差 20%，同一个组件就会一边已经淡完、一边还在滑，方形背景更是早就收干净了——
+        /// 观感就是几套动画各走各的。统一走这里，任何一处改节奏都不会再脱钩。
+        /// </remarks>
+        private static TimeSpan MotionBatchDuration()
+        {
+            return TimeSpan.FromSeconds(ResolveMotionProfile().Seconds);
         }
 
         /// <summary>出现用的位置曲线：EaseOutBack，冲过终点 4.47% 再落回（Inkeys 原值 back=1.1）。</summary>
@@ -3563,7 +3616,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (shown && _animateVisibilityChange && opacityNow > 0.01 && opacityNow < 0.99)
             {
                 var refade = new System.Windows.Media.Animation.DoubleAnimation(
-                    opacityNow, 1.0, AnimationSpeed.ScaleMilliseconds((int)(ToolbarItemShowDurationMs * 0.3)));
+                    opacityNow, 1.0, MotionBatchDuration());
                 refade.EasingFunction = CreateEnterEasing();
                 border.BeginAnimation(UIElement.OpacityProperty, refade);
             }
@@ -3815,7 +3868,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 MotionTrace($"组件出场 {Describe(element)}：淡入+缩放 {startOpacity:F2}→1 / {startScale:F2}→1");
 
-                var duration = AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs);
+                // 与位移通道、胶囊跨度、独立方形背景同一份时长（含手感预设与全局倍率）
+                var duration = MotionBatchDuration();
 
                 // 1. 透明度：无 → 有。
                 // 新组件从邻居身下抽出来，淡入就是"抽出来"这件事的可见性信号，
