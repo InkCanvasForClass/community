@@ -428,6 +428,47 @@ namespace Ink_Canvas
             {
             }
 
+            // 轻量子进程必须在执行任何 WPF/Shell 初始化前分流。
+            // UIA 提权 helper 只负责取得目标令牌并创建最终 UIAccess 进程，
+            // 不应初始化高 DPI、Shell/COM、TLS 或 Dispatcher 诊断钩子。
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length >= 2 && args[1] == "--watchdog")
+            {
+                RunWatchdogIfNeeded();
+                Environment.Exit(0);
+                return;
+            }
+
+            IsUIAccessFallbackLaunch = args.Contains("--uia-fallback");
+
+            if (args.Contains("--enable-uia-topmost-helper"))
+            {
+                uint sourcePid = 0;
+                for (int i = 0; i < args.Length - 1; i++)
+                {
+                    if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase)
+                        && uint.TryParse(args[i + 1], out uint parsedPid))
+                    {
+                        sourcePid = parsedPid;
+                        break;
+                    }
+                }
+
+                bool started = sourcePid != 0
+                    ? UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid)
+                    : UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper();
+
+                if (!started)
+                {
+                    LogHelper.WriteLogToFile("UIAccess | UIA 子进程启动失败，回退启动普通置顶实例", LogHelper.LogType.Warning);
+                    started = UIAccessHelper.RestartAsNormalUser("--uia-fallback");
+                }
+
+                Environment.Exit(started ? 0 : 1);
+                return;
+            }
+
+
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
             // 注意：此处显式禁用 Switch.System.Windows.Input.Stylus.EnablePointerSupport。
@@ -482,47 +523,6 @@ namespace Ink_Canvas
             catch
             {
                 // 监控失败不影响启动
-            }
-
-            // 如果是看门狗子进程，直接进入看门狗主循环并终止主流程
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length >= 2 && args[1] == "--watchdog")
-            {
-                RunWatchdogIfNeeded();
-                Environment.Exit(0);
-                return;
-            }
-
-            IsUIAccessFallbackLaunch = args.Contains("--uia-fallback");
-
-            if (args.Contains("--enable-uia-topmost-helper"))
-            {
-                // 检查是否为原进程令牌模式（通过 --uia-source-pid 参数判断）
-                uint sourcePid = 0;
-                for (int i = 0; i < args.Length - 1; i++)
-                {
-                    if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase)
-                        && uint.TryParse(args[i + 1], out uint parsedPid))
-                    {
-                        sourcePid = parsedPid;
-                        break;
-                    }
-                }
-
-                bool started = sourcePid != 0
-                    ? UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid)
-                    : UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper();
-
-                if (!started)
-                {
-                    // UIA 子进程可能在 CreateProcessWithTokenW 成功后继续启动时崩溃。
-                    // helper 仍需启动普通用户实例，避免原进程退出后桌面上没有可用实例。
-                    LogHelper.WriteLogToFile("UIAccess | UIA 子进程启动失败，回退启动普通置顶实例", LogHelper.LogType.Warning);
-                    started = UIAccessHelper.RestartAsNormalUser("--uia-fallback");
-                }
-
-                Environment.Exit(started ? 0 : 1);
-                return;
             }
 
             // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
