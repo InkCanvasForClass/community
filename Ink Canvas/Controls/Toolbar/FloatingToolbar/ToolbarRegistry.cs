@@ -1700,13 +1700,31 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ApplyInitialVisibility(view, ruleset);
                 contentPanel.Children.Add(view);
 
+                // 独立边框应该是个正方形（宽 = 高）：内容装得进 58×58 就固定成 58×58。
+                // 多组件分组、调色板这类本来就靠内容撑开的段装不下 58，仍按内容宽度——
+                // 硬夹到 58 会把里面的组件裁掉，比"不是正方形"更糟。
+                // 量的是内容面板（自带 Margin）：58 去掉两边 2px 边框正好剩 54。
+                bool square = false;
+                try
+                {
+                    contentPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    square = contentPanel.DesiredSize.Width > 0
+                             && contentPanel.DesiredSize.Width <= 54 && contentPanel.DesiredSize.Height <= 54;
+                }
+                catch
+                {
+                    // 量不出来就按内容走：宁可非方形，也不要裁掉内容
+                }
+
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
-                    Padding = orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
+                    Padding = square
+                        ? new Thickness(0)
+                        : orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
                     MinWidth = 0,
-                    Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
-                    Width = orientation == Orientation.Vertical ? 58 : double.NaN,
+                    Height = square || orientation == Orientation.Horizontal ? 58 : double.NaN,
+                    Width = square || orientation == Orientation.Vertical ? 58 : double.NaN,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
                     Child = contentPanel,
@@ -1907,6 +1925,22 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             // 整组的透明度/缩放会叠在内部按钮上，位移也会被算两遍
             // （容器一层、内部按钮再一层），看到的就是"整块方块淡入"。
             // 所以面板只递归、不记账，让内部每个分组内组件各自成为 FLIP/倒放的单位。
+            // 独立方形（开启独立边框的组件）= 背景 + 里面那一个组件，位移只能补在外壳上：
+            // 背景和图标同属一个整体，补在里面的按钮上会让背景先瞬移到新位置，
+            // 图标却还从旧位置滑进来——就是用户看到的"左边收起，右边那段的背景直接闪过去"。
+            // 段内组件仍要递归进顺序表（退场倒放按序起播），只是不再单独补位移。
+            if (current is Border separateUnit && current != root && GetSeparateSegment(separateUnit))
+            {
+                order?.Add(separateUnit);
+                // 位置为 (0,0) 的也要记：左边那段收起后，右边这段正好落到原点。
+                // 不记的话下一次展开时它被当成"新来的"，锚点表里又没有人，
+                // 位移直接是 0——背景瞬移回右位，正是用户说的"左边显示时右边背景闪过去"。
+                if (TryMeasureLayoutPosition(separateUnit, root, out var unitPoint))
+                {
+                    sink[separateUnit] = unitPoint;
+                }
+            }
+
             if (current.Tag as string == InjectedTag && current != root && current is not Panel)
             {
                 // 位置为 0 的元素过去被跳过（那时只看谁"挪动了"）；现在还要它当左邻锚点，
@@ -2064,6 +2098,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 正在倒放收起的组件归"收起"那一遍管：这里既不给它补位移，
                 // 也不让它当别人的锚点（它的位置是动画中间态）。
                 if (_exiting.ContainsKey(child)) continue;
+
+                // 独立方形内部的组件跟着外壳一起动（外壳已经补过一次位移），
+                // 再补一次就是双倍，图标还会和方形背景分家。
+                if (IsInsideSeparateUnit(child)) continue;
 
                 if (ownZIndex)
                 {
@@ -2545,7 +2583,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             border.BeginAnimation(FrameworkElement.MarginProperty, null);
             border.Margin = plan.Margin;
             Panel.SetZIndex(border, plan.ZIndex);
-            ResetSegmentUnitVisual(border);
+            // 独立方形的背景视觉**不**在这里归位：紧接着的显示要从当前不透明度/缩放
+            // 接着往回长，先归 1 再从头淡入会在中间闪一下（0.5 → 1 → 0 → 1）。
+            // 非独立段本来就没有背景淡出/缩放，归位与否无差别，交给调用方按需处理。
             // 缩到一半的跨度弹簧也撤掉：接下来的跨度补间会从当前可见值接管，
             // 留着一个"收到 0 就折叠"的弹簧会把刚长出来的段又收掉。
             StopExtentMotion(border);
@@ -2636,8 +2676,23 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             // PPT 场景里任何一次模式同步都会让所有独立边框整块闪一下。
             if (_enteringUnits.ContainsKey(border)) return;
 
-            // 已经在场、也已经显形：这一轮没有"出现"可言
-            if (border.Visibility == Visibility.Visible && border.Opacity >= 0.99) return;
+            // 收起到一半又要显示：这一轮是"接上"而不是"从头出现"，
+            // 起点取当前不透明度/缩放，不能先归位再从 0 淡入（0.5 → 1 → 0 → 1 的闪跳）。
+            bool resuming = _exiting.TryGetValue(border, out var pending) && pending.SeparateUnit;
+
+            // 已经在场、也已经显形，且没有在收起：这一轮没有"出现"可言
+            if (!resuming && border.Visibility == Visibility.Visible && border.Opacity >= 0.99) return;
+
+            double fromOpacity = 0.0;
+            double fromScale = ToolbarItemShowStartScale;
+            if (resuming)
+            {
+                fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
+                fromScale = Math.Max(0.0, EnsureSegmentUnitScale(border).ScaleX);
+
+                // 读数之后才撤收起状态：还原排布/图层，但保留当前视觉值给下面续播
+                CancelSegmentHide(border);
+            }
 
             // 排布瞬时回来，但背景还要从 0 淡入。先落定排布但**不要**通知跟随：
             // 这一刻若按"方形已经在位"提交，整条栏会先横跳半个方形再开始淡入。
@@ -2645,7 +2700,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             ApplySegmentSettled(border, vertical, true, notify: false);
             if (_animateVisibilityChange)
             {
-                AnimateSegmentUnitEnter(border, vertical);
+                AnimateSegmentUnitEnter(border, vertical, fromOpacity, fromScale);
             }
             NotifyExtentChanged(vertical);
         }
@@ -2662,9 +2717,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
 
             double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
+            // 收起可能打断一次还没长完的入场：从当前缩放接着往回收，别先跳回 1
+            double fromScale = Math.Max(0.0, scale.ScaleX);
             _enteringUnits.Remove(border);
-            scale.ScaleX = 1.0;
-            scale.ScaleY = 1.0;
+            scale.ScaleX = fromScale;
+            scale.ScaleY = fromScale;
 
             var fade = new System.Windows.Media.Animation.DoubleAnimation(fromOpacity, 0.0, duration)
             {
@@ -2678,17 +2735,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             border.BeginAnimation(UIElement.OpacityProperty, fade);
 
             scale.BeginAnimation(ScaleTransform.ScaleXProperty,
-                new System.Windows.Media.Animation.DoubleAnimation(1.0, ToolbarItemShowStartScale, duration)
+                new System.Windows.Media.Animation.DoubleAnimation(fromScale, ToolbarItemShowStartScale, duration)
                 {
                     EasingFunction = CreateExitEasing()
                 });
             scale.BeginAnimation(ScaleTransform.ScaleYProperty,
-                new System.Windows.Media.Animation.DoubleAnimation(1.0, ToolbarItemShowStartScale, duration)
+                new System.Windows.Media.Animation.DoubleAnimation(fromScale, ToolbarItemShowStartScale, duration)
                 {
                     EasingFunction = CreateExitEasing()
                 });
 
-            MotionTrace($"独立段收起 背景倒放 {Describe(border)} 1→0 + 缩放 1→{ToolbarItemShowStartScale:F2} 时长={profile.Seconds * 1000:F0}ms");
+            MotionTrace($"独立段收起 背景倒放 {Describe(border)} {fromOpacity:F2}→0 + 缩放 {fromScale:F2}→{ToolbarItemShowStartScale:F2} 时长={profile.Seconds * 1000:F0}ms");
 
             // 这段淡出没有跨度补间，但"排布已经让出、背景还画着"的那块跨度每帧都在变：
             // 不挂逐帧回调，居中跟随整段都不动，收尾时才一次性落位（横跳半个方形）。
@@ -2696,7 +2753,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         }
 
         /// <summary>独立方形的背景入场：0 → 1 淡入、0.82 → 1 长回原尺寸。</summary>
-        private static void AnimateSegmentUnitEnter(Border border, bool vertical)
+        /// <remarks>
+        /// <paramref name="fromOpacity"/> / <paramref name="fromScale"/> 是入场起点：
+        /// 新出现时是 0 / 0.82；收起被打断时是打断那一刻的值，从中间接着长回去，
+        /// 不会再"先归位再从头淡入"闪一下。
+        /// </remarks>
+        private static void AnimateSegmentUnitEnter(
+            Border border, bool vertical, double fromOpacity, double fromScale)
         {
             var profile = ResolveMotionProfile();
             var duration = TimeSpan.FromSeconds(profile.Seconds);
@@ -2706,9 +2769,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
 
-            scale.ScaleX = ToolbarItemShowStartScale;
-            scale.ScaleY = ToolbarItemShowStartScale;
-            border.Opacity = 0.0;
+            scale.ScaleX = fromScale;
+            scale.ScaleY = fromScale;
+            border.Opacity = fromOpacity;
 
             // 排布已经回来了，眼睛还没看见它：记下这块跨度，由跟随按不透明度慢慢加回去。
             //
@@ -2722,7 +2785,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             if (footprint <= 0.5) footprint = 58.0;
             _enteringUnits[border] = footprint;
 
-            var fade = new System.Windows.Media.Animation.DoubleAnimation(0.0, 1.0, duration)
+            var fade = new System.Windows.Media.Animation.DoubleAnimation(fromOpacity, 1.0, duration)
             {
                 EasingFunction = CreateEnterEasing()
             };
@@ -2737,17 +2800,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             border.BeginAnimation(UIElement.OpacityProperty, fade);
 
             scale.BeginAnimation(ScaleTransform.ScaleXProperty,
-                new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1.0, duration)
+                new System.Windows.Media.Animation.DoubleAnimation(fromScale, 1.0, duration)
                 {
                     EasingFunction = CreateEnterEasing()
                 });
             scale.BeginAnimation(ScaleTransform.ScaleYProperty,
-                new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1.0, duration)
+                new System.Windows.Media.Animation.DoubleAnimation(fromScale, 1.0, duration)
                 {
                     EasingFunction = CreateEnterEasing()
                 });
 
-            MotionTrace($"独立段展开 背景入场 {Describe(border)} 0→1 + 缩放 {ToolbarItemShowStartScale:F2}→1 登记跨度={footprint:F1} 时长={profile.Seconds * 1000:F0}ms");
+            MotionTrace($"独立段展开 背景入场 {Describe(border)} {fromOpacity:F2}→1 + 缩放 {fromScale:F2}→1 登记跨度={footprint:F1} 时长={profile.Seconds * 1000:F0}ms");
 
             // 同收起侧：这块跨度按不透明度逐帧长回来，居中跟随要每帧拿到当前值
             EnsureExtentMotionHook();
@@ -2774,15 +2837,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
         }
 
-        /// <summary>独立方形自己的缩放通道（不是组件那条位置通道）。</summary>
+        /// <summary>独立方形自己的缩放通道（与组件共用同一个变换组，位移通道归 FLIP）。</summary>
+        /// <remarks>
+        /// 外壳现在也是 FLIP 的位移单位。这里若直接 new 一个 ScaleTransform 写进 RenderTransform，
+        /// 会把 FLIP 刚挂上的位移通道连根拔掉——那一格方形会先瞬移到落点，再开始淡出/淡入，
+        /// 正是"左边收起，右边背景直接闪过去"。所以统一取通道组里的缩放那一条。
+        /// </remarks>
         private static ScaleTransform EnsureSegmentUnitScale(Border border)
         {
-            if (border.RenderTransform is ScaleTransform existing) return existing;
-
-            var scale = new ScaleTransform(1, 1);
-            border.RenderTransform = scale;
-            border.RenderTransformOrigin = new Point(0.5, 0.5);
-            return scale;
+            return GetOrCreateScaleTransform(border);
         }
 
         /// <summary>把独立方形的背景视觉归位：撤销淡出/缩放，摘掉残留动画。</summary>
@@ -2793,13 +2856,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             _enteringUnits.Remove(border);
             border.BeginAnimation(UIElement.OpacityProperty, null);
             border.Opacity = 1;
-            if (border.RenderTransform is ScaleTransform scale)
-            {
-                scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                scale.ScaleX = 1;
-                scale.ScaleY = 1;
-            }
+
+            var scale = EnsureSegmentUnitScale(border);
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            scale.ScaleX = 1;
+            scale.ScaleY = 1;
         }
 
         /// <summary>退场中的独立方形还画着的跨度（按当前不透明度加权）。</summary>
@@ -3320,6 +3382,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 StopExtentMotion(border);
                 border.BeginAnimation(extentProperty, null);
                 border.ClearValue(extentProperty);
+                // 独立方形的淡出/缩放可能停在半路：没有动画时要直接归位，不能留着半透明
+                ResetSegmentUnitVisual(border);
                 border.BeginAnimation(UIElement.OpacityProperty, null);
                 border.Opacity = 1;
                 border.ClipToBounds = false;
@@ -3330,7 +3394,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             // 又要它显示：若上一轮收起还没收完，先撤掉收起状态，
             // 让下面的跨度补间从**当前跨度**接着长回去（不跳回 0）。
-            if (shouldShow) CancelSegmentHide(border);
+            // 独立方形例外：它的收起是"背景淡出 + 缩回"，要按当前不透明度反解出场起点，
+            // 由 BeginSeparateSegmentShow 内部先读数再撤，否则先归位会闪一下。
+            if (shouldShow && !IsSeparateSegment(border)) CancelSegmentHide(border);
 
             // 独立边框段：胶囊是固定方形（宽 = 高），两个方向都不碰跨度。
             // 展开侧它在位（图标自己弹出来），收起侧按倒放就是"图标先退回去、
@@ -3658,10 +3724,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         {
             if (element == null) return;
 
-            // 收起到一半又要它显示：撤掉倒放、还原完整排布，再按"从无到有"重新出场。
-            // 先按一次 Collapsed 是为了统一走进下面那条 becameVisible 分支。
+            // 收起到一半又要它显示：先把排布还原、再统一走进 becameVisible 分支，
+            // 但出场起点取**打断那一刻**的不透明度/缩放——从中间接着往回长。
+            // 旧做法"撤掉倒放、再从 0 淡入"会看到 0.5 → 1 → 0 → 1 的闪跳。
+            double resumeOpacity = double.NaN;
+            double resumeScale = double.NaN;
             if (target == Visibility.Visible && _exiting.TryGetValue(element, out var pending) && !pending.Segment)
             {
+                resumeOpacity = Math.Max(0.0, Math.Min(1.0, element.Opacity));
+                resumeScale = GetOrCreateScaleTransform(element).ScaleX;
                 FinishHide(element, collapse: false);
                 element.Visibility = Visibility.Collapsed;
             }
@@ -3687,15 +3758,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 否则组件虽然 Visible，父级 Collapsed 时根本不会渲染、也就没有动画
                 RevealGroupContainers(element);
 
-                MotionTrace($"组件出场 {Describe(element)}：淡入+缩放 {ToolbarItemShowStartOpacity:F2}→1 / {ToolbarItemShowStartScale:F2}→1");
+                double startOpacity = double.IsNaN(resumeOpacity) ? ToolbarItemShowStartOpacity : resumeOpacity;
+                double startScale = double.IsNaN(resumeScale) ? ToolbarItemShowStartScale : resumeScale;
+
+                MotionTrace($"组件出场 {Describe(element)}：淡入+缩放 {startOpacity:F2}→1 / {startScale:F2}→1");
 
                 var duration = AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs);
 
                 // 1. 透明度：无 → 有。
                 // 新组件从邻居身下抽出来，淡入就是"抽出来"这件事的可见性信号，
                 // 所以从 0 起；此处不再叠一层"半透明起步"，那会让它一开始就显形、像凭空出现。
+                // 收起被打断时从当前值续上，两端都在同一条曲线上，不闪。
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(
-                    ToolbarItemShowStartOpacity, 1.0, duration)
+                    startOpacity, 1.0, duration)
                 {
                     EasingFunction = CreateEnterEasing()
                 };
@@ -3710,12 +3785,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // TransformToAncestor 量到的位置带上偏差，邻居让位就会算错。
                 var scale = GetOrCreateScaleTransform(element);
                 var scaleX = new System.Windows.Media.Animation.DoubleAnimation(
-                    ToolbarItemShowStartScale, 1.0, duration)
+                    startScale, 1.0, duration)
                 {
                     EasingFunction = CreateEnterEasing()
                 };
                 var scaleY = new System.Windows.Media.Animation.DoubleAnimation(
-                    ToolbarItemShowStartScale, 1.0, duration)
+                    startScale, 1.0, duration)
                 {
                     EasingFunction = CreateEnterEasing()
                 };
