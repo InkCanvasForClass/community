@@ -1700,31 +1700,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ApplyInitialVisibility(view, ruleset);
                 contentPanel.Children.Add(view);
 
-                // 独立边框应该是个正方形（宽 = 高）：内容装得进 58×58 就固定成 58×58。
-                // 多组件分组、调色板这类本来就靠内容撑开的段装不下 58，仍按内容宽度——
-                // 硬夹到 58 会把里面的组件裁掉，比"不是正方形"更糟。
-                // 量的是内容面板（自带 Margin）：58 去掉两边 2px 边框正好剩 54。
-                bool square = false;
-                try
-                {
-                    contentPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    square = contentPanel.DesiredSize.Width > 0
-                             && contentPanel.DesiredSize.Width <= 54 && contentPanel.DesiredSize.Height <= 54;
-                }
-                catch
-                {
-                    // 量不出来就按内容走：宁可非方形，也不要裁掉内容
-                }
-
+                // 独立边框的最小宽度取一个方形的厚度（58）：窄内容（分隔线、单个图标）撑满成正方形，
+                // 宽内容（分组、调色板）按内容继续变宽，不会被裁掉。
+                // 高度仍交给当前模式的布局，不写死——别的模式厚度未必是 58。
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
-                    Padding = square
-                        ? new Thickness(0)
-                        : orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
-                    MinWidth = 0,
-                    Height = square || orientation == Orientation.Horizontal ? 58 : double.NaN,
-                    Width = square || orientation == Orientation.Vertical ? 58 : double.NaN,
+                    Padding = orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
+                    MinWidth = orientation == Orientation.Horizontal ? 58 : 0,
+                    MinHeight = orientation == Orientation.Vertical ? 58 : 0,
+                    Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
+                    Width = orientation == Orientation.Vertical ? 58 : double.NaN,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
                     Child = contentPanel,
