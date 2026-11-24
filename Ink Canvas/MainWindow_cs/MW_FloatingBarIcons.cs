@@ -5618,7 +5618,7 @@ namespace Ink_Canvas
 
                     selectionBG.Visibility = Visibility.Visible;
                     if (!Settings.Appearance.DisableToolbarAnimation)
-                        targetButton.SetSelectedVisualOffset(true);
+                        targetButton.SetSelectedVisualOffset(true, ToolbarSpringSpec);
                     _lastHighlightButton = targetButton;
                     return;
                 }
@@ -5660,8 +5660,8 @@ namespace Ink_Canvas
                 if (!Settings.Appearance.DisableToolbarAnimation)
                 {
                     if (prevHighlightButton != null && prevHighlightButton != targetButton)
-                        prevHighlightButton.SetSelectedVisualOffset(false);
-                    targetButton.SetSelectedVisualOffset(true);
+                        prevHighlightButton.SetSelectedVisualOffset(false, ToolbarSpringSpec);
+                    targetButton.SetSelectedVisualOffset(true, ToolbarSpringSpec);
                 }
 
                 selectionBG.Width = selectionWidth;
@@ -5923,7 +5923,7 @@ namespace Ink_Canvas
         private void HideAllSelectionHighlights()
         {
             if (_lastHighlightButton != null)
-                _lastHighlightButton.SetSelectedVisualOffset(false);
+                _lastHighlightButton.SetSelectedVisualOffset(false, ToolbarSpringSpec);
             if (SelectionBGFloatingBar != null)
             {
                 SelectionBGFloatingBar.Visibility = Visibility.Hidden;

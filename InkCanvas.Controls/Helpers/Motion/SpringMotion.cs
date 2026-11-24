@@ -22,7 +22,7 @@ namespace Ink_Canvas.Helpers.Motion
     /// 同优先级：每个元素只允许一条弹簧在跑，后发起的调用接管前者。
     /// 数值求解本身在 <see cref="SpringSolver"/> 里，与 WPF 解耦、可单测。
     /// </remarks>
-    internal sealed class SpringTranslateAnimator
+    public sealed class SpringTranslateAnimator
     {
         private static readonly ConditionalWeakTable<FrameworkElement, SpringTranslateAnimator> Cache = new();
 
@@ -77,6 +77,21 @@ namespace Ink_Canvas.Helpers.Motion
             _solverY.Settle(0);
             _transform.X = 0;
             _transform.Y = 0;
+        }
+
+        /// <summary>
+        /// 立刻把视觉偏移设成指定值（不播放动画）。
+        /// 用于建立控件时的初始偏移：之后第一次 <see cref="RunAsync"/> 才能从正确的位置起步，
+        /// 而不是先跳一下再动。
+        /// </summary>
+        public void SetOffset(Vector offset)
+        {
+            Stop();
+            _solverX.Settle(offset.X);
+            _solverY.Settle(offset.Y);
+            EnsureTransformAttached();
+            _transform.X = offset.X;
+            _transform.Y = offset.Y;
         }
 
         /// <summary>

@@ -1,9 +1,9 @@
+using Ink_Canvas.Helpers.Motion;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Controls
 {
@@ -11,6 +11,11 @@ namespace Ink_Canvas.Controls
     {
         private static ToolbarImageButton _lastPressedButton;
         private bool _isVerticalOrientation;
+        private SpringTranslateAnimator _contentSpring;
+
+        /// <summary>内容层的弹簧驱动器：位移全部由它接管 ButtonContent 的 RenderTransform。</summary>
+        private SpringTranslateAnimator ContentSpring =>
+            _contentSpring ??= SpringTranslateAnimator.For(ButtonContent);
 
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(ToolbarImageButton),
@@ -99,9 +104,7 @@ namespace Ink_Canvas.Controls
             // 未选中态的内容偏移（横排下移 2px、竖排左移 2px）必须建控件时就落在位上。
             // 否则"从没选中过"的按钮停在 0 偏移，比"选中过又取消"的按钮高 2px，
             // 于是同一工具栏会出现三种高度：没选中过的 / 选中的 / 选中过但已取消的。
-            ButtonContent.RenderTransform = isVertical
-                ? new TranslateTransform(-2, 0)
-                : new TranslateTransform(0, 2);
+            ContentSpring.SetOffset(isVertical ? new Vector(-2, 0) : new Vector(0, 2));
 
             if (isVertical)
             {
@@ -151,12 +154,16 @@ namespace Ink_Canvas.Controls
             }
         }
 
-        public void SetSelectedVisualOffset(bool isSelected)
+        /// <summary>
+        /// 切换选中/未选中的视觉偏移（选中上移 2px，未选中居中）。
+        /// </summary>
+        /// <param name="isSelected">是否处于选中态。</param>
+        /// <param name="spec">弹簧手感；不传时用轻快档（小位移不需要慢速）。</param>
+        public void SetSelectedVisualOffset(bool isSelected, SpringSpec? spec = null)
         {
             if (ButtonContent == null) return;
 
-            var transform = ButtonContent.RenderTransform as TranslateTransform;
-
+            // 边距随状态瞬时切换：每次切换只触发一次布局，逐帧位移交给弹簧在合成线程收敛。
             if (_isVerticalOrientation)
             {
                 // 选定项：左边距归零，内容不动
@@ -164,16 +171,6 @@ namespace Ink_Canvas.Controls
                 ButtonBorder.Margin = isSelected
                     ? new Thickness(0, 0, 7, 0)
                     : new Thickness(2, 0, 7, 0);
-
-                double targetX = isSelected ? 0 : -2;
-                double fromX = transform?.X ?? 0;
-                if (Math.Abs(fromX - targetX) < 0.5) return;
-
-                var newTransform = new TranslateTransform(fromX, 0);
-                ButtonContent.RenderTransform = newTransform;
-                var animX = new DoubleAnimation(targetX, new Duration(TimeSpan.FromMilliseconds(120)))
-                { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
-                newTransform.BeginAnimation(TranslateTransform.XProperty, animX);
             }
             else
             {
@@ -182,17 +179,20 @@ namespace Ink_Canvas.Controls
                 ButtonBorder.Margin = isSelected
                     ? new Thickness(0, 0, 0, 7)
                     : new Thickness(0, 2, 0, 7);
-
-                double targetY = isSelected ? 0 : 2;
-                double fromY = transform?.Y ?? 0;
-                if (Math.Abs(fromY - targetY) < 0.5) return;
-
-                var newTransform = new TranslateTransform(0, fromY);
-                ButtonContent.RenderTransform = newTransform;
-                var animY = new DoubleAnimation(targetY, new Duration(TimeSpan.FromMilliseconds(120)))
-                { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } };
-                newTransform.BeginAnimation(TranslateTransform.YProperty, animY);
             }
+
+            var target = _isVerticalOrientation
+                ? new Vector(isSelected ? 0 : -2, 0)
+                : new Vector(0, isSelected ? 0 : 2);
+
+            var spring = ContentSpring;
+            var from = spring.CurrentOffset;
+
+            // 已经稳稳停在目标上就不必再起一条弹簧（多数是启动后的第一次同步）。
+            if (!spring.IsRunning && (from - target).Length < 0.5) return;
+
+            // 起点与初速度都取自当前弹簧状态：动画中途再次切换是重定向，不会停一下重来。
+            _ = spring.RunAsync(from, target, spring.CurrentVelocity, spec ?? SpringSpec.Snappy);
         }
 
         public event MouseButtonEventHandler ButtonMouseDown;
