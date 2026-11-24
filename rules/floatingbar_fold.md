@@ -236,7 +236,7 @@ COM 的 SlideShowEnd 事件可能早到也可能晚到，两次判断的结果�
 ## 位移动画：弹簧 + 合成层
 
 所有浮动部件的位移（主工具栏、左右把手、快捷面板、迷你栏）都走同一套弹簧：
-`Helpers/Motion/SpringMotion.cs`（求解器）+ `MainWindow_cs/MW_FloatingBarMotion.cs`（接入）。
+`InkCanvas.Controls/Helpers/Motion/SpringMotion.cs`（求解器）+ `MainWindow_cs/MW_FloatingBarMotion.cs`（接入）。
 
 **为什么不直接用 `ThicknessAnimation` 动 `Margin`**：
 `Margin` 是布局属性，每帧变化都会重新测量与排列，动画期间 UI 线程被布局吃满，

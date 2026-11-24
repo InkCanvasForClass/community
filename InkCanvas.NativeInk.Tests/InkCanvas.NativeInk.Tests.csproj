@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -30,6 +31,7 @@
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkStrokeGeometryState.cs" Link="Ink\Native\WetInkStrokeGeometryState.cs" />
     <!-- 弹簧求解器是纯数学（无 WPF 依赖），直接链源码做单测 -->
     <Compile Include="..\Ink Canvas\Helpers\Motion\SpringSolver.cs" Link="Helpers\Motion\SpringSolver.cs" />
+    <Compile Include="..\InkCanvas.Controls\Helpers\Motion\SpringSolver.cs" Link="Helpers\Motion\SpringSolver.cs" />
     <!-- 菜单弹出曲线同样是纯数学（无 WPF 依赖），直接链源码做单测 -->
     <Compile Include="..\Ink Canvas\Helpers\Motion\PopupCurve.cs" Link="Helpers\Motion\PopupCurve.cs" />
     <Compile Include="..\Ink Canvas\Helpers\Motion\PopupTiming.cs" Link="Helpers\Motion\PopupTiming.cs" />
