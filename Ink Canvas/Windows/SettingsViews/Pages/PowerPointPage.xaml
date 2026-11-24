@@ -114,6 +114,13 @@
                                           Checked="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"
                                           Unchecked="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"/>
                             </ui:SettingsCard>
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchPPTThumbnailDiskCache"
+                                          Content="{x:Static props:PPTStrings.ThumbnailDiskCache}"
+                                          ToolTip="{x:Static props:PPTStrings.ThumbnailDiskCacheHint}"
+                                          Checked="ToggleSwitchPPTThumbnailDiskCache_OnToggled"
+                                          Unchecked="ToggleSwitchPPTThumbnailDiskCache_OnToggled"/>
+                            </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 

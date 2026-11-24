@@ -72,6 +72,12 @@
   <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
     <value>加载 PPT 增强预览缩略图时来个圆形转圈圈，仪式感拉满</value>
   </data>
+<data name="ThumbnailDiskCache" xml:space="preserve">
+    <value>开启缩略图缓存仓库</value>
+  </data>
+  <data name="ThumbnailDiskCacheHint" xml:space="preserve">
+    <value>把已保存 PPT 的缩略图存进磁盘，下次打开直接读取，加载速度起飞。</value>
+  </data>
   <data name="LoadingPPT" xml:space="preserve">
     <value>PPT 装载中...</value>
   </data>

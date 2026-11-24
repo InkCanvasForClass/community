@@ -1825,6 +1825,7 @@ namespace Ink_Canvas.Helpers
             var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
             object slides = null;
+            string presentationPath = null;
 
             try
             {
@@ -1840,6 +1841,32 @@ namespace Ink_Canvas.Helpers
                 dynamic slideCollection = slides;
                 int count = slideCollection.Count;
                 if (count <= 0) return result;
+
+                bool canUseDiskCache = false;
+                long presentationLength = -1;
+                long presentationLastWriteTicks = -1;
+                string presentationName = null;
+                string presentationId = null;
+                try
+                {
+                    presentationPath = presentation.FullName;
+                    presentationName = Convert.ToString(presentation.Name);
+                    presentationId = PPTPresentationStorage.CreatePresentationId(presentationName, count, presentationPath);
+                    var presentationFile = new FileInfo(presentationPath);
+                    if (presentationFile.Exists)
+                    {
+                        presentationLength = presentationFile.Length;
+                        presentationLastWriteTicks = presentationFile.LastWriteTimeUtc.Ticks;
+                        canUseDiskCache = MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
+                                          Convert.ToInt32(presentation.Saved) != 0;
+                    }
+                }
+                catch { }
+                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, presentationName, width, height, count, cancellationToken, out var cachedThumbnails))
+                {
+                    progress?.Report(1.0);
+                    return cachedThumbnails;
+                }
 
                 tempDir = Path.Combine(Path.GetTempPath(), "InkCanvas", "PPTPreviews", Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(tempDir);
@@ -1876,6 +1903,31 @@ namespace Ink_Canvas.Helpers
                     }
 
                     progress?.Report((double)i / count);
+                }
+
+                bool isStillSavedRevision = false;
+                try
+                {
+                    // Re-read the live presentation identity after exporting. Save As can change
+                    // FullName/Name while the original file metadata remains unchanged.
+                    string currentPresentationPath = Convert.ToString(presentation.FullName);
+                    string currentPresentationName = Convert.ToString(presentation.Name);
+                    int currentSlideCount = Convert.ToInt32(slideCollection.Count);
+                    var currentFile = new FileInfo(presentationPath);
+                    isStillSavedRevision = canUseDiskCache &&
+                        MainWindow.Settings?.PowerPointSettings?.EnablePPTThumbnailDiskCache == true &&
+                        Convert.ToInt32(presentation.Saved) != 0 &&
+                        string.Equals(currentPresentationPath, presentationPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(currentPresentationName, presentationName, StringComparison.Ordinal) &&
+                        currentSlideCount == count &&
+                        PPTPresentationStorage.CreatePresentationId(currentPresentationName, currentSlideCount, currentPresentationPath) == presentationId &&
+                        currentFile.Exists && currentFile.Length == presentationLength &&
+                        currentFile.LastWriteTimeUtc.Ticks == presentationLastWriteTicks;
+                }
+                catch { }
+                if (isStillSavedRevision && result.Count == count)
+                {
+                    PPTThumbnailDiskCache.Save(presentationPath, presentationName, width, height, count, result);
                 }
             }
             catch (OperationCanceledException)
