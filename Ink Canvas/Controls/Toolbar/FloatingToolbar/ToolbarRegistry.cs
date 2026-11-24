@@ -1699,15 +1699,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ApplyInitialVisibility(view, ruleset);
                 contentPanel.Children.Add(view);
 
-                // 独立边框的最小宽度取一个方形的厚度（58）：窄内容（分隔线、单个图标）撑满成正方形，
-                // 宽内容（分组、调色板）按内容继续变宽，不会被裁掉。
-                // 高度仍交给当前模式的布局，不写死——别的模式厚度未必是 58。
                 wrapper = new Border
                 {
                     Margin = new Thickness(0),
                     Padding = orientation == Orientation.Horizontal ? new Thickness(2, 0, 2, 0) : new Thickness(0, 2, 0, 2),
-                    MinWidth = orientation == Orientation.Horizontal ? 58 : 0,
-                    MinHeight = orientation == Orientation.Vertical ? 58 : 0,
+                    MinWidth = 0,
                     Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
                     Width = orientation == Orientation.Vertical ? 58 : double.NaN,
                     CornerRadius = new CornerRadius(8),
