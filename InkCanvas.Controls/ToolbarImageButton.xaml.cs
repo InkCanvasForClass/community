@@ -141,6 +141,14 @@ namespace Ink_Canvas.Controls
         public void ApplyOrientation(bool isVertical)
         {
             _isVerticalOrientation = isVertical;
+
+            // 未选中态的内容偏移（横排下移 2px、竖排左移 2px）必须建控件时就落在位上。
+            // 否则"从没选中过"的按钮停在 0 偏移，比"选中过又取消"的按钮高 2px，
+            // 于是同一工具栏会出现三种高度：没选中过的 / 选中的 / 选中过但已取消的。
+            ButtonContent.RenderTransform = isVertical
+                ? new TranslateTransform(-2, 0)
+                : new TranslateTransform(0, 2);
+
             if (isVertical)
             {
                 // 竖排滑槽实际就是 52x44（ButtonPanel 43x44 + 左右边距 2/7），
