@@ -2467,8 +2467,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 double arranged = vertical ? arrangedPoint.Y : arrangedPoint.X;
 
                 // 切换前的位置：倒放的起点。
+                //
+                // 独立方形里的组件不吃这条补偿：它的外壳就是位移单位（ApplyFlipOffsets 同样跳过它），
+                // 方形让位时整体换格，组件已经跟着挪过去了。这里再按"切换前位置"补一次，
+                // 图标就会先停在方形外面，再用整个时长滑回去——用户说的"组件飘来飘去"。
+                bool insideSeparateUnit = IsInsideSeparateUnit(child);
                 double from = arranged;
-                if (beforeOffsets != null && beforeOffsets.TryGetValue(child, out var before))
+                if (!insideSeparateUnit && beforeOffsets != null && beforeOffsets.TryGetValue(child, out var before))
                 {
                     from = vertical ? before.Y : before.X;
                 }
@@ -2784,14 +2789,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             var duration = TimeSpan.FromSeconds(profile.Seconds);
             var scale = EnsureSegmentUnitScale(border);
 
+            // 先读"眼睛看到的"当前值，再摘动画。顺序不能反：摘掉动画的瞬间属性会回落到基值，
+            // 而入场把基值留在 0 / 0.82，于是"展开途中被打断"时读到的是 0.00 / 0.82，
+            // 背景在打断那一帧直接消失，后面 0→0 的倒放什么也看不见——用户看到的就是
+            // "背景瞬间收掉、段内组件还在，等背景收完组件才动"。
+            double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
+            double fromScale = Math.Max(0.0, scale.ScaleX);
+
             border.BeginAnimation(UIElement.OpacityProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
 
-            double fromOpacity = Math.Max(0.0, Math.Min(1.0, border.Opacity));
-            // 收起可能打断一次还没长完的入场：从当前缩放接着往回收，别先跳回 1
-            double fromScale = Math.Max(0.0, scale.ScaleX);
             _enteringUnits.Remove(border);
+            border.Opacity = fromOpacity;
             scale.ScaleX = fromScale;
             scale.ScaleY = fromScale;
 
