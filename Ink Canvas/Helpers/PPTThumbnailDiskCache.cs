@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -13,7 +16,7 @@ namespace Ink_Canvas.Helpers
         private static readonly TimeSpan TempDirectoryMaxAge = TimeSpan.FromDays(1);
 
         public static bool TryLoad(string presentationPath, string presentationName, int width, int height,
-            int slideCount, out List<PPTSlideThumbnail> thumbnails)
+            int slideCount, CancellationToken cancellationToken, out List<PPTSlideThumbnail> thumbnails)
         {
             thumbnails = null;
             if (!TryGetCacheDirectory(presentationPath, presentationName, width, height, slideCount, out var directory))
@@ -24,16 +27,23 @@ namespace Ink_Canvas.Helpers
                 var loaded = new List<PPTSlideThumbnail>(slideCount);
                 for (int i = 1; i <= slideCount; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     string file = Path.Combine(directory, i.ToString("0000") + ".png");
                     if (!File.Exists(file)) return false;
                     byte[] bytes = File.ReadAllBytes(file);
-                    if (!IsPng(bytes)) return false;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!IsPng(bytes) || !IsValidPngPayload(bytes, cancellationToken)) return false;
                     loaded.Add(new PPTSlideThumbnail { SlideNumber = i, PngBytes = bytes });
                 }
 
                 thumbnails = loaded;
                 try { Directory.SetLastWriteTimeUtc(directory, DateTime.UtcNow); } catch { }
                 return true;
+            }
+            catch (OperationCanceledException)
+            {
+                thumbnails = null;
+                throw;
             }
             catch (Exception ex)
             {
@@ -147,6 +157,35 @@ namespace Ink_Canvas.Helpers
             return bytes != null && bytes.Length >= 8 &&
                    bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47 &&
                    bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A;
+        }
+
+        private static bool IsValidPngPayload(byte[] bytes, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using (var stream = new MemoryStream(bytes, false))
+            {
+                var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+                if (decoder.Frames == null || decoder.Frames.Count != 1) return false;
+
+                BitmapFrame frame = decoder.Frames[0];
+                int width = frame.PixelWidth;
+                int height = frame.PixelHeight;
+                int bitsPerPixel = frame.Format.BitsPerPixel;
+                if (width <= 0 || height <= 0 || bitsPerPixel <= 0) return false;
+
+                long stride = (((long)width * bitsPerPixel + 31) / 32) * 4;
+                long bufferLength = stride * height;
+                if (stride > int.MaxValue || bufferLength <= 0 || bufferLength > int.MaxValue) return false;
+
+                // Force the decoder to materialize the full pixel payload. Creating a decoder
+                // alone may defer errors until the frame is actually consumed.
+                var pixels = new byte[(int)bufferLength];
+                frame.CopyPixels(new Int32Rect(0, 0, width, height), pixels, (int)stride, 0);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return true;
         }
 
         private static void CleanupCacheRoot(string presentationsRoot)
