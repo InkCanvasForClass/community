@@ -133,6 +133,7 @@ namespace Ink_Canvas.Helpers
             RestartApp(false);
         }
 
+<<<<<<< net10 (ours)
         /// <summary>
         /// 启动阶段专用 UIAccess 交接入口。
         /// 不读取或保存 SettingsManager，也不关闭当前进程；由 App_Startup 统一负责互斥体与回退。
@@ -196,6 +197,69 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+||||||| net6 (base)
+=======
+        /// <summary>
+        /// 启动阶段专用的轻量 UIA 交接入口。
+        /// 不读写 SettingsManager、不主动关闭当前进程，由 App_Startup 统一处理交接与回退。
+        /// </summary>
+        public static bool TryLaunchUIAFromStartup(bool useProcessToken)
+        {
+            try
+            {
+                if (UIAccessHelper.HasUIAccess())
+                {
+                    return true;
+                }
+
+                if (IsRunningAsAdmin())
+                {
+                    return useProcessToken
+                        ? UIAccessHelper.RestartAsNormalUserWithUIAccess_ProcessToken(
+                            sourcePid: (uint)Process.GetCurrentProcess().Id)
+                        : UIAccessHelper.RestartAsNormalUserWithUIAccess();
+                }
+
+                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                string forwardArgs = UIAccessHelper.BuildForwardArgsArgument();
+                ProcessStartInfo psi;
+                Process helperProcess;
+
+                if (useProcessToken)
+                {
+                    int currentPid = Process.GetCurrentProcess().Id;
+                    psi = new ProcessStartInfo(exePath)
+                    {
+                        Arguments = $"{UIAccessHelper.UIA_HELPER_SWITCH} --uia-source-pid {currentPid}{forwardArgs}",
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    };
+                    helperProcess = Process.Start(psi);
+
+                    // helper 需要复制当前普通进程的用户令牌；当前进程必须保持存活。
+                    System.Threading.Thread.Sleep(2000);
+                }
+                else
+                {
+                    psi = new ProcessStartInfo(exePath)
+                    {
+                        Arguments = $"{UIAccessHelper.UIA_HELPER_SWITCH}{forwardArgs}",
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    };
+                    helperProcess = Process.Start(psi);
+                }
+
+                return WaitForUIAHelperExit(helperProcess);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 启动阶段 UIA 交接失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+>>>>>>> net6 (incoming)
         public static void SwitchToUIATopMostAndRestart()
         {
             TrySwitchToUIATopMostAndRestart();
