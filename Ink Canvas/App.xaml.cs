@@ -1443,12 +1443,6 @@ namespace Ink_Canvas
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
 
-            // 配置已加载后再启动看门狗，避免使用默认的 CrashAction 覆盖用户设置。
-            if (!isUpdateMode && !isFinalApp && CrashAction == CrashActionType.SilentRestart)
-            {
-                StartWatchdogIfNeeded();
-            }
-
             // 如果是更新模式，不显示主窗口但保持应用运行
             if (isUpdateMode)
             {
@@ -1749,6 +1743,45 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
+            // 阶段一：在创建 MainWindow、工具栏和插件之前判断是否需要 UIAccess。
+            // 仅普通启动路径执行；更新交接、helper、fallback 和已具备 UIAccess 的进程均不重复提权。
+            bool shouldUseUIAccess = TryGetUIAccessStartupOptions(
+                parsedSettings,
+                out bool useProcessToken);
+
+            if (shouldUseUIAccess
+                && !isUpdateMode
+                && !isFinalApp
+                && !isUpdateInProgress
+                && !IsUIAccessFallbackLaunch
+                && !UIAccessHelper.HasUIAccess())
+            {
+                LogHelper.WriteLogToFile(
+                    $"UIAccess | 阶段一：检测到启动需要 UIAccess，准备启动轻量提权流程 (Mode={(useProcessToken ? "ProcessToken" : "UserToken")})");
+
+                bool uiaStarted = AppRestartHelper.TryLaunchUIAFromStartup(useProcessToken);
+                if (uiaStarted)
+                {
+                    IsUIAccessTopMostEnabled = true;
+                    IsAppExitByUser = true;
+                    LogHelper.WriteLogToFile("UIAccess | 阶段一完成：最终 UIAccess 进程已启动，当前过渡进程退出");
+                    Shutdown();
+                    return;
+                }
+
+                // helper / UAC / token 创建失败时保留当前普通进程继续启动。
+                // WindowSettingsHelper 会识别此标记，执行普通置顶并关闭失效的 UIA 配置，
+                // 避免 Loaded 后再次进入同一条提权链。
+                IsUIAccessFallbackLaunch = true;
+                LogHelper.WriteLogToFile("UIAccess | 阶段一失败：保留当前进程并进入普通置顶回退", LogHelper.LogType.Warning);
+            }
+
+            // UIA 交接完成后再启动看门狗，避免过渡进程额外拉起守护进程。
+            if (!isUpdateMode && !isFinalApp && CrashAction == CrashActionType.SilentRestart)
+            {
+                StartWatchdogIfNeeded();
+            }
+
             // 必须在托盘图标注册（ForceCreate）之前清理，否则会把自己刚注册的图标删掉。
             CleanupStaleTrayIcon();
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
@@ -2018,6 +2051,45 @@ namespace Ink_Canvas
         /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
         /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
         /// </summary>
+        /// <summary>
+        /// 从启动阶段已缓存的 JSON 中读取 UIA 所需的最小配置。
+        /// 不实例化 SettingsManager，也不触发完整设置加载。
+        /// </summary>
+        private static bool TryGetUIAccessStartupOptions(dynamic parsedSettings, out bool useProcessToken)
+        {
+            useProcessToken = false;
+
+            try
+            {
+                string enabledValue = parsedSettings?["advanced"]?["enableUIAccessTopMost"]?.ToString();
+                string alwaysOnTopValue = parsedSettings?["advanced"]?["isAlwaysOnTop"]?.ToString();
+                string modeValue = parsedSettings?["advanced"]?["uiaMode"]?.ToString();
+
+                bool enabled = bool.TryParse(enabledValue, out bool parsedEnabled) && parsedEnabled;
+                bool alwaysOnTop = string.IsNullOrWhiteSpace(alwaysOnTopValue)
+                    || !bool.TryParse(alwaysOnTopValue, out bool parsedAlwaysOnTop)
+                    || parsedAlwaysOnTop;
+
+                // Json.NET 默认以整数序列化枚举：0=UserToken，1=ProcessToken。
+                // 同时兼容字符串枚举，未知值安全回退到 UserToken。
+                if (int.TryParse(modeValue, out int mode))
+                {
+                    useProcessToken = mode == (int)UIAMode.ProcessToken;
+                }
+                else if (Enum.TryParse(modeValue, true, out UIAMode parsedMode))
+                {
+                    useProcessToken = parsedMode == UIAMode.ProcessToken;
+                }
+
+                return enabled && alwaysOnTop;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 读取启动配置失败，跳过提前提权: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
         private static dynamic ReadSettingsJsonOnce()
         {
             if (_cachedParsedSettings != null) return _cachedParsedSettings;
