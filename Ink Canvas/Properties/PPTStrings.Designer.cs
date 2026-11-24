@@ -60,6 +60,10 @@ namespace Ink_Canvas.Properties
 
         public static string EnhancedPreviewLoadingAnimationHint => ResourceManager.GetString(nameof(EnhancedPreviewLoadingAnimationHint), _resourceCulture);
 
+        public static string ThumbnailDiskCache => ResourceManager.GetString(nameof(ThumbnailDiskCache), _resourceCulture);
+
+        public static string ThumbnailDiskCacheHint => ResourceManager.GetString(nameof(ThumbnailDiskCacheHint), _resourceCulture);
+
         public static string LoadingPPT => ResourceManager.GetString(nameof(LoadingPPT), _resourceCulture);
 
         public static string Enhancement => ResourceManager.GetString(nameof(Enhancement), _resourceCulture);

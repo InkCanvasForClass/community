@@ -72,6 +72,12 @@
   <data name="EnhancedPreviewLoadingAnimationHint" xml:space="preserve">
     <value>Shows a circular loading animation while enhanced preview thumbnails are loading.</value>
   </data>
+<data name="ThumbnailDiskCache" xml:space="preserve">
+    <value>Enable thumbnail disk cache</value>
+  </data>
+  <data name="ThumbnailDiskCacheHint" xml:space="preserve">
+    <value>Cache thumbnails for saved presentations and load them directly from disk next time.</value>
+  </data>
   <data name="LoadingPPT" xml:space="preserve">
     <value>Loading PPT...</value>
   </data>
