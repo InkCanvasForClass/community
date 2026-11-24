@@ -182,35 +182,20 @@ namespace Ink_Canvas
         private static int _exitFuseArmed;
 
         /// <summary>
-        /// 托盘图标固定 GUID：所有构建/安装路径共用同一个图标标识。
-        /// H.NotifyIcon 的 Create() 会先按该 GUID 删除旧图标再注册，
-        /// 因此被强杀/崩溃留下的幽灵图标会在下次启动时被清掉，不会越积越多。
+        /// 清理上一次运行被强杀/崩溃后残留在通知区域的幽灵图标。
+        /// 图标身份沿用 H.NotifyIcon 默认的 GUID（exe 路径哈希），
+        /// 不改变身份就不会重置 Windows 记住的通知区域设置（是否显示、排序位置）。
         /// </summary>
-        private static readonly Guid TrayIconFixedId = new Guid("C3A0F1D4-6B7E-4E2A-9D6C-5F1B8A2E7C93");
-
-        /// <summary>
-        /// 统一托盘图标身份并清理上一次运行留下的幽灵图标。
-        /// 旧版本用 exe 路径哈希作为 GUID，升级后首次启动时按旧算法再删一次，
-        /// 避免旧图标与新图标并存；之后所有版本都使用固定 GUID。
-        /// </summary>
-        private void InitializeTrayIconIdentity()
+        private static void CleanupStaleTrayIcon()
         {
-            if (_taskbar == null) return;
-
             try
             {
-                // 旧版本（按 exe 路径哈希生成 GUID）的残留图标
                 TryDeleteTrayIconById(H.NotifyIcon.Core.TrayIcon.CreateUniqueGuidForProcessPath());
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"清理旧版托盘图标失败: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"清理残留托盘图标失败: {ex.Message}", LogHelper.LogType.Warning);
             }
-
-            // H.NotifyIcon 在 Create() 里也会先按 Id 删除再注册；这里提前删一次，
-            // 让上一次被强杀留下的固定 GUID 图标在软件启动阶段立即消失。
-            TryDeleteTrayIconById(TrayIconFixedId);
-            _taskbar.Id = TrayIconFixedId;
         }
 
         // 与 NOTIFYICONDATAW 布局一致；用 IntPtr 代替 HWND/HICON，x86/x64 都能得到正确大小。
@@ -1831,8 +1816,9 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
+            // 必须在托盘图标注册（ForceCreate）之前清理，否则会把自己刚注册的图标删掉。
+            CleanupStaleTrayIcon();
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
-            InitializeTrayIconIdentity();
 
             StartArgs = e.Args;
 
