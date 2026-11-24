@@ -1848,6 +1848,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         private static Dictionary<FrameworkElement, Point> CaptureChildOffsets(Panel panel)
         {
             var result = new Dictionary<FrameworkElement, Point>();
+            // 续播起点只对发起它的那一轮有效：上一轮若因关动画/重建没走到 FLIP，
+            // 残留下来会被下一轮当成"老住户"用错位置。
+            _resumedOffsets.Clear();
             if (panel == null) return result;
 
             // 组件是三层嵌套：ContentBorder(Border) → ContentPanel(StackPanel) → 按钮(InjectedTag)。
@@ -1867,9 +1870,16 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             // 正在倒放收起的组件不算"切换前就在场"：它此刻的位置是动画中间态，
             // 记下来会让下一轮把它当成老住户，倒放就失去了起点。
+            // 但它的位置要单独留一份：万一这一轮它又被打断改成显示，
+            // 续播要用"打断时的排布位置 + 当时的位移"才算得连续。
+            _resumeAnchors.Clear();
             if (_exiting.Count > 0)
             {
-                foreach (var pending in _exiting.Keys) result.Remove(pending);
+                foreach (var pending in _exiting.Keys)
+                {
+                    if (result.TryGetValue(pending, out var pendingPoint)) _resumeAnchors[pending] = pendingPoint;
+                    result.Remove(pending);
+                }
             }
             return result;
         }
@@ -2019,6 +2029,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 System.Diagnostics.Debug.WriteLine($"[ToolbarRegistry] 邻居滑动动画失败: {ex.Message}");
             }
+            finally
+            {
+                // 续播起点只对刚跑完的这一轮有效
+                _resumedOffsets.Clear();
+                _resumeAnchors.Clear();
+            }
         }
 
         /// <summary>
@@ -2083,6 +2099,36 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 独立方形内部的组件跟着外壳一起动（外壳已经补过一次位移），
                 // 再补一次就是双倍，图标还会和方形背景分家。
                 if (IsInsideSeparateUnit(child)) continue;
+
+                // 收起被打断后重新出场：它不是"新来的"，从打断那一刻的视觉位置接着回 0。
+                // 视觉起点 = 打断时的排布位置 + 当时的位移；再与切换后的排布位置相减，
+                // 同一轮里别的组件增减造成的排布变化也一并补偿，位移才真正连续。
+                // 落到下面的"新出现"分支就会从左邻的旧位置重新滑一段，
+                // 那正是"背景已经顺了，里面的组件还在飘"的来源。
+                if (_resumedOffsets.TryGetValue(child, out var resumedOffset))
+                {
+                    if (!TryMeasureLayoutPosition(child, panel, out var resumedNow)) continue;
+
+                    double resumedFinal = vertical ? resumedNow.Y : resumedNow.X;
+                    double resumedOld = resumedFinal;
+                    if (_resumeAnchors.TryGetValue(child, out var resumeAnchor))
+                    {
+                        resumedOld = vertical ? resumeAnchor.Y : resumeAnchor.X;
+                    }
+
+                    // 它已经恢复在场：同一个槽位里后面的新组件应从这里起步，
+                    // 不该跳过它再往左找一个邻居。
+                    anchors[LayoutSlot(child, panel)] = resumedOld;
+
+                    double resumeDelta = resumedOld + (vertical ? resumedOffset.Y : resumedOffset.X) - resumedFinal;
+                    if (Math.Abs(resumeDelta) < 0.5) continue;
+
+                    MotionTrace($"续播 {Describe(child)} 位移 {resumeDelta:F1}→0");
+                    StartChannelMotion(
+                        GetOrCreateChannel(child, TranslateChannelIndex),
+                        vertical, resumeDelta, 0.0, collapse: false);
+                    continue;
+                }
 
                 if (ownZIndex)
                 {
@@ -2201,6 +2247,23 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
         private static readonly Dictionary<FrameworkElement, ExitPlan> _exiting =
             new Dictionary<FrameworkElement, ExitPlan>();
+
+        /// <summary>
+        /// 收起被打断、改为重新出场的组件：记下打断那一刻的位移，交给 FLIP 接着走。
+        /// </summary>
+        /// <remarks>
+        /// <see cref="FinishHide"/> 会把位移通道清零，而 FLIP 只按"切换前在不在位置表里"
+        /// 判断谁是新来的；被打断的组件在 <see cref="CaptureChildOffsets"/> 里已被剔除，
+        /// 于是会被当成新组件，从左邻位置重新滑一段——背景（跨度）已经能续播，
+        /// 组件却还在多滑一段，用户看到的就是"里面的组件飘来飘去"。
+        /// 这里保留打断时的位移，由 <see cref="ApplyFlipOffsets"/> 直接从该值补回 0。
+        /// </remarks>
+        private static readonly Dictionary<FrameworkElement, Point> _resumedOffsets =
+            new Dictionary<FrameworkElement, Point>();
+
+        /// <summary>倒放中的组件在本次同步开始时的排布位置（续播时用来算布局差）。</summary>
+        private static readonly Dictionary<FrameworkElement, Point> _resumeAnchors =
+            new Dictionary<FrameworkElement, Point>();
 
         /// <summary>入场中的独立方形：排布已经回来，但背景还在从 0 淡入（值是它的排布跨度）。</summary>
         private static readonly Dictionary<Border, double> _enteringUnits = new Dictionary<Border, double>();
@@ -3714,6 +3777,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 resumeOpacity = Math.Max(0.0, Math.Min(1.0, element.Opacity));
                 resumeScale = GetOrCreateScaleTransform(element).ScaleX;
+
+                // 记下打断那一刻的位移：FinishHide 会把它清零，而 FLIP 又只认"位置表里有没有"。
+                // 不记的话，这个正退到一半的组件会被当成新来的，从左邻位置重新滑一遍。
+                if (animate)
+                {
+                    var interruptedTranslate = GetOrCreateChannel(element, TranslateChannelIndex);
+                    _resumedOffsets[element] = new Point(interruptedTranslate.X, interruptedTranslate.Y);
+                }
+
                 FinishHide(element, collapse: false);
                 element.Visibility = Visibility.Collapsed;
             }
