@@ -97,12 +97,19 @@ namespace Ink_Canvas.Controls
             _isVerticalOrientation = isVertical;
             if (isVertical)
             {
+                // 竖排滑槽实际就是 52x44（ButtonPanel 43x44 + 左右边距 2/7），
+                // 写死在这里，首次测量不再等图标内容。
+                Width = 52;
+                Height = 44;
                 ButtonPanel.Width = 43;
                 ButtonPanel.Height = 44;
                 ButtonBorder.Margin = new Thickness(2, 0, 7, 0);
             }
             else
             {
+                // 横排滑槽 44x52（ButtonPanel 44x43 + 上下边距 2/7）。
+                Width = 44;
+                Height = 52;
                 ButtonPanel.Width = 44;
                 ButtonPanel.Height = 43;
                 ButtonBorder.Margin = new Thickness(0, 2, 0, 7);

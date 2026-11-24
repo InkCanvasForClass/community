@@ -4,7 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             Width="44" Height="52"
              mc:Ignorable="d">
+    <!--
+        图标控件自身写死横排 44x52 / 竖排 52x44（ApplyOrientation 里互换）：
+        它的尺寸不再依赖图标内容测量。启动时图标还没画出来（DrawingImage / 字体图标
+        尚未解析）的那几帧里，控件 DesiredSize 不会被量小，工具栏首帧就是最终尺寸，
+        不会出现"先小一下再变大"。
+    -->
     <Border x:Name="ButtonBorder" CornerRadius="4" Background="Transparent" Margin="0,2,0,7">
         <Grid Name="ButtonPanel" d:Background="Red"
               MouseDown="ButtonPanel_MouseDown"
