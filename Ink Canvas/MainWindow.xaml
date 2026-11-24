@@ -892,48 +892,10 @@
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <!--浮动工具栏-->
+        <!-- 工具栏主体（ViewboxFloatingBar）已迁到独立窗口 FloatingToolbarWindow，
+             这里只留下同属浮动栏体系的闲置迷你批注栏。代码通过 MainWindow 的
+             XxxFloatingBar 同名属性访问那个窗口里的元素，见 MW_FloatingBarWindowBridge。 -->
         <Grid Name="FloatingbarUIForInkReplay" d:Visibility="Collapsed">
-            <Viewbox Name="ViewboxFloatingBar" Margin="-500,0,0,0" Cursor="Arrow"
-                     Visibility="Collapsed"  d:Visibility="Visible"
-                     HorizontalAlignment="Left" VerticalAlignment="Top"
-                     Stretch="None"
-                     UseLayoutRounding="True" SnapsToDevicePixels="True"
-                     RenderTransformOrigin="0.5,0.5">
-                <Viewbox.LayoutTransform>
-                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
-                </Viewbox.LayoutTransform>
-                <Grid Name="GridFloatingBarContainer">
-                    <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" >
-                        <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
-                                Width="58" Height="58"
-                                Background="{DynamicResource FloatingBarBackgroundBrush}"
-                                CornerRadius="8"
-                                BorderThickness="2"
-                                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                                MouseDown="SymbolIconEmoji_MouseDown"
-                                MouseUp="SymbolIconEmoji_MouseUp">
-                            <Image Name="FloatingbarHeadIconImg" Margin="0.5"
-                                   SnapsToDevicePixels="True"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
-                        </Border>
-                    </ikw:SimpleStackPanel>
-                    <Canvas Name="CanvasFloatingBarSelection" IsHitTestVisible="False">
-                        <Border Name="SelectionBGFloatingBar"
-                                Visibility="Hidden"
-                                Width="44" Height="43"
-                                CornerRadius="4"
-                                Background="#303B82F6"
-                                Canvas.Left="0" Canvas.Top="0" />
-                        <Border Name="IndicatorBarFloatingBar"
-                                Visibility="Hidden"
-                                Width="16" Height="3"
-                                CornerRadius="2"
-                                Background="#2563EB"
-                                Canvas.Left="14" Canvas.Bottom="2" />
-                    </Canvas>
-                </Grid>
-            </Viewbox>
             <!-- Issue #285 更小批注栏：闲置状态下替代浮动栏的紧凑圆角批注栏，可自动吸边 -->
             <Border Name="IdleMiniBar"
                     Visibility="Collapsed" d:Visibility="Visible"

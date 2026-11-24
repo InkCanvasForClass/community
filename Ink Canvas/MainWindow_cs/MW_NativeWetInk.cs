@@ -1427,7 +1427,9 @@ namespace Ink_Canvas
             Point windowTopLeftScreen)
         {
             var list = new List<WetInkPixelRect>(8);
-            TryAddElementExclusion(list, FindName("ViewboxFloatingBar") as FrameworkElement, dpi, windowTopLeftScreen);
+            // 工具栏已迁到独立窗口，FindName 在主窗口名字域里找不到它，改用桥接属性；
+            // TryAddElementExclusion 内部走 PointToScreen，跨窗口安全。
+            TryAddElementExclusion(list, ViewboxFloatingBar, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("ViewboxBlackboardLeftSide") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("ViewboxBlackboardCenterSide") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("ViewboxBlackboardRightSide") as FrameworkElement, dpi, windowTopLeftScreen);

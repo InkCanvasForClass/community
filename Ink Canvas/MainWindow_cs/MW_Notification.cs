@@ -195,7 +195,8 @@ namespace Ink_Canvas
 
             try
             {
-                var position = ViewboxFloatingBar.TransformToAncestor(this).Transform(new Point(0, 0));
+                // 浮动栏在独立窗口里，TransformToAncestor 会抛异常，改用桥接层的屏幕坐标换算。
+                var position = GetFloatingBarBoundsInMainWindow().TopLeft;
                 double notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
                 double notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
                 // 浮动栏缩放由 LayoutTransform（ViewboxFloatingBarScaleTransform）实现，

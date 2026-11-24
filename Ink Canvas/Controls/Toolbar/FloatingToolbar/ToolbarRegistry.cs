@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Helpers.Motion;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Newtonsoft.Json;
@@ -150,6 +151,20 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return tip.Length <= 12 ? tip : tip.Substring(0, 12);
             }
             return element.GetType().Name;
+        }
+
+        /// <summary>
+        /// 找到承载工具栏的 MainWindow。
+        /// </summary>
+        /// <remarks>
+        /// 工具栏视树已搬到 FloatingToolbarWindow，按钮的 Window.GetWindow 不再返回 MainWindow；
+        /// 那里只挂了一层从属窗口，主持人仍然是它的 Owner。
+        /// </remarks>
+        internal static MainWindow FindOwningMainWindow(FrameworkElement element)
+        {
+            if (Window.GetWindow(element) is MainWindow mw) return mw;
+            if (Window.GetWindow(element) is FloatingToolbarWindow floating && floating.Owner is MainWindow owner) return owner;
+            return Application.Current?.MainWindow as MainWindow;
         }
 
         /// <summary>
@@ -4510,11 +4525,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 注册 Popup 到 PopupManagerHelper
                 btn.Loaded += (s, e) =>
                 {
-                    var window = Window.GetWindow(btn);
-                    if (window is MainWindow mw)
-                    {
-                        mw.GetPopupManager()?.RegisterPopup(popup);
-                    }
+                    ToolbarRegistry.FindOwningMainWindow(btn)?.GetPopupManager()?.RegisterPopup(popup);
                 };
 
                 btn.ButtonMouseUp += (s, e) =>
@@ -4526,11 +4537,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     else
                     {
                         // 关闭主窗口中其他已打开的 Popup
-                        var window = Window.GetWindow(btn);
-                        if (window is MainWindow mw)
-                        {
-                            mw.CloseAllPopups();
-                        }
+                        ToolbarRegistry.FindOwningMainWindow(btn)?.CloseAllPopups();
                         AnimationsHelper.ShowPopupWithSlideAndFade(popup);
                         popup.Dispatcher.BeginInvoke(new Action(() =>
                         {

@@ -1,0 +1,78 @@
+<helpers:PerformanceTransparentWin x:Class="Ink_Canvas.Windows.FloatingToolbarWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowActivated="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="Manual"
+        Topmost="True"
+        Focusable="False"
+        Background="#00000000"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        Title="FloatingToolbar">
+    <!--
+        工具栏独立窗口。
+
+        坐标约定（务必保持不变）：
+        - ViewboxFloatingBar.Margin 仍然是**唯一**逻辑位置真值，取值与拆分前完全一致
+          （相对 MainWindow 客户区的 DIP）。
+        - 窗口的客户区与 MainWindow 客户区**逐像素重合**，所以窗口内坐标就是主窗口客户区坐标，
+          Margin 不需要任何换算。
+        - 为什么必须整块覆盖而不是只开一个小窗：WPF 在元素的实际尺寸小于期望尺寸时
+          会给它加 layout clip，凡是布局位置落在窗口之外的内容都会被整块裁掉
+          （实测：同一窗口内，布局在窗口内的元素能上屏，布局越界再用 RenderTransform
+          拉回来的一律不显示）。因此工具栏必须始终布局在窗口内。
+        - 空白像素由 WM_NCHITTEST 返回 HTTRANSPARENT，点击直接穿透到画布。
+    -->
+    <Grid x:Name="RootGrid" Background="{x:Null}">
+        <Grid x:Name="ContentHost">
+            <Viewbox Name="ViewboxFloatingBar" Margin="0,0,0,0" Cursor="Arrow"
+                     Visibility="Collapsed"  d:Visibility="Visible"
+                     HorizontalAlignment="Left" VerticalAlignment="Top"
+                     Stretch="None"
+                     UseLayoutRounding="True" SnapsToDevicePixels="True"
+                     RenderTransformOrigin="0.5,0.5">
+                <Viewbox.LayoutTransform>
+                    <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
+                </Viewbox.LayoutTransform>
+                <Grid Name="GridFloatingBarContainer">
+                    <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" >
+                        <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
+                                Width="58" Height="58"
+                                Background="{DynamicResource FloatingBarBackgroundBrush}"
+                                CornerRadius="8"
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                                MouseDown="SymbolIconEmoji_MouseDown">
+                            <Image Name="FloatingbarHeadIconImg" Margin="0.5"
+                                   SnapsToDevicePixels="True"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                    </ikw:SimpleStackPanel>
+                    <Canvas Name="CanvasFloatingBarSelection" IsHitTestVisible="False">
+                        <Border Name="SelectionBGFloatingBar"
+                                Visibility="Hidden"
+                                Width="44" Height="43"
+                                CornerRadius="4"
+                                Background="#303B82F6"
+                                Canvas.Left="0" Canvas.Top="0" />
+                        <Border Name="IndicatorBarFloatingBar"
+                                Visibility="Hidden"
+                                Width="16" Height="3"
+                                CornerRadius="2"
+                                Background="#2563EB"
+                                Canvas.Left="14" Canvas.Bottom="2" />
+                    </Canvas>
+                </Grid>
+            </Viewbox>
+        </Grid>
+    </Grid>
+</helpers:PerformanceTransparentWin>
