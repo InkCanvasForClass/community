@@ -1670,10 +1670,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 {
                     Margin = new Thickness(0),
                     Padding = new Thickness(0),
-                    MinWidth = orientation == Orientation.Horizontal ? 58 : 0,
-                    MinHeight = orientation == Orientation.Vertical ? 58 : 0,
-                    Height = orientation == Orientation.Horizontal ? 58 : double.NaN,
-                    Width = orientation == Orientation.Vertical ? 58 : double.NaN,
+                    // 单个图标的外层方形两个方向都写死 58：
+                    // 原来只有一个方向是固定值，另一边靠 MinWidth/MinHeight 兜底，
+                    // 量跨度、排布都要先跑一次布局才能确定；固定死之后随时可量、恒定不变。
+                    Width = 58,
+                    Height = 58,
                     CornerRadius = new CornerRadius(8),
                     BorderThickness = new Thickness(2),
                     Child = contentPanel,
