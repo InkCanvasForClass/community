@@ -32,7 +32,7 @@ namespace Ink_Canvas.Helpers
                     if (!File.Exists(file)) return false;
                     byte[] bytes = File.ReadAllBytes(file);
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!IsPng(bytes) || !IsValidPngPayload(bytes, cancellationToken)) return false;
+                    if (!IsPng(bytes) || !IsValidPngPayload(bytes, width, height, cancellationToken)) return false;
                     loaded.Add(new PPTSlideThumbnail { SlideNumber = i, PngBytes = bytes });
                 }
 
@@ -159,7 +159,7 @@ namespace Ink_Canvas.Helpers
                    bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A;
         }
 
-        private static bool IsValidPngPayload(byte[] bytes, CancellationToken cancellationToken)
+        private static bool IsValidPngPayload(byte[] bytes, int expectedWidth, int expectedHeight, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -172,7 +172,7 @@ namespace Ink_Canvas.Helpers
                 int width = frame.PixelWidth;
                 int height = frame.PixelHeight;
                 int bitsPerPixel = frame.Format.BitsPerPixel;
-                if (width <= 0 || height <= 0 || bitsPerPixel <= 0) return false;
+                if (width != expectedWidth || height != expectedHeight || bitsPerPixel <= 0) return false;
 
                 long stride = (((long)width * bitsPerPixel + 31) / 32) * 4;
                 long bufferLength = stride * height;
