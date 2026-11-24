@@ -1862,7 +1862,7 @@ namespace Ink_Canvas.Helpers
                     }
                 }
                 catch { }
-                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, presentationName, width, height, count, out var cachedThumbnails))
+                if (canUseDiskCache && PPTThumbnailDiskCache.TryLoad(presentationPath, presentationName, width, height, count, cancellationToken, out var cachedThumbnails))
                 {
                     progress?.Report(1.0);
                     return cachedThumbnails;
