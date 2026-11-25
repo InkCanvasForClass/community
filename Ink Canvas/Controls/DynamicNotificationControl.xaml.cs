@@ -22,6 +22,18 @@ namespace Ink_Canvas.Controls
         private bool isCountdownRendering;
         private double countdownProgressLength;
         private readonly DoubleCollection countdownProgressDashArray = new DoubleCollection { 0, 1 };
+        private SolidColorBrush rootBackgroundBrush;
+        private SolidColorBrush rootBorderBrush;
+        private SolidColorBrush titleForegroundBrush;
+        private SolidColorBrush summaryForegroundBrush;
+        private SolidColorBrush contentForegroundBrush;
+        private SolidColorBrush iconForegroundBrush;
+        private SolidColorBrush iconBackgroundBrush;
+        private SolidColorBrush closeButtonForegroundBrush;
+        private SolidColorBrush countdownStrokeBrush;
+        private SolidColorBrush actionBackgroundBrush;
+        private SolidColorBrush actionForegroundBrush;
+        private SolidColorBrush actionBorderBrush;
 
         public event EventHandler Closed;
 
@@ -37,12 +49,13 @@ namespace Ink_Canvas.Controls
             isExpanded = message?.ForcePopup == true;
             isClosing = false;
 
-            TitleTextBlock.Text = string.IsNullOrWhiteSpace(message?.Title) ? NotificationStrings.DefaultTitle : message.Title;
-            SummaryTextBlock.Text = message?.Summary ?? string.Empty;
-            SummaryTextBlock.Visibility = string.IsNullOrWhiteSpace(SummaryTextBlock.Text) ? Visibility.Collapsed : Visibility.Visible;
-            ContentTextBlock.Text = string.IsNullOrWhiteSpace(message?.Summary) ? message?.Content ?? string.Empty : message.Summary;
-            ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? NotificationStrings.ViewDetails : message.ActionText;
-            ActionButton.Visibility = message?.Action != null || !string.IsNullOrWhiteSpace(message?.ActionUrl) ? Visibility.Visible : Visibility.Collapsed;
+            SetTextIfChanged(TitleTextBlock, string.IsNullOrWhiteSpace(message?.Title) ? NotificationStrings.DefaultTitle : message.Title);
+            SetTextIfChanged(SummaryTextBlock, message?.Summary ?? string.Empty);
+            SetVisibilityIfChanged(SummaryTextBlock, string.IsNullOrWhiteSpace(SummaryTextBlock.Text) ? Visibility.Collapsed : Visibility.Visible);
+            SetTextIfChanged(ContentTextBlock, string.IsNullOrWhiteSpace(message?.Summary) ? message?.Content ?? string.Empty : message.Summary);
+            if (!Equals(ActionButton.Content, string.IsNullOrWhiteSpace(message?.ActionText) ? NotificationStrings.ViewDetails : message.ActionText))
+                ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? NotificationStrings.ViewDetails : message.ActionText;
+            SetVisibilityIfChanged(ActionButton, message?.Action != null || !string.IsNullOrWhiteSpace(message?.ActionUrl) ? Visibility.Visible : Visibility.Collapsed);
             IconGlyph.Icon = GetIcon(message);
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
 
@@ -87,29 +100,53 @@ namespace Ink_Canvas.Controls
         private void ApplyThemeColors(NotificationMessage message)
         {
             var (background, border, foreground, secondaryForeground, iconBackground) = GetThemeColors(message);
-            RootBorder.Background = new SolidColorBrush(background);
-            RootBorder.BorderBrush = new SolidColorBrush(border);
-            TitleTextBlock.Foreground = new SolidColorBrush(foreground);
-            SummaryTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
-            ContentTextBlock.Foreground = new SolidColorBrush(secondaryForeground);
-            IconGlyph.Foreground = new SolidColorBrush(foreground);
-            IconBackgroundBorder.Background = new SolidColorBrush(iconBackground);
-            CloseButtonText.Foreground = new SolidColorBrush(secondaryForeground);
-            CountdownProgressPath.Stroke = new SolidColorBrush(border);
+            SetCachedBrush(RootBorder, Border.BackgroundProperty, ref rootBackgroundBrush, background);
+            SetCachedBrush(RootBorder, Border.BorderBrushProperty, ref rootBorderBrush, border);
+            SetCachedBrush(TitleTextBlock, TextBlock.ForegroundProperty, ref titleForegroundBrush, foreground);
+            SetCachedBrush(SummaryTextBlock, TextBlock.ForegroundProperty, ref summaryForegroundBrush, secondaryForeground);
+            SetCachedBrush(ContentTextBlock, TextBlock.ForegroundProperty, ref contentForegroundBrush, secondaryForeground);
+            SetCachedBrush(IconGlyph, Control.ForegroundProperty, ref iconForegroundBrush, foreground);
+            SetCachedBrush(IconBackgroundBorder, Border.BackgroundProperty, ref iconBackgroundBrush, iconBackground);
+            SetCachedBrush(CloseButtonText, TextBlock.ForegroundProperty, ref closeButtonForegroundBrush, secondaryForeground);
+            SetCachedBrush(CountdownProgressPath, Shape.StrokeProperty, ref countdownStrokeBrush, border);
 
             // 操作按钮使用半透明主题色
             if (isDarkTheme)
             {
-                ActionButton.Background = new SolidColorBrush(Color.FromArgb(34, 255, 255, 255));
-                ActionButton.Foreground = new SolidColorBrush(Colors.White);
-                ActionButton.BorderBrush = new SolidColorBrush(Color.FromArgb(51, 255, 255, 255));
+                SetCachedBrush(ActionButton, Control.BackgroundProperty, ref actionBackgroundBrush, Color.FromArgb(34, 255, 255, 255));
+                SetCachedBrush(ActionButton, Control.ForegroundProperty, ref actionForegroundBrush, Colors.White);
+                SetCachedBrush(ActionButton, Control.BorderBrushProperty, ref actionBorderBrush, Color.FromArgb(51, 255, 255, 255));
             }
             else
             {
-                ActionButton.Background = new SolidColorBrush(Color.FromArgb(20, 0, 0, 0));
-                ActionButton.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                ActionButton.BorderBrush = new SolidColorBrush(Color.FromArgb(34, 0, 0, 0));
+                SetCachedBrush(ActionButton, Control.BackgroundProperty, ref actionBackgroundBrush, Color.FromArgb(20, 0, 0, 0));
+                SetCachedBrush(ActionButton, Control.ForegroundProperty, ref actionForegroundBrush, Color.FromRgb(24, 24, 27));
+                SetCachedBrush(ActionButton, Control.BorderBrushProperty, ref actionBorderBrush, Color.FromArgb(34, 0, 0, 0));
             }
+        }
+
+        private static void SetTextIfChanged(TextBlock textBlock, string value)
+        {
+            if (!string.Equals(textBlock.Text, value, StringComparison.Ordinal))
+                textBlock.Text = value;
+        }
+
+        private static void SetVisibilityIfChanged(UIElement element, Visibility value)
+        {
+            if (element.Visibility != value)
+                element.Visibility = value;
+        }
+
+        private static void SetCachedBrush(DependencyObject target, DependencyProperty property, ref SolidColorBrush cachedBrush, Color color)
+        {
+            if (cachedBrush == null || cachedBrush.Color != color)
+            {
+                cachedBrush = new SolidColorBrush(color);
+                cachedBrush.Freeze();
+            }
+
+            if (!ReferenceEquals(target.GetValue(property), cachedBrush))
+                target.SetValue(property, cachedBrush);
         }
 
         private (Color Background, Color Border, Color Foreground, Color SecondaryForeground, Color IconBackground) GetThemeColors(NotificationMessage message)
