@@ -21,6 +21,7 @@ namespace Ink_Canvas.Controls
         private bool isClosing;
         private bool isCountdownRendering;
         private double countdownProgressLength;
+        private readonly DoubleCollection countdownProgressDashArray = new DoubleCollection { 0, 1 };
 
         public event EventHandler Closed;
 
@@ -347,12 +348,16 @@ namespace Ink_Canvas.Controls
 
             progress = Math.Max(0, Math.Min(1, progress));
             var thickness = CountdownProgressPath.StrokeThickness;
-            CountdownProgressPath.StrokeDashOffset = 0;
-            CountdownProgressPath.StrokeDashArray = new DoubleCollection
+            // Reuse the same Freezable collection: this method runs on every rendered frame
+            // while the notification is visible, so allocating a new collection here creates
+            // avoidable per-frame garbage and invalidation work.
+            if (!ReferenceEquals(CountdownProgressPath.StrokeDashArray, countdownProgressDashArray))
             {
-                countdownProgressLength * progress / thickness,
-                countdownProgressLength / thickness
-            };
+                CountdownProgressPath.StrokeDashArray = countdownProgressDashArray;
+            }
+
+            countdownProgressDashArray[0] = countdownProgressLength * progress / thickness;
+            countdownProgressDashArray[1] = countdownProgressLength / thickness;
         }
 
         private void Close()
