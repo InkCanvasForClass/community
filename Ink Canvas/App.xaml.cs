@@ -1455,6 +1455,13 @@ namespace Ink_Canvas
             }
 
 
+            // 更新进程可能立即在后台执行网络操作；仅该特殊路径提前设置 TLS。
+            // 普通 UIA 过渡进程仍不会初始化 TLS，完整运行时会在交接后配置。
+            if (e.Args.Contains("--update-mode"))
+            {
+                ConfigureTlsForWindows7();
+            }
+
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
 
