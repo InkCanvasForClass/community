@@ -25,6 +25,7 @@ namespace Ink_Canvas
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
             BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
+            PeopleCount = Math.Max(1, settings.RandSettings.TotalStudents);
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
             // 加载背景
@@ -96,6 +97,7 @@ namespace Ink_Canvas
             PeopleControlPane.IsHitTestVisible = false;
             BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
+            PeopleCount = Math.Max(1, settings.RandSettings.TotalStudents);
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
             // 加载背景
@@ -336,7 +338,7 @@ namespace Ink_Canvas
                 TextBlockPeopleCount.Text = PeopleCount.ToString();
                 if (PeopleCount == 0)
                 {
-                    PeopleCount = 60;
+                    PeopleCount = Math.Max(1, MainWindow.Settings?.RandSettings?.TotalStudents ?? 60);
                     TextBlockPeopleCount.Text = Properties.RandomStrings.Random_Rand_ClickToImport;
                 }
             }

@@ -76,6 +76,8 @@ namespace Ink_Canvas.Properties
 
         public static string Random_Title => ResourceManager.GetString(nameof(Random_Title), _resourceCulture);
 
+        public static string Random_TotalStudents => ResourceManager.GetString(nameof(Random_TotalStudents), _resourceCulture);
+
         public static string Random_UseExternal => ResourceManager.GetString(nameof(Random_UseExternal), _resourceCulture);
 
         public static string Random_SelectTimerAlarm => ResourceManager.GetString(nameof(Random_SelectTimerAlarm), _resourceCulture);

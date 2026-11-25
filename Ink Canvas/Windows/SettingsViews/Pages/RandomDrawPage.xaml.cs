@@ -61,6 +61,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = settings.RandSettings.DisplayRandWindowNamesInputBtn;
             RandWindowOnceCloseLatencySlider.Value = settings.RandSettings.RandWindowOnceCloseLatency;
             RandWindowOnceMaxStudentsSlider.Value = settings.RandSettings.RandWindowOnceMaxStudents;
+            ComboBoxTotalStudents.Text = settings.RandSettings.TotalStudents.ToString();
             ToggleSwitchShowRandomAndSingleDraw.IsOn = settings.RandSettings.ShowRandomAndSingleDraw;
             ToggleSwitchEnableQuickDraw.IsOn = settings.RandSettings.EnableQuickDraw;
             ToggleSwitchQuickDrawExternalCaller.IsOn = settings.RandSettings.QuickDrawExternalCaller;
@@ -123,6 +124,42 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(RandWindowOnceMaxStudentsSlider, RandWindowOnceMaxStudentsText, "{0:0}");
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.RandWindowOnceMaxStudents = (int)RandWindowOnceMaxStudentsSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxTotalStudents_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem item)
+            {
+                comboBox.Text = item.Content?.ToString() ?? comboBox.Text;
+            }
+            ApplyTotalStudentsSetting();
+        }
+
+        private void ComboBoxTotalStudents_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ApplyTotalStudentsSetting();
+        }
+
+        private void ApplyTotalStudentsSetting()
+        {
+            if (!_isLoaded) return;
+
+            int totalStudents = SettingsManager.Settings.RandSettings.TotalStudents;
+            if (!int.TryParse(ComboBoxTotalStudents.Text?.Trim(), out totalStudents))
+            {
+                totalStudents = SettingsManager.Settings.RandSettings.TotalStudents;
+            }
+            if (totalStudents < 10) totalStudents = 10;
+            if (totalStudents > 200) totalStudents = 200;
+
+            var text = totalStudents.ToString();
+            if (ComboBoxTotalStudents.Text != text)
+            {
+                ComboBoxTotalStudents.Text = text;
+            }
+
+            SettingsManager.Settings.RandSettings.TotalStudents = totalStudents;
             SettingsManager.SaveSettingsToFile();
         }
 
