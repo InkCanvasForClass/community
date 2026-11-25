@@ -1811,7 +1811,16 @@ namespace Ink_Canvas
 
                 // 让最终 UIAccess 子进程能够接管标准单实例互斥体。
                 bool restoreMutexAfterFailure = ownsStandardMutex;
-                ReleaseMutexForRestart();
+                if (restoreMutexAfterFailure)
+                {
+                    ReleaseMutexForRestart();
+                }
+                else
+                {
+                    // -m 多实例路径可能没有取得标准互斥体，只释放句柄，不尝试 ReleaseMutex。
+                    mutex?.Dispose();
+                    mutex = null;
+                }
                 ownsStandardMutex = false;
 
                 bool uiaStarted = AppRestartHelper.TryLaunchUIAFromStartup(useProcessToken);
