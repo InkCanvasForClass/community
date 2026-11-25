@@ -11,6 +11,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string Description => FloatingBarStrings.Board_Tools;
         public override string IconGeometry => XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon;
 
+        // 点击打开工具菜单：等工具栏动画落定再执行，避免重建菜单的重活把动画拖住。
+        protected override bool OpensUiOnClick => true;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.SymbolIconTools_MouseUp(sender, e);
 

@@ -26,6 +26,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         // 因此使用 CustomSettingsPanelFactory 提供完全自定义的设置面板，而非通过 CustomSettings 声明式生成。
         public override Func<FrameworkElement> CustomSettingsPanelFactory => BuildMiniWhiteboardSettingsPanel;
 
+        // 点击要创建/显示小白板窗口：等工具栏动画落定再执行，避免建窗的重活把动画拖住。
+        protected override bool OpensUiOnClick => true;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ToggleMiniWhiteboard();
 

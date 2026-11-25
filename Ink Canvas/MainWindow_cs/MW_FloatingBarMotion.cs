@@ -1,5 +1,9 @@
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Helpers.Motion;
+using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Animation;
@@ -214,6 +218,100 @@ namespace Ink_Canvas
             if (isRightSide) startHorizontal = -startHorizontal;
 
             return spring.RunAsync(new Vector(startHorizontal, 0), default, velocity, ToolbarSpringSpec);
+        }
+
+        // ─────────────────── 点击"打开菜单/窗口"时给动画让路 ───────────────────
+
+        /// <summary>等待动画落定的上限（毫秒）：手感倍率调得很慢时，不能让菜单跟着等两秒。</summary>
+        private const double ToolbarUiActionMaxWaitMs = 500.0;
+
+        /// <summary>当前等待中的打开动作；再次点击时取消上一次，避免排队打开两次。</summary>
+        private CancellationTokenSource _toolbarUiActionWait;
+
+        /// <summary>
+        /// 工具栏（含两侧把手、迷你栏）此刻是否还有动画在跑。
+        /// </summary>
+        /// <remarks>
+        /// 折叠过渡、跨度补间、组件显隐让位、弹簧位移都要算进来：
+        /// 这几种运动都由 UI 线程逐帧推进，任何一项没跑完，UI 线程被占住就会掉帧。
+        /// </remarks>
+        internal bool IsFloatingBarMotionActive =>
+            _foldTransitionRunning
+            || ToolbarRegistry.IsMotionActive
+            || (_floatingBarSpring?.IsRunning ?? false)
+            || (_leftSidePanelSpring?.IsRunning ?? false)
+            || (_rightSidePanelSpring?.IsRunning ?? false)
+            || (_idleMiniBarSpring?.IsRunning ?? false);
+
+        /// <summary>
+        /// 执行"点击后要打开菜单/窗口"的动作：工具栏自己在动画时不抢 UI 线程。
+        /// </summary>
+        /// <remarks>
+        /// 打开窗口要解析整棵 XAML、创建 HWND，打开菜单要重建菜单内容再把 Popup 挂上去，
+        /// 都是几十到几百毫秒的同步工作。这类工作落在动画中间时，UI 线程被占住，
+        /// 动画就整段停住或连掉几帧——用户看到的"点一下按钮动画就卡住"就是它。
+        ///
+        /// 托盘菜单项那次的做法是"先等关闭动画播完，再做重活"，思路可以借，但实现不能照抄：
+        /// 那边用嵌套消息循环等 Closed 事件，放在这里会让点击事件重入（等待期间再点一下会套第二层），
+        /// 而且嵌套循环期间输入还会派发到工具栏上。这里改成不阻塞的等待——
+        /// 点击事件立刻返回，动画照常逐帧推进，落定后再执行打开动作。
+        /// 没有动画在跑时行为完全不变，立刻执行，不多等一帧。
+        /// </remarks>
+        /// <param name="label">组件 Id，仅用于轨迹日志。</param>
+        /// <param name="action">真正打开菜单/窗口的动作。</param>
+        internal void RunToolbarUiAction(string label, Action action)
+        {
+            if (action == null) return;
+
+            if (!IsFloatingBarMotionActive)
+            {
+                RunToolbarUiActionNow(label, action);
+                return;
+            }
+
+            // 上一次的等待还没兑现就又被点了一下：后一次点击代表用户最新意图，取消旧的，
+            // 否则会先开再关（菜单类组件按当前状态取反，两次排队等于什么都没做）。
+            _toolbarUiActionWait?.Cancel();
+            var cts = new CancellationTokenSource();
+            _toolbarUiActionWait = cts;
+
+            ToolbarRegistry.MotionTrace($"点击延后 等动画落定 id={label}");
+            _ = WaitThenRunToolbarUiActionAsync(label, action, cts);
+        }
+
+        private async Task WaitThenRunToolbarUiActionAsync(string label, Action action, CancellationTokenSource cts)
+        {
+            try
+            {
+                var wait = Stopwatch.StartNew();
+                while (!cts.IsCancellationRequested
+                       && wait.Elapsed.TotalMilliseconds < ToolbarUiActionMaxWaitMs
+                       && IsFloatingBarMotionActive)
+                {
+                    await Task.Delay(16);
+                }
+
+                if (cts.IsCancellationRequested) return;
+
+                ToolbarRegistry.MotionTrace(
+                    $"点击放行 id={label} 等待={wait.Elapsed.TotalMilliseconds:F0}ms"
+                    + (IsFloatingBarMotionActive ? "（已达等待上限，动画仍在跑）" : ""));
+
+                RunToolbarUiActionNow(label, action);
+            }
+            catch (Exception ex)
+            {
+                // 这里脱离了点事件，异常不会再有人接；不接住会变成未观察任务异常
+                LogHelper.WriteLogToFile($"工具栏点击动作失败（{label}）: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>执行打开动作，并把它在 UI 线程上的耗时写进轨迹日志（用于确认重活到底有多重）。</summary>
+        private static void RunToolbarUiActionNow(string label, Action action)
+        {
+            var cost = Stopwatch.StartNew();
+            action();
+            ToolbarRegistry.MotionTrace($"点击完成 id={label} 处理={cost.Elapsed.TotalMilliseconds:F1}ms");
         }
     }
 }
