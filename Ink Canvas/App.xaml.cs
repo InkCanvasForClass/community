@@ -431,8 +431,6 @@ namespace Ink_Canvas
             {
             }
 
-            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-
             // 如果是看门狗子进程，直接进入看门狗主循环并终止主流程
             var args = Environment.GetCommandLineArgs();
             if (args.Length >= 2 && args[1] == "--watchdog")
@@ -473,6 +471,9 @@ namespace Ink_Canvas
                 Environment.Exit(started ? 0 : 1);
                 return;
             }
+
+            // 仅最终应用进程需要 WinForms 高 DPI 初始化；helper / watchdog 不创建 UI。
+            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
             // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
             // 构造函数中先用默认值（ShowCrashWindow），LoadSettings 运行后会被覆盖。
