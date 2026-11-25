@@ -224,7 +224,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                var position = ViewboxFloatingBar.TransformToAncestor(this).Transform(new Point(0, 0));
+                var position = GetFloatingBarBoundsInMainWindow().TopLeft;
                 notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
                 notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
                 // 浮动栏的 ActualWidth 不包含 LayoutTransform 缩放，使用视觉宽度定位通知。

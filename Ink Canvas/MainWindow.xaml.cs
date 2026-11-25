@@ -540,6 +540,10 @@ namespace Ink_Canvas
             */
             InitializeComponent();
 
+            // 工具栏视树在独立窗口里，必须在构造阶段就建好：
+            // 后续初始化（插件按钮注入、定位、折叠）都会直接访问这些元素。
+            EnsureFloatingToolbarWindow();
+
             if (BorderTools.Child is FrameworkElement btChild) btChild.Visibility = Visibility.Collapsed;
             if (BorderDrawShape.Child is FrameworkElement bdsChild) bdsChild.Visibility = Visibility.Collapsed;
             if (BoardBorderToolsPopup.Child is FrameworkElement bbtpChild) bbtpChild.Visibility = Visibility.Collapsed;
@@ -1549,6 +1553,9 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"[Startup] 主窗口加载开始，启动模式={App.CurrentStartupMode}", LogHelper.LogType.Info);
             SuppressNativeInkCanvasSelectionAdorners();
             loadPenCanvas();
+            // 先把工具栏窗口显示出来（不激活），再注入按钮：元素的 IsLoaded / 模板应用
+            // 都要依赖窗口已呈现，否则首帧拿不到真实宽高。
+            ShowFloatingToolbarWindow();
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();

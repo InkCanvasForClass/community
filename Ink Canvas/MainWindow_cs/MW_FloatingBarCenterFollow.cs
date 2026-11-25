@@ -67,8 +67,39 @@ namespace Ink_Canvas
         /// <summary>提交日志配额。</summary>
         private int _floatingBarCenterFollowCommitLogs;
 
+        /// <summary>基准同步日志配额。</summary>
+        private int _floatingBarCenterFollowBaselineLogs;
+
+        /// <summary>收尾延后日志配额。</summary>
+        private int _floatingBarCenterFollowDeferredLogs;
+
         /// <summary>外部落位日志配额。</summary>
         private int _floatingBarCenterFollowResetLogs;
+
+        /// <summary>吸附判定：离"底栏默认位置"多近算差不多靠近（DIP）。</summary>
+        private const double FloatingBarCenterSnapVerticalTolerance = 90.0;
+
+        /// <summary>吸附判定：离"屏幕居中位置"多近算差不多居中（DIP）。</summary>
+        private const double FloatingBarCenterSnapHorizontalTolerance = 120.0;
+
+        /// <summary>
+        /// 是否处于"居中模式"：启动即进入，拖动后退出，吸附回中后重新进入。
+        /// </summary>
+        /// <remarks>
+        /// 不靠"实测中心离屏幕中心多近"来猜：用户只是把栏挪了几像素，实测也会判定成"仍居中"，
+        /// 于是下一次跨度变化又把它拽回去，和"手移动过就不再居中"的语义相反。
+        /// 这里用显式状态记录，几何容差只用来兜住"启动位置本身有偏差"这类小事。
+        /// </remarks>
+        internal bool _floatingBarCenteredMode = true;
+
+        /// <summary>与当前方向对应的居中轴目标（横排是 X 中心线，竖排是 Y 中心线，DIP）。</summary>
+        private double _floatingBarCenterLineTarget = double.NaN;
+
+        /// <summary>横排工具栏的底栏默认 Y（DIP），吸附时用。</summary>
+        private double _floatingBarCenterTopTarget = double.NaN;
+
+        /// <summary>上面两个目标值是按哪个方向记的：换边（横⇄竖）后旧值不能拿来用。</summary>
+        private bool _floatingBarCenterTargetIsVertical;
 
         /// <summary>挂上逐帧跟随（幂等）。工具栏装配完成后调用。</summary>
         internal void HookFloatingBarCenterFollow()
@@ -98,7 +129,17 @@ namespace Ink_Canvas
         private void OnFloatingBarExtentSettled()
         {
             // 还有别的分段在跑就先不动，等最后一段收尾时一起提交
-            if (ToolbarRegistry.IsExtentAnimating) return;
+            if (ToolbarRegistry.IsExtentAnimating)
+            {
+                // 这条要是"最后一次收尾"也会被跳过，位置就永远停在补偿态——
+                // 留一行日志，实测时能把"到底等没等到提交"分清楚。
+                if (_floatingBarCenterFollowDeferredLogs < 24)
+                {
+                    _floatingBarCenterFollowDeferredLogs++;
+                    ToolbarRegistry.MotionTrace("居中跟随 收尾延后：还有跨度/独立方形动画在跑");
+                }
+                return;
+            }
             UpdateFloatingBarCenterFollow(commit: true);
 
             if (_floatingBarCenterFollowLayoutWorstMs > 0)
@@ -147,6 +188,47 @@ namespace Ink_Canvas
             UpdateFloatingBarCenterFollow(commit: true);
         }
 
+        /// <summary>
+        /// 落位代码刚写完 Margin 之后调用：把跟随基准重新锚到"这一帧的跨度 + 新 Margin"。
+        /// </summary>
+        /// <remarks>
+        /// 基准若停在旧位置/旧跨度上，下一帧 ExtentFrame 会把这次落位当成"外部落位"，
+        /// 顺手把基准重置成动画**首帧**的跨度——首帧到起点这一段增长永远拿不到补偿，
+        /// 于是"吸附后第一次展开"整段动画都偏半个增量；收起再展开时基准已经落在收起态，
+        /// 所以只有第一次不正常。展开开始时 BeginExtentMotion 已同步写入起点跨度，
+        /// 这里量到的正好是动画起点，作为基准与补偿公式严格对齐。
+        /// </remarks>
+        private void SyncFloatingBarCenterFollowBaseline()
+        {
+            try
+            {
+                if (!TryGetFloatingBarCenterFollowMetrics(
+                        out _, out _, out var extent, out var marginNow, ensureLayout: true))
+                {
+                    return;
+                }
+
+                double previousExtent = _floatingBarCenterFollowAlignedExtent;
+                double previousMargin = _floatingBarCenterFollowAlignedMargin;
+
+                // 基准换成新位置后，旧补偿就不再对应任何东西了，必须一起归零
+                SetFloatingBarCenterFollowShift(0);
+                _floatingBarCenterFollowAlignedExtent = extent;
+                _floatingBarCenterFollowAlignedMargin = marginNow;
+
+                if (_floatingBarCenterFollowBaselineLogs < 40)
+                {
+                    _floatingBarCenterFollowBaselineLogs++;
+                    ToolbarRegistry.MotionTrace(
+                        $"居中跟随 基准同步 跨度={previousExtent:F1}→{extent:F1} margin={previousMargin:F1}→{marginNow:F1} 跨度动画中={ToolbarRegistry.IsExtentAnimating}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"居中跟随基准同步失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
         /// <summary>居中跟随的主体：按当前跨度算偏心量并补偿（或收尾时提交）。</summary>
         private void UpdateFloatingBarCenterFollow(bool commit)
         {
@@ -185,15 +267,20 @@ namespace Ink_Canvas
                     _floatingBarCenterFollowAlignedMargin = marginNow;
                 }
 
-                if (!IsFloatingBarCenteredOnFollowAxis(
-                        vertical, scale, marginNow, _floatingBarCenterFollowAlignedExtent))
+                // 只有"居中模式"才介入；几何判定看的是这一轮跨度变化**之前**的基准位置，
+                // 这样点击把手收拢后（位置被 PlaceFloatingBarAfterHeadToggle 改到头那一侧）不会
+                // 被强行拉回屏幕中心，而是照旧围绕把手原地收放。
+                if (!_floatingBarCenteredMode ||
+                    !IsFloatingBarCenteredOnFollowAxis(
+                        vertical, scale, _floatingBarCenterFollowAlignedMargin,
+                        _floatingBarCenterFollowAlignedExtent))
                 {
                     // 不在居中位置（用户拖走了、或正贴边）：不介入，基准跟着当前跨度走
                     if (_floatingBarCenterFollowResetLogs < 24)
                     {
                         _floatingBarCenterFollowResetLogs++;
                         ToolbarRegistry.MotionTrace(
-                            $"居中跟随 不介入 margin={marginNow:F1} 基准跨度={_floatingBarCenterFollowAlignedExtent:F1} 当前跨度={extent:F1} 补偿归零（原={_floatingBarCenterFollowAppliedShift:F1}）");
+                            $"居中跟随 不介入 居中模式={_floatingBarCenteredMode} margin={marginNow:F1} 基准跨度={_floatingBarCenterFollowAlignedExtent:F1} 当前跨度={extent:F1} 补偿归零（原={_floatingBarCenterFollowAppliedShift:F1}）");
                     }
                     SetFloatingBarCenterFollowShift(0);
                     _floatingBarCenterFollowAlignedExtent = extent;
@@ -234,7 +321,29 @@ namespace Ink_Canvas
                 }
 
                 var margin = ViewboxFloatingBar.Margin;
-                double newMargin = marginNow + shift * scale;
+                double newMargin;
+                if (_floatingBarCenteredMode && !double.IsNaN(_floatingBarCenterLineTarget) &&
+                    _floatingBarCenterTargetIsVertical == vertical)
+                {
+                    // 居中模式下收尾时直接按"居中轴目标"重算，而不是只保住当前中心：
+                    // 启动位置或快照宽度若有一丁点偏差，会在这里被纠正掉，而不是永久留着。
+                    double extentOnScreen = extent * scale;
+                    newMargin = _floatingBarCenterLineTarget - extentOnScreen / 2.0;
+
+                    double screenExtent = vertical
+                        ? GetFloatingBarScreenHeight(Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        : GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+                    if (screenExtent > 0 && !double.IsNaN(screenExtent) && !double.IsInfinity(screenExtent))
+                    {
+                        newMargin = vertical
+                            ? NormalizeFloatingBarTopForScreen(newMargin, extentOnScreen, screenExtent)
+                            : NormalizeFloatingBarLeftForScreen(newMargin, extentOnScreen, screenExtent);
+                    }
+                }
+                else
+                {
+                    newMargin = marginNow + shift * scale;
+                }
                 double appliedShift = _floatingBarCenterFollowAppliedShift;
                 var target = vertical
                     ? new Thickness(margin.Left, newMargin, margin.Right, margin.Bottom)
@@ -311,19 +420,22 @@ namespace Ink_Canvas
                 // 在 Measure 里就能反映出来，没必要让整窗（含墨迹画布）跟着重排。
                 extent = MeasureFloatingBarExtent(vertical);
 
+                // 独立方形让出排布的那一刻就少了整个 58px，但眼睛还看得见它在淡出；
+                // 反过来展开时排布先回来、背景还没淡入。只量布局会让跨度台阶式跳变，
+                // 补偿跟着跳半个方形（(58+3)/2=30.5px）。这里把"还画着/还没显形"的部分折算回来。
+                double laidOutExtent = extent;
+                extent += ToolbarRegistry.GetExitingVisualExtent(vertical);
+                extent -= ToolbarRegistry.GetEnteringVisualExtent(vertical);
+
                 // 量出来和实排不一致时记一行：这条日志就是"能不能信任子树量"的凭据
                 double actualExtent = vertical ? ViewboxFloatingBar.ActualHeight : ViewboxFloatingBar.ActualWidth;
-                if (Math.Abs(actualExtent - extent) > 8.0 &&
+                if (Math.Abs(actualExtent - laidOutExtent) > 8.0 &&
                     _floatingBarCenterFollowExtentMismatchLogs < 8)
                 {
                     _floatingBarCenterFollowExtentMismatchLogs++;
-                    ToolbarRegistry.MotionTrace($"居中跟随跨度量不符 子树={extent:F1} 实排={actualExtent:F1}");
+                    ToolbarRegistry.MotionTrace($"居中跟随跨度量不符 子树={laidOutExtent:F1} 实排={actualExtent:F1} 折算后={extent:F1}");
                 }
             }
-            // 退场中的独立方形仍然画着，只是排布被让出去了：按不透明度折算回来，
-            // 跨度才是眼睛看到的那个宽度——收起第一帧就不会少掉半个方形（见 ToolbarRegistry.GetExitingVisualExtent）
-            extent += ToolbarRegistry.GetExitingVisualExtent(vertical);
-        extent -= ToolbarRegistry.GetEnteringVisualExtent(vertical);
 
             if (extent <= 0.5 || double.IsNaN(extent) || double.IsInfinity(extent)) return false;
 
@@ -394,6 +506,85 @@ namespace Ink_Canvas
             _floatingBarCenterFollowAppliedShift = 0;
             _floatingBarCenterFollowAlignedExtent = double.NaN;
             _floatingBarCenterFollowAlignedMargin = double.NaN;
+        }
+
+        /// <summary>
+        /// 落位代码算出"居中默认位置"后调用：记下居中轴目标，供居中跟随纠偏与拖动吸附使用。
+        /// </summary>
+        /// <remarks>
+        /// 记的是"中心线"而不是左边缘：跨度变化时左边缘本来就要平移半个增量，
+        /// 只有中心线在屏幕上是固定不动的。
+        /// </remarks>
+        private void RecordFloatingBarCenterTarget(
+            bool vertical, Point pos, double floatingBarWidth, double floatingBarHeight)
+        {
+            if (vertical)
+            {
+                _floatingBarCenterLineTarget = pos.Y + floatingBarHeight / 2.0;
+            }
+            else
+            {
+                _floatingBarCenterLineTarget = pos.X + floatingBarWidth / 2.0;
+                _floatingBarCenterTopTarget = pos.Y;
+            }
+            _floatingBarCenterTargetIsVertical = vertical;
+        }
+
+        /// <summary>
+        /// 拖动松手后调用：差不多靠近底栏且差不多居中时，动画吸附到精确的居中位置。
+        /// </summary>
+        /// <remarks>
+        /// 吸附成功后重新进入居中模式，之后的跨度变化继续由居中跟随维持居中。
+        /// 判定用的是落位代码记录的默认位置，而不是这里另算一套公式，避免两者慢慢漂移。
+        /// </remarks>
+        private void TrySnapFloatingBarToCenteredPosition()
+        {
+            try
+            {
+                if (IsVerticalToolbar) return;
+                if (isFloatingBarFolded) return;
+                if (ViewboxFloatingBar == null) return;
+                if (double.IsNaN(_floatingBarCenterLineTarget) ||
+                    double.IsNaN(_floatingBarCenterTopTarget)) return;
+                if (_floatingBarCenterTargetIsVertical) return;
+
+                var margin = ViewboxFloatingBar.Margin;
+                // 负值是折叠/贴边态，不参与吸附
+                if (margin.Left < -1 || margin.Top < -1) return;
+
+                double width = GetFloatingBarScaledWidth();
+                if (!(width > 0) || double.IsNaN(width) || double.IsInfinity(width)) return;
+
+                double targetLeft = _floatingBarCenterLineTarget - width / 2.0;
+                double screenWidth = GetFloatingBarScreenWidth(Settings.Advanced.IsEnableAvoidFullScreenHelper);
+                if (screenWidth > 0 && !double.IsNaN(screenWidth) && !double.IsInfinity(screenWidth))
+                {
+                    targetLeft = NormalizeFloatingBarLeftForScreen(targetLeft, width, screenWidth);
+                }
+
+                double targetTop = _floatingBarCenterTopTarget;
+
+                if (Math.Abs(margin.Left - targetLeft) > FloatingBarCenterSnapHorizontalTolerance) return;
+                if (Math.Abs(margin.Top - targetTop) > FloatingBarCenterSnapVerticalTolerance) return;
+
+                // 吸附即回到居中模式；先把保存的位置点复位成"自动居中"
+                _floatingBarCenteredMode = true;
+                if (IsInPPTPresentationMode)
+                    pointPPT = new Point(-1, -1);
+                else
+                    pointDesktop = new Point(-1, -1);
+
+                ToolbarRegistry.MotionTrace(
+                    $"居中吸附 命中 margin=({margin.Left:F1},{margin.Top:F1})→目标=({targetLeft:F1},{targetTop:F1})");
+
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ResetFloatingBarCenterFollow();
+                MoveFloatingBarTo(new Thickness(targetLeft, targetTop, 0, -20), animate: true);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"居中吸附失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         /// <summary>纵向缩放。仓库里只有 GetFloatingBarScaleX，竖排工具栏要用到 Y。</summary>

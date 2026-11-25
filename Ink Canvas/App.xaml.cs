@@ -520,6 +520,17 @@ namespace Ink_Canvas
 
             ConfigureTlsForWindows7();
 
+            // 退出 Windows 节能节流（EcoQoS）+ 提高计时器精度。
+            // 只做一次，日志里会写明改之前是否真的处于节流状态，便于验证效果。
+            try
+            {
+                Helpers.RenderPacingController.ApplyPowerPerformanceMode();
+            }
+            catch
+            {
+                // 节能设置失败不影响启动
+            }
+
             // Dispatcher 长任务监控（诊断用）。
             try
             {

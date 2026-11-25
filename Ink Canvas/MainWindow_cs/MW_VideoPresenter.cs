@@ -693,6 +693,14 @@ namespace Ink_Canvas
                 // （"新页面"按钮在此位置复用为"展开页码预览"）
                 UpdateBoothPageInfoDisplay();
 
+                // 刷新侧栏页码列表：填充第 0 项（直播页，文字"再次点击返回直播画面"）
+                RefreshBoothPageListView();
+
+                // 摄像头画面可能是白纸等亮背景，先按深色占位背景显示浅色文字，
+                // 待首帧到达后再按画面实际亮度校正（避免白字落在白纸上看不清）
+                UpdateWatermarkForegroundByBackground();
+                ScheduleBoothWatermarkColorRefresh();
+
                 // 同步逻辑工具与工具栏高亮。必须放在 RebuildBoardToolbar() 之后：
                 // 重建会生成全新的按钮实例，之前套用的选中背景会丢失。
                 // 另外进入展台时物理 EditingMode 可能已是 Ink，但 _currentToolMode 仍是初始值
@@ -839,6 +847,9 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 恢复白板状态异常: {ex.Message}", LogHelper.LogType.Error);
             }
+
+            // 退出特殊模式后按白板/黑板（含自定义背景色）重新计算水印文字颜色
+            UpdateWatermarkForegroundByBackground();
 
             // 墨迹隔离：若退出特殊模式后依然停留在白板中，将白板原本的墨迹与子元素完整恢复到画布
             if (currentMode == 1)
@@ -1488,10 +1499,35 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     "[VideoPresenter] MediaOpened: 摄像头已打开，隐藏占位文字",
                     LogHelper.LogType.Info);
+
+                // 首帧就绪后按画面亮度校正水印文字颜色
+                ScheduleBoothWatermarkColorRefresh();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[Booth] MediaOpened 处理失败（隐藏占位文字/启用拍照按钮）: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 延迟采样展台画面亮度并刷新左上角时间、右上角一言的文字颜色。
+        /// VMR9 的 D3D 前缓冲通常晚于 MediaOpened 就绪，因此分两次尝试（首次可能取不到帧）。
+        /// </summary>
+        private async void ScheduleBoothWatermarkColorRefresh()
+        {
+            try
+            {
+                await Task.Delay(400);
+                if (!_isVideoPresenterSpecialMode) return;
+                UpdateWatermarkForegroundByBackground();
+
+                await Task.Delay(1400);
+                if (!_isVideoPresenterSpecialMode) return;
+                UpdateWatermarkForegroundByBackground();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新展台水印文字颜色失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -4597,6 +4633,9 @@ namespace Ink_Canvas
 
             // 拍照按钮变为「返回拍照」
             UpdateBoothToolbarItemStates();
+
+            // 照片内容可能比直播画面更亮/更暗，按冻结照片亮度重新选择水印文字颜色
+            UpdateWatermarkForegroundByBackground();
         }
 
         /// <summary>
@@ -4652,6 +4691,8 @@ namespace Ink_Canvas
                 if (camIdx >= 0)
                 {
                     _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    // 回到直播页后重新按摄像头画面亮度校正水印文字颜色
+                    ScheduleBoothWatermarkColorRefresh();
                 }
             }
 
