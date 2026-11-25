@@ -15,6 +15,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string IconGeometry => null;
         public override FontIconData? IconKey => FluentSystemIcons.Video_24_Regular;
 
+        // 点击要打开白板 + 视频展台侧栏：等工具栏动画落定再执行。
+        protected override bool OpensUiOnClick => true;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
         {
             host.Window.Dispatcher.Invoke(() =>

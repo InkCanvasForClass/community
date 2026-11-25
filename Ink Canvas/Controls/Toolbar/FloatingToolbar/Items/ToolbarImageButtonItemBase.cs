@@ -34,6 +34,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public virtual string IconGeometry => null;
         public virtual FontIconData? IconKey => null;
 
+        /// <summary>
+        /// 点击后是否要打开菜单/窗口（UI 线程上的重活）。
+        /// </summary>
+        /// <remarks>
+        /// 打开窗口要解析 XAML、创建 HWND；打开菜单要重建菜单内容再挂 Popup；
+        /// 都是几十到几百毫秒的同步工作。这类动作正好落在工具栏动画中间时，
+        /// UI 线程被占住，动画会整段停住或连掉几帧。
+        /// 置 true 的组件统一走 <c>MainWindow.RunToolbarUiAction</c>：
+        /// 没有动画时立刻执行，有动画时等它落定再执行。
+        /// 换笔、撤销这类轻动作不要置 true，否则会平白多出一段等待。
+        /// </remarks>
+        protected virtual bool OpensUiOnClick => false;
+
         protected abstract void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e);
 
         protected virtual void AfterBuild(IToolbarHost host, ToolbarImageButton view) { }
@@ -66,9 +79,23 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
                 if (btn.TryFindResource(LabelBrushResourceKey) is Brush brush) btn.LabelBrush = brush;
                 else btn.SetResourceReference(ToolbarImageButton.LabelBrushProperty, LabelBrushResourceKey);
             }
-            btn.ButtonMouseUp += (s, e) => OnClick(host, s, e);
+            btn.ButtonMouseUp += (s, e) => InvokeClick(host, s, e);
             AfterBuild(host, btn);
             return btn;
+        }
+
+        /// <summary>
+        /// 点击分派：打开菜单/窗口的动作交给宿主的动画让路机制，其余动作原样立刻执行。
+        /// </summary>
+        private void InvokeClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
+        {
+            if (!OpensUiOnClick)
+            {
+                OnClick(host, sender, e);
+                return;
+            }
+
+            host.Window.RunToolbarUiAction(Id, () => OnClick(host, sender, e));
         }
 
         private void ReplaceImageWithFontIcon(ToolbarImageButton btn)

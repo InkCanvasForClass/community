@@ -12,6 +12,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string Description => FloatingBarStrings.FloatingBar_Whiteboard;
         public override string IconGeometry => XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon;
 
+        // 点击切换白板模式 / 右键打开模式菜单：等工具栏动画落定再执行。
+        protected override bool OpensUiOnClick => true;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
         {
             if (e?.ChangedButton == MouseButton.Right)

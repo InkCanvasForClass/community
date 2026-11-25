@@ -11,6 +11,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string Description => GeometryStrings.Title;
         public override string IconGeometry => XamlGraphicsIconGeometries.ShapesIcon;
 
+        // 点击打开图形面板：等工具栏动画落定再执行，避免挂 Popup 的重活把动画拖住。
+        protected override bool OpensUiOnClick => true;
+
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
             => host.Window.ImageDrawShape_MouseUp(sender, e);
 
