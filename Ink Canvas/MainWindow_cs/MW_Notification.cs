@@ -101,6 +101,8 @@ namespace Ink_Canvas
 
         private void NotificationCenterService_NotificationRequested(NotificationMessage message)
         {
+            // Let input and rendering take precedence over notification presentation.
+            // A notification should not interrupt a frame already being prepared by MainWindow.
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
@@ -132,7 +134,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"灵动通知显示失败: {ex.Message}", LogHelper.LogType.Error);
                     NotificationCenterService.NotifyCurrentClosed();
                 }
-            }));
+            }), DispatcherPriority.Background);
         }
 
         private bool IsNotificationSuppressedByDictationDoNotDisturb()
