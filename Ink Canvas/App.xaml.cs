@@ -1481,6 +1481,15 @@ namespace Ink_Canvas
                     SetSplashMessage("正在启动 Ink Canvas...");
                     SetSplashProgress(25);
                     Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                }
+
+                if (IsDefaultStartupMode)
+                {
+                    await Task.Delay(100);
+                }
+
+                if (_isSplashScreenShown)
+                {
                     SetSplashMessage("正在加载配置...");
                     SetSplashProgress(50);
                     if (IsDefaultStartupMode)
