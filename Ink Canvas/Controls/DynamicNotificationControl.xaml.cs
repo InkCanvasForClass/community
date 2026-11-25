@@ -356,8 +356,10 @@ namespace Ink_Canvas.Controls
                 CountdownProgressPath.StrokeDashArray = countdownProgressDashArray;
             }
 
+            countdownProgressDashArray.BeginInit();
             countdownProgressDashArray[0] = countdownProgressLength * progress / thickness;
             countdownProgressDashArray[1] = countdownProgressLength / thickness;
+            countdownProgressDashArray.EndInit();
         }
 
         private void Close()
