@@ -24,9 +24,6 @@
                 Padding="14,10"
                 CornerRadius="24"
                 BorderThickness="1">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Color="#000000" />
-        </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
