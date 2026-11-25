@@ -431,63 +431,6 @@ namespace Ink_Canvas
             {
             }
 
-            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-
-            // 注意：此处显式禁用 Switch.System.Windows.Input.Stylus.EnablePointerSupport。
-            // 启用该开关会让 WPF 使用 WM_POINTER 触摸栈，导致 DragMove() 和 DoDragDrop()
-            // （gong-wpf-dragdrop 库内部使用）的模态消息循环无法接收触摸释放消息。
-            // 在模拟触摸屏（UU 远程、spacedesk 等远程控制软件注入的虚拟触摸）下，
-            // 拖动操作会进入假死状态，直到呼出鼠标或点击其他窗口生成真实鼠标消息才解除。
-            // AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
-
-            // SetCurrentProcessExplicitAppUserModelID 内部会初始化 Shell/COM，在 UIAccess
-            // 降权子进程的特殊令牌环境下会触发 native 堆损坏(0xC0000374)，稳定崩在此 P/Invoke
-            // 且 try/catch 挡不住（进程级 fail-fast）。该调用仅用于任务栏图标分组，对 UIAccess
-            // 子进程非关键，故仅在非 UIAccess 进程执行。（管理员主进程无 UIAccess，正常执行。）
-            try
-            {
-                if (!UIAccessHelper.HasUIAccess())
-                {
-                    PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Info);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
-            }
-
-            // 配置TLS协议以支持Windows 7
-            ConfigureTlsForWindows7();
-
-            // Dispatcher 长任务监控（诊断用）：
-            // OperationStarted = 操作真正开始执行，记录执行时长（Completed-Started），
-            // 排除 Background 优先级排队等待的虚高（posted→completed 含排队）。
-            try
-            {
-                Dispatcher.Hooks.OperationStarted += (s, e) =>
-                {
-                    var sw = Stopwatch.StartNew();
-                    e.Operation.Completed += (_, __) =>
-                    {
-                        sw.Stop();
-                        if (sw.ElapsedMilliseconds > 20)
-                        {
-                            var name = ExtractDispatcherOpName(e.Operation);
-                            var elapsed = sw.Elapsed.TotalMilliseconds;
-                            Debug.WriteLine($"Dispatcher Exec:{elapsed:F1}ms {name}");
-                        }
-                    };
-                };
-            }
-            catch
-            {
-                // 监控失败不影响启动
-            }
-
             // 如果是看门狗子进程，直接进入看门狗主循环并终止主流程
             var args = Environment.GetCommandLineArgs();
             if (args.Length >= 2 && args[1] == "--watchdog")
@@ -529,6 +472,9 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 仅最终应用进程需要 WinForms 高 DPI 初始化；helper / watchdog 不创建 UI。
+            System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+
             // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
             // 构造函数中先用默认值（ShowCrashWindow），LoadSettings 运行后会被覆盖。
 
@@ -540,14 +486,66 @@ namespace Ink_Canvas
             SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
+        }
+
+        /// <summary>
+        /// 初始化完整应用运行时。UIA 过渡进程和看门狗进程不会执行此方法。
+        /// </summary>
+        private void InitializeFullStartupRuntime()
+        {
+            // 注意：此处显式禁用 Switch.System.Windows.Input.Stylus.EnablePointerSupport。
+            // 启用该开关会让 WPF 使用 WM_POINTER 触摸栈，导致 DragMove() 和 DoDragDrop()
+            // （gong-wpf-dragdrop 库内部使用）的模态消息循环无法接收触摸释放消息。
+            // 在模拟触摸屏（UU 远程、spacedesk 等远程控制软件注入的虚拟触摸）下，
+            // 拖动操作会进入假死状态，直到呼出鼠标或点击其他窗口生成真实鼠标消息才解除。
+            // AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
+
+            // SetCurrentProcessExplicitAppUserModelID 内部会初始化 Shell/COM，在 UIAccess
+            // 降权子进程的特殊令牌环境下会触发 native 堆损坏(0xC0000374)，稳定崩在此 P/Invoke。
+            try
+            {
+                if (!UIAccessHelper.HasUIAccess())
+                {
+                    PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
+            }
+
+            ConfigureTlsForWindows7();
+
+            // Dispatcher 长任务监控（诊断用）。
+            try
+            {
+                Dispatcher.Hooks.OperationStarted += (s, e) =>
+                {
+                    var sw = Stopwatch.StartNew();
+                    e.Operation.Completed += (_, __) =>
+                    {
+                        sw.Stop();
+                        if (sw.ElapsedMilliseconds > 20)
+                        {
+                            var name = ExtractDispatcherOpName(e.Operation);
+                            var elapsed = sw.Elapsed.TotalMilliseconds;
+                            Debug.WriteLine($"Dispatcher Exec:{elapsed:F1}ms {name}");
+                        }
+                    };
+                };
+            }
+            catch
+            {
+                // 监控失败不影响启动
+            }
+
             UpdateCpuUsageSnapshot();
             LogHelper.WriteLogToFile("[Crash] 已注册应用启动、退出和未处理异常事件", LogHelper.LogType.Info);
-
-            // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
-
-            // 看门狗必须在 App_Startup 读取 Settings.json 并同步 CrashAction 后启动。
-            // 构造函数阶段仍使用默认 CrashAction，不能在此处做判断。
         }
 
         /// <summary>
@@ -1408,35 +1406,8 @@ namespace Ink_Canvas
             CurrentStartupMode = GetStartupModeFromParsed(parsedSettings);
             LogHelper.WriteLogToFile($"App | 启动模式: {CurrentStartupMode}");
 
-            // 照片矫正加速模式：CUDA 模式下设置 OPENCV_OPENCL_DEVICE 强制使用 NVIDIA OpenCL 平台。
-            // 必须在 OpenCV 第一次创建 UMat 之前设置才能生效（OpenCL 上下文进程级别单初始化）。
-            ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
-
-            TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
-            TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
-
-            // 应用 Windows 系统个性化强调色到全局主题管理器，使强调按钮与弹窗确认按钮自动匹配系统强调色
-            ThemeHelper.ApplySystemAccentColor();
-
-            // 根据设置决定是否显示启动画面（复用已解析的设置对象）
-            if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
-            {
-                // 注入缓存 JSON 给 SplashScreen，避免其构造期间重复读取 + 解析 Settings.json
-                SplashScreen.CachedSettingsJson = CachedSettingsJson;
-                ShowSplashScreen();
-                SetSplashMessage("正在启动 Ink Canvas...");
-                SetSplashProgress(25);
-
-                // 强制刷新UI，确保启动画面显示。
-                // 注意：在 App 构造阶段同步调用 Dispatcher.Invoke 会让当前线程等待自身调度，
-                // 形成可见卡顿甚至死锁。此处直接返回，依靠 Splash 自身 Loaded 事件完成首帧渲染即可。
-                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
-            }
-
-            if (IsDefaultStartupMode)
-            {
-                await Task.Delay(100);
-            }
+            // 第一阶段只读取 UIA 所需的少量配置；其余设置、主题和启动画面延后到交接判定之后。
+            bool shouldUseUIAccess = TryGetUIAccessStartupOptions(parsedSettings, out bool useProcessToken);
 
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
@@ -1482,28 +1453,51 @@ namespace Ink_Canvas
             }
 
 
-            if (_isSplashScreenShown)
+            // 更新进程可能立即在后台执行网络操作；仅该特殊路径提前设置 TLS。
+            // 普通 UIA 过渡进程仍不会初始化 TLS，完整运行时会在交接后配置。
+            if (e.Args.Contains("--update-mode"))
             {
-                SetSplashMessage("正在加载配置...");
-                SetSplashProgress(50);
-                if (IsDefaultStartupMode)
-                {
-                    await Task.Delay(100);
-                }
+                ConfigureTlsForWindows7();
             }
 
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
 
-            // 配置已加载后再启动看门狗，避免使用默认的 CrashAction 覆盖用户设置。
-            if (!isUpdateMode && !isFinalApp && CrashAction == CrashActionType.SilentRestart)
-            {
-                StartWatchdogIfNeeded();
-            }
-
-            // 如果是更新模式，不显示主窗口但保持应用运行
+            // 更新模式不参与 UIA 交接，但仍按原行为初始化基础运行时和启动配置。
             if (isUpdateMode)
             {
+                InitializeFullStartupRuntime();
+                ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
+                TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+                TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
+                ThemeHelper.ApplySystemAccentColor();
+
+                bool shouldShowSplashScreenForUpdate = ShouldShowSplashScreenFromParsed(parsedSettings)
+                    && !IsLaunchByFileOrUri(e.Args);
+                if (shouldShowSplashScreenForUpdate)
+                {
+                    SplashScreen.CachedSettingsJson = CachedSettingsJson;
+                    ShowSplashScreen();
+                    SetSplashMessage("正在启动 Ink Canvas...");
+                    SetSplashProgress(25);
+                    Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                }
+
+                if (IsDefaultStartupMode)
+                {
+                    await Task.Delay(100);
+                }
+
+                if (_isSplashScreenShown)
+                {
+                    SetSplashMessage("正在加载配置...");
+                    SetSplashProgress(50);
+                    if (IsDefaultStartupMode)
+                    {
+                        await Task.Delay(100);
+                    }
+                }
+
                 LogHelper.WriteLogToFile("App | 检测到更新模式，跳过主窗口显示，保持应用运行");
                 return;
             }
@@ -1679,11 +1673,13 @@ namespace Ink_Canvas
             //   抢不到也继续运行（交接场景旧实例即将退出），只跳过“检测到已有实例则退出”的决策。
             // - 正常路径：抢不到标准名 => 已有实例在运行 => 交接给已运行实例并退出（原有行为）。
             bool skipExitDecision = isUpdateInProgress || isUpdateMode || isFinalApp || skipMutexCheck;
+            bool ownsStandardMutex = false;
 
             if (!skipExitDecision)
             {
                 bool ret;
                 mutex = new Mutex(true, StandardMutexName, out ret);
+                ownsStandardMutex = ret;
 
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
@@ -1804,6 +1800,7 @@ namespace Ink_Canvas
                 // 旧实例可能正处于释放窗口期，带短重试等待抢占；抢不到也继续运行（交接场景旧实例即将退出），
                 // 仅跳过“检测到已有实例则退出”的决策。
                 mutex = AcquireStandardMutexWithRetry();
+                ownsStandardMutex = true;
 
                 // 交接等待改为事件驱动：final-app 已精确等待更新进程退出；
                 // 其余交接路径（如 --skip-mutex-check）等同类进程真正消失即继续。
@@ -1814,6 +1811,93 @@ namespace Ink_Canvas
                     await WaitForOtherInstancesToExitAsync(15000);
                 }
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
+            }
+
+            // 第二阶段：完成更新/单实例检查后，再执行 UIAccess 交接。
+            // 此时尚未创建启动画面、托盘图标、主窗口、工具栏或插件服务。
+            if (shouldUseUIAccess
+                && !isFinalApp
+                && !skipMutexCheck
+                && !isUpdateInProgress
+                && !IsUIAccessFallbackLaunch
+                && !UIAccessHelper.HasUIAccess())
+            {
+                LogHelper.WriteLogToFile(
+                    $"UIAccess | 阶段一：启动前检测到 UIAccess 需求 (Mode={(useProcessToken ? "ProcessToken" : "UserToken")})");
+
+                // 让最终 UIAccess 子进程能够接管标准单实例互斥体。
+                bool restoreMutexAfterFailure = ownsStandardMutex;
+                if (restoreMutexAfterFailure)
+                {
+                    ReleaseMutexForRestart();
+                }
+                else
+                {
+                    // -m 多实例路径可能没有取得标准互斥体，只释放句柄，不尝试 ReleaseMutex。
+                    mutex?.Dispose();
+                    mutex = null;
+                }
+                ownsStandardMutex = false;
+
+                bool uiaStarted = AppRestartHelper.TryLaunchUIAFromStartup(useProcessToken);
+                if (uiaStarted)
+                {
+                    LogHelper.WriteLogToFile("UIAccess | 阶段二完成：最终 UIAccess 进程已启动，当前轻量过渡进程退出");
+                    // 不走 App_Exit：该过渡进程没有初始化托盘、插件或 IPC，常规退出清理反而会创建这些单例。
+                    Environment.Exit(0);
+                    return;
+                }
+
+                // UAC 取消或 helper 启动失败：只在原进程确实持有标准互斥体时重新获取。
+                if (restoreMutexAfterFailure)
+                {
+                    mutex = AcquireStandardMutexWithRetry();
+                    ownsStandardMutex = true;
+                }
+
+                IsUIAccessFallbackLaunch = true;
+                IsUIAccessTopMostEnabled = false;
+                IsAppExitByUser = false;
+                LogHelper.WriteLogToFile("UIAccess | 提权交接失败，保留当前进程并进入普通置顶回退", LogHelper.LogType.Warning);
+            }
+
+            // 第三阶段：只有最终 UIAccess 进程或普通权限回退进程才初始化完整运行时。
+            InitializeFullStartupRuntime();
+            ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
+            TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+            TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
+            ThemeHelper.ApplySystemAccentColor();
+
+            bool shouldShowSplashScreen = ShouldShowSplashScreenFromParsed(parsedSettings)
+                && !IsLaunchByFileOrUri(e.Args);
+            if (shouldShowSplashScreen)
+            {
+                SplashScreen.CachedSettingsJson = CachedSettingsJson;
+                ShowSplashScreen();
+                SetSplashMessage("正在启动 Ink Canvas...");
+                SetSplashProgress(25);
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+            }
+
+            if (IsDefaultStartupMode)
+            {
+                await Task.Delay(100);
+            }
+
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在加载配置...");
+                SetSplashProgress(50);
+                if (IsDefaultStartupMode)
+                {
+                    await Task.Delay(100);
+                }
+            }
+
+            // 看门狗只属于最终应用进程，过渡进程和 helper 不额外拉起守护进程。
+            if (!isFinalApp && CrashAction == CrashActionType.SilentRestart)
+            {
+                StartWatchdogIfNeeded();
             }
 
             // 必须在托盘图标注册（ForceCreate）之前清理，否则会把自己刚注册的图标删掉。
@@ -2107,6 +2191,43 @@ namespace Ink_Canvas
         {
             CachedSettingsJson = json;
             _cachedParsedSettings = JsonConvert.DeserializeObject(json);
+        }
+
+        /// <summary>
+        /// 从已缓存的 Settings.json 中读取 UIAccess 启动所需的最小配置。
+        /// 不创建 SettingsManager，避免在 UIA 交接前加载完整应用配置。
+        /// </summary>
+        private static bool TryGetUIAccessStartupOptions(dynamic parsedSettings, out bool useProcessToken)
+        {
+            useProcessToken = false;
+
+            try
+            {
+                string enabledValue = parsedSettings?["advanced"]?["enableUIAccessTopMost"]?.ToString();
+                string alwaysOnTopValue = parsedSettings?["advanced"]?["isAlwaysOnTop"]?.ToString();
+                string modeValue = parsedSettings?["advanced"]?["uiaMode"]?.ToString();
+
+                bool enabled = bool.TryParse(enabledValue, out bool parsedEnabled) && parsedEnabled;
+                bool alwaysOnTop = string.IsNullOrWhiteSpace(alwaysOnTopValue)
+                    || (bool.TryParse(alwaysOnTopValue, out bool parsedAlwaysOnTop) && parsedAlwaysOnTop);
+
+                if (int.TryParse(modeValue, out int mode)
+                    && Enum.IsDefined(typeof(UIAMode), mode))
+                {
+                    useProcessToken = (UIAMode)mode == UIAMode.ProcessToken;
+                }
+                else if (Enum.TryParse(modeValue, true, out UIAMode parsedMode))
+                {
+                    useProcessToken = parsedMode == UIAMode.ProcessToken;
+                }
+
+                return enabled && alwaysOnTop;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 读取启动配置失败，跳过提前交接: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
         }
 
         /// <summary>
