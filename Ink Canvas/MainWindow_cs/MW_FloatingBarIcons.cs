@@ -284,6 +284,13 @@ namespace Ink_Canvas
             if (isDragDropInEffect)
             {
                 var currentPos = e.GetPosition(null);
+
+                // 手真的把它挪开了：退出居中模式，之后的跨度变化不再自动纠回屏幕中心
+                if (Math.Abs(currentPos.X - downPos.X) > 10 || Math.Abs(currentPos.Y - downPos.Y) > 10)
+                {
+                    _floatingBarCenteredMode = false;
+                }
+
                 var xPos = currentPos.X - pos.X + ViewboxFloatingBar.Margin.Left;
                 var yPos = currentPos.Y - pos.Y + ViewboxFloatingBar.Margin.Top;
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
@@ -492,6 +499,9 @@ namespace Ink_Canvas
                     headPos,
                     IsFloatingBarContentVisible());
                 _popupManager?.MarkNeedsUpdate();
+
+                // 差不多靠近底栏且差不多居中：动画吸附回去，并重新进入居中模式
+                TrySnapFloatingBarToCenteredPosition();
             }
 
             // 每次点击或拖动结束后都重新定位高光
@@ -2301,6 +2311,8 @@ namespace Ink_Canvas
             _userHasDraggedFloatingBar = false;
             pointDesktop = new Point(-1, -1);
             pointPPT = new Point(-1, -1);
+            // 回到自动落位：重新进入居中模式
+            _floatingBarCenteredMode = true;
 
             RebuildToolbar();
 
@@ -2506,6 +2518,10 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Margin = new Thickness(pos.X, ViewboxFloatingBar.Margin.Top, -2000, -200);
                 }
             }
+            // 展开刚开始：跨度补间已同步写入起点跨度，这里把跟随基准锚到"起点跨度 + 新 Margin"。
+            // 不锚的话下一帧会把这次落位当成外部落位、把基准重置成首帧跨度，
+            // 首帧到起点的那段增长永远补不回来——就是"吸附后第一次展开不居中"。
+            SyncFloatingBarCenterFollowBaseline();
             SaveFloatingBarPositionPoint();
         }
 
@@ -2593,6 +2609,8 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Margin = new Thickness(ViewboxFloatingBar.Margin.Left, pos.Y, -2000, -200);
                 }
             }
+            // 同注意横排：展开起点即基准，否则第一次展开整段补偿都少算首帧那一步
+            SyncFloatingBarCenterFollowBaseline();
             SaveFloatingBarPositionPoint();
         }
 
@@ -2842,7 +2860,7 @@ namespace Ink_Canvas
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 // 不在这里 Settle：那会把正在进行的背景宽度补间当场掐断，动画就没了。
-                // "宽度是中间值"的问题改由逐帧居中跟随解决（OnCenterFollowFrame）。
+                // 动画期间不动 Margin，胶囊从既有锚点展开/收起，收尾由 ExtentSettled 统一处理。
                 ViewboxFloatingBar.UpdateLayout();
             }
             isViewboxFloatingBarMarginAnimationRunning = true;
@@ -3040,6 +3058,13 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
+                // 记下这次算出的居中默认位置（供居中跟随纠偏、拖动吸附使用），
+                // 必须在 pointDesktop/pointPPT 覆盖之前取，覆盖后拿到的是用户拖走的位置。
+                if (MarginFromEdge >= 0)
+                {
+                    RecordFloatingBarCenterTarget(IsVerticalToolbar, pos, floatingBarWidth, floatingBarHeight);
+                }
+
                 if (IsPptPlacementScene)
                 {
                     if (pointPPT.X != -1 || pointPPT.Y != -1)
@@ -3047,7 +3072,11 @@ namespace Ink_Canvas
                         if (Math.Abs(pointPPT.Y - pos.Y) > 50)
                             pos = pointPPT;
                         else
+                        {
                             pointPPT = pos;
+                            // 落位代码把 X 拉回屏幕中间了：这就算回到居中模式
+                            _floatingBarCenteredMode = true;
+                        }
                     }
                 }
                 else
@@ -3057,7 +3086,11 @@ namespace Ink_Canvas
                         if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
                             pos = pointDesktop;
                         else
+                        {
                             pointDesktop = pos;
+                            // 落位代码把 X 拉回屏幕中间了：这就算回到居中模式
+                            _floatingBarCenteredMode = true;
+                        }
                     }
                 }
 
@@ -3218,12 +3251,18 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
+                RecordFloatingBarCenterTarget(IsVerticalToolbar, pos, floatingBarWidth, floatingBarHeight);
+
                 if (pointDesktop.X != -1 || pointDesktop.Y != -1)
                 {
                     if (Math.Abs(pointDesktop.Y - pos.Y) > 50)
                         pos = pointDesktop;
                     else
+                    {
                         pointDesktop = pos;
+                        // 落位代码把 X 拉回屏幕中间了：这就算回到居中模式
+                        _floatingBarCenteredMode = true;
+                    }
                 }
 
                 // 布局一次落到终点，位移交给弹簧在合成线程上收敛。
@@ -3348,6 +3387,8 @@ namespace Ink_Canvas
                 {
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
+
+                RecordFloatingBarCenterTarget(IsVerticalToolbar, pos, floatingBarWidth, floatingBarHeight);
 
                 if (pointPPT.X != -1 || pointPPT.Y != -1)
                 {

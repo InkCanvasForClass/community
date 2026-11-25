@@ -20,6 +20,7 @@ namespace Ink_Canvas.Helpers
         private static readonly TimeSpan MaintenanceInterval = TimeSpan.FromMilliseconds(500);
 
         private static readonly List<ManagedWindow> ManagedWindows = new List<ManagedWindow>();
+        /// <summary>自己维护层级、不参与自动置顶管理的窗口（如浮动工具栏窗口）。</summary>
         private static readonly HashSet<Window> ExcludedWindows = new HashSet<Window>();
         private static readonly HashSet<IntPtr> ExcludedHandles = new HashSet<IntPtr>();
         private static readonly object SyncRoot = new object();
@@ -193,6 +194,11 @@ namespace Ink_Canvas.Helpers
             });
         }
 
+        /// <summary>
+        /// 把窗口排除在自动置顶管理之外。
+        /// 适用于自己跟随所属窗口维护层级的窗口（如浮动工具栏窗口）：
+        /// 交给这里管理的话，主窗口每次激活重新置顶都会把它压到下面。
+        /// </summary>
         public static void ExcludeWindow(Window window)
         {
             if (window == null) return;
@@ -365,10 +371,14 @@ namespace Ink_Canvas.Helpers
 
         private static void Window_Closed(object sender, EventArgs e)
         {
-            if (sender is Window window)
+            if (sender is not Window window) return;
+
+            lock (SyncRoot)
             {
-                UnregisterWindow(window);
+                ExcludedWindows.Remove(window);
             }
+
+            UnregisterWindow(window);
         }
 
         private static void ScanOpenWindows()
@@ -578,6 +588,20 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"提升 Popup Z 序失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 被排除的窗口（如浮动工具栏）不参与 Popup 提升，
+        /// 否则它在隐藏状态下会被 SWP_SHOWWINDOW 强行显示出来。
+        /// </summary>
+        private static bool IsExcludedHandle(IntPtr handle)
+        {
+            foreach (var window in ExcludedWindows)
+            {
+                if (window != null && new WindowInteropHelper(window).Handle == handle) return true;
+            }
+
+            return false;
         }
 
         private static void ReleaseManagedChildTopmostCore()

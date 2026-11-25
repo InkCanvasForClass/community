@@ -31,6 +31,7 @@ namespace Ink_Canvas.Helpers
     {
         private static int _displayRefreshRate;
         private static bool _unlimitedFrameRate;
+        private static bool _powerPerformanceApplied;
 
         /// <summary>显示器刷新率（Hz）；探测失败时为 0。</summary>
         public static int DisplayRefreshRate => _displayRefreshRate;
@@ -128,6 +129,119 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 让进程退出 Windows 的节能节流，并提高系统计时器精度。
+        /// </summary>
+        /// <remarks>
+        /// 只做两件可验证的事，不做猜测式调参：
+        ///
+        /// 1. 退出 EcoQoS（效率模式）的 CPU 执行速度节流。Windows 会给"用户没在操作"
+        ///    或"后台化"的进程打上 EcoQoS 标记，调度器随即把它压到低功耗核/低频率上；
+        ///    白板类应用常长时间全屏无输入，被判定可节流的概率很高，动画一开场就吃降频长帧。
+        ///    <c>SetProcessInformation(ProcessPowerThrottling)</c> 把 EXECUTION_SPEED 的
+        ///    StateMask 置 0 是微软文档给出的退出方式。这里先读一次当前状态再写，
+        ///    日志能证明"改之前到底有没有被节流"，而不是假设它一定被节流了。
+        /// 2. 把计时器精度提到 1ms（<c>timeBeginPeriod(1)</c>）。默认 15.6ms 的定时器粒度
+        ///    会让所有等待型调度（Dispatcher 定时器、呈现线程的节拍对齐）最多抖一整个粒度。
+        ///    Win10 2004 起该调用只影响本进程，不会拖累整机功耗。
+        ///
+        /// 不做的事：不提升进程优先级（那是抢占，不是节能），不阻止显示器休眠，
+        /// 不改 DWM 组合策略——与"不要节能"无关或副作用过大。
+        /// 幂等：重复调用只生效一次。
+        /// </remarks>
+        public static void ApplyPowerPerformanceMode()
+        {
+            if (_powerPerformanceApplied) return;
+            _powerPerformanceApplied = true;
+
+            ApplyEcoQosOptOut();
+            ApplyHighResolutionTimer();
+        }
+
+        private static void ApplyEcoQosOptOut()
+        {
+            try
+            {
+                var handle = GetCurrentProcess();
+                string before = DescribeEcoQos(handle);
+
+                var state = new PROCESS_POWER_THROTTLING_STATE
+                {
+                    Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION,
+                    ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
+                    StateMask = 0 // 0 = 显式关闭"执行速度"节流
+                };
+
+                bool ok = SetProcessInformation(handle, ProcessPowerThrottling, ref state,
+                    Marshal.SizeOf<PROCESS_POWER_THROTTLING_STATE>());
+                if (ok)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[RenderPacing] 已关闭 EcoQoS 执行速度节流（之前={before} 之后={DescribeEcoQos(handle)}）。",
+                        LogHelper.LogType.Info);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[RenderPacing] 关闭 EcoQoS 失败（Win32 错误 {Marshal.GetLastWin32Error()}），之前={before}；继续按系统默认调度运行。",
+                        LogHelper.LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[RenderPacing] 关闭 EcoQoS 异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private static string DescribeEcoQos(IntPtr handle)
+        {
+            try
+            {
+                var query = new PROCESS_POWER_THROTTLING_STATE
+                {
+                    Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION
+                };
+                if (!GetProcessInformation(handle, ProcessPowerThrottling, ref query,
+                        Marshal.SizeOf<PROCESS_POWER_THROTTLING_STATE>()))
+                {
+                    return "读取失败";
+                }
+
+                bool throttled = (query.ControlMask & PROCESS_POWER_THROTTLING_EXECUTION_SPEED) != 0
+                                 && (query.StateMask & PROCESS_POWER_THROTTLING_EXECUTION_SPEED) != 0;
+                return throttled ? "执行速度节流=开" : "执行速度节流=关";
+            }
+            catch
+            {
+                return "读取异常";
+            }
+        }
+
+        private static void ApplyHighResolutionTimer()
+        {
+            try
+            {
+                // TIMERR_NOERROR = 0
+                uint result = timeBeginPeriod(1);
+                if (result == 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        "[RenderPacing] 计时器精度已提升到 1ms（timeBeginPeriod），消除默认 15.6ms 粒度的等待抖动。",
+                        LogHelper.LogType.Info);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[RenderPacing] timeBeginPeriod(1) 失败（错误码 {result}），继续使用默认计时器精度。",
+                        LogHelper.LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[RenderPacing] timeBeginPeriod 异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
         /// 单帧时间预算（毫秒）。按显示器刷新率换算，供 HUD 与诊断判读：
         /// "最差 41ms" 在 60Hz（预算 16.7ms）下是掉两帧，在 30Hz 下却正常。
         /// </summary>
@@ -182,5 +296,34 @@ namespace Ink_Canvas.Helpers
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+
+        // PROCESS_INFORMATION_CLASS.ProcessPowerThrottling = 4
+        private const int ProcessPowerThrottling = 4;
+
+        // PROCESS_POWER_THROTTLING_CURRENT_VERSION / PROCESS_POWER_THROTTLING_EXECUTION_SPEED
+        private const uint PROCESS_POWER_THROTTLING_CURRENT_VERSION = 1;
+        private const uint PROCESS_POWER_THROTTLING_EXECUTION_SPEED = 0x1;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PROCESS_POWER_THROTTLING_STATE
+        {
+            public uint Version;
+            public uint ControlMask;
+            public uint StateMask;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetProcessInformation(IntPtr process, int processInformationClass,
+            ref PROCESS_POWER_THROTTLING_STATE processInformation, int processInformationSize);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetProcessInformation(IntPtr process, int processInformationClass,
+            ref PROCESS_POWER_THROTTLING_STATE processInformation, int processInformationSize);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetCurrentProcess();
+
+        [DllImport("winmm.dll")]
+        private static extern uint timeBeginPeriod(uint period);
     }
 }

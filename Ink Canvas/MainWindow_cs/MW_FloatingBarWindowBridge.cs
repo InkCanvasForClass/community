@@ -3,7 +3,10 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows;
 
 namespace Ink_Canvas
@@ -26,6 +29,11 @@ namespace Ink_Canvas
         private DependencyPropertyDescriptor _mainWindowTopmostDescriptor;
         private EventHandler _mainWindowTopmostChangedHandler;
         private bool _floatingBarWindowHooksAttached;
+
+        private HwndSource _ownerHwndSource;
+        private bool _floatingBarZOrderGuardInstalled;
+        private bool _floatingBarZOrderAssertPending;
+        private DispatcherTimer _floatingBarZOrderWatchdog;
 
         /// <summary>桥接层是否已经主动显示过工具栏窗口（用于过滤启动早期的主窗口 IsVisibleChanged）。</summary>
         private bool _floatingBarWindowShown;
@@ -60,7 +68,13 @@ namespace Ink_Canvas
             if (_floatingToolbarWindow != null) return;
 
             _floatingToolbarWindow = new FloatingToolbarWindow(this);
+
+            // 工具栏窗口自己维护「紧贴主窗口上方」的层级。交给 WindowTopmostManager
+            // 统一置顶的话，主窗口每次激活重新置顶时都会把它压到画布下面。
+            WindowTopmostManager.ExcludeWindow(_floatingToolbarWindow);
+
             AttachFloatingBarWindowHooks();
+            StartFloatingBarZOrderWatchdog();
         }
 
         /// <summary>显示工具栏窗口。不激活主窗口，也不抢焦点。</summary>
@@ -76,6 +90,7 @@ namespace Ink_Canvas
             }
 
             _floatingToolbarWindow.SyncToOwnerBounds();
+            _floatingToolbarWindow.EnsureAboveOwner();
             SyncFloatingBarHostState();
             _floatingBarWindowShown = true;
         }
@@ -96,6 +111,17 @@ namespace Ink_Canvas
             _mainWindowTopmostChangedHandler = (s, e) => SyncFloatingBarTopmost();
             _mainWindowTopmostDescriptor?.AddValueChanged(this, _mainWindowTopmostChangedHandler);
 
+            // 主窗口的 Z 序变化（激活、原生置顶）不会经过上面的 DP 通知，
+            // 必须直接监听窗口消息，把工具栏重新排回主窗口正上方。
+            if (PresentationSource.FromVisual(this) is HwndSource)
+            {
+                InstallFloatingBarZOrderGuard();
+            }
+            else
+            {
+                SourceInitialized += (s, e) => InstallFloatingBarZOrderGuard();
+            }
+
             // FloatingbarUIForInkReplay 仍留在主窗口（闲置迷你栏在它下面），
             // 它的显隐/命中开关要继续控制整个浮动栏体系。
             FloatingbarUIForInkReplay.IsVisibleChanged += (s, e) => SyncFloatingBarHostState();
@@ -106,8 +132,15 @@ namespace Ink_Canvas
                 // 启动阶段主窗口 Show() 会先触发一次 IsVisibleChanged，
                 // 那时还没定过位，直接 Show 会在屏幕左上角闪一下，所以只跟随后续变化。
                 if (_floatingToolbarWindow == null || !_floatingBarWindowShown) return;
-                if (IsVisible) _floatingToolbarWindow.Show();
-                else _floatingToolbarWindow.Hide();
+                if (IsVisible)
+                {
+                    _floatingToolbarWindow.Show();
+                    _floatingToolbarWindow.EnsureAboveOwner();
+                }
+                else
+                {
+                    _floatingToolbarWindow.Hide();
+                }
             };
 
             Closed += (s, e) => DisposeFloatingToolbarWindow();
@@ -127,6 +160,60 @@ namespace Ink_Canvas
         {
             if (_floatingToolbarWindow == null) return;
             _floatingToolbarWindow.Topmost = Topmost;
+            _floatingToolbarWindow.EnsureAboveOwner();
+        }
+
+        /// <summary>监听主窗口的窗口消息，捕获激活 / 原生置顶导致的 Z 序变化。</summary>
+        private void InstallFloatingBarZOrderGuard()
+        {
+            if (_floatingBarZOrderGuardInstalled) return;
+            if (PresentationSource.FromVisual(this) is not HwndSource source) return;
+
+            _ownerHwndSource = source;
+            _ownerHwndSource.AddHook(FloatingBarOwnerZOrderHook);
+            _floatingBarZOrderGuardInstalled = true;
+        }
+
+        private IntPtr FloatingBarOwnerZOrderHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_ACTIVATE = 0x0006;
+            const int WM_WINDOWPOSCHANGED = 0x0047;
+
+            if (msg == WM_ACTIVATE || msg == WM_WINDOWPOSCHANGED)
+            {
+                QueueFloatingBarZOrderAssert();
+            }
+
+            return IntPtr.Zero;
+        }
+
+        /// <summary>把重排合并成一次调度，避免连续消息里反复调用 SetWindowPos。</summary>
+        private void QueueFloatingBarZOrderAssert()
+        {
+            if (_floatingBarZOrderAssertPending) return;
+            _floatingBarZOrderAssertPending = true;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _floatingBarZOrderAssertPending = false;
+                _floatingToolbarWindow?.EnsureAboveOwner();
+            }), DispatcherPriority.Input);
+        }
+
+        /// <summary>
+        /// 低频兜底巡检：主窗口一旦真的把工具栏压回下面，就立刻修回并记一条日志。
+        /// 平时只读 Z 序，不改变任何状态。
+        /// </summary>
+        private void StartFloatingBarZOrderWatchdog()
+        {
+            if (_floatingBarZOrderWatchdog != null) return;
+
+            _floatingBarZOrderWatchdog = new DispatcherTimer(DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromMilliseconds(400)
+            };
+            _floatingBarZOrderWatchdog.Tick += (s, e) => _floatingToolbarWindow?.VerifyZOrderAboveOwner();
+            _floatingBarZOrderWatchdog.Start();
         }
 
         private void DisposeFloatingToolbarWindow()
@@ -139,6 +226,16 @@ namespace Ink_Canvas
             }
             _mainWindowTopmostDescriptor = null;
             _mainWindowTopmostChangedHandler = null;
+
+            if (_floatingBarZOrderGuardInstalled && _ownerHwndSource != null)
+            {
+                _ownerHwndSource.RemoveHook(FloatingBarOwnerZOrderHook);
+            }
+            _floatingBarZOrderGuardInstalled = false;
+            _ownerHwndSource = null;
+
+            _floatingBarZOrderWatchdog?.Stop();
+            _floatingBarZOrderWatchdog = null;
 
             try
             {
