@@ -37,6 +37,7 @@ namespace Ink_Canvas
 
         private bool _nativeWetInkStarted;
         private bool _nativeWetInkDisabled;
+        private bool _wetInkOverlayVisible;
         private bool _nativeWetInkDeviceFailureNotified;
         private long _nativeCoordinateGeneration = 1;
         private EventHandler _nativeWetInkLocationChangedHandler;
@@ -301,6 +302,21 @@ namespace Ink_Canvas
         {
             try { _wetInkWindowHost?.SetOverlayVisible(visible); }
             catch { /* best-effort */ }
+
+            // 湿墨覆盖层上屏时会盖在浮动工具栏上面，重新断言一次工具栏的层级。
+            if (visible && !_wetInkOverlayVisible)
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    _floatingToolbarWindow?.EnsureAboveOwner();
+                }
+                else
+                {
+                    Dispatcher.BeginInvoke(new Action(() => _floatingToolbarWindow?.EnsureAboveOwner()));
+                }
+            }
+
+            _wetInkOverlayVisible = visible;
         }
 
         private void RefreshOverlayVisibility()

@@ -255,6 +255,8 @@ namespace Ink_Canvas
             {
                 // 设置白板/黑板模式下的背景
                 GridBackgroundCover.Background = new SolidColorBrush(color);
+                // 背景亮度变化后同步调整时间和一言的文字颜色，避免同色看不清
+                UpdateWatermarkForegroundByBackground();
             }
 
             // 保存设置

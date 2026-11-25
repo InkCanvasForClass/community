@@ -6,16 +6,16 @@
 
 1. **跨度补间**（`ToolbarRegistry` 逐帧写段 `Width`）
 2. **图标通道补间**（逐帧写 `TranslateTransform` 做 FLIP）
-3. **居中跟随**（逐帧写 `RenderTransform` 补偿，收尾原子提交 `Margin`）
+3. **居中跟随**（逐帧写 `RenderTransform` 补偿，收尾原子提交 `Margin`）——**已删除**，见阶段二
 4. 外加 `FloatingBarSpring` 占用 `ViewboxFloatingBar.RenderTransform`
 
 任何一对交叠都会产生"谁最后写谁生效"的竞态。继续在原地打补丁只会增加分支数。
 
 **目标**：把浮动工具栏从 MainWindow 可视树搬进独立无边框窗口（与画布解耦），然后把动画重写成**单一进度钟**——一个 `Progress` 派生全部视觉，中断时各属性从当前视觉值重新设目标，收起=展开的严格倒放。已确认的用户决策：
 
-- 窗口尺寸用**容量包络**：动画开始前一次扩到最大跨度（含 `EaseOutBack` 回弹余量 ~6%），动画全程不动窗口矩形，静止后才收缩。不逐帧改尺寸、也不用全屏大透明窗。
-- 动画**彻底重写**为单一进度钟，不保留现有三套结构。
-- **打断**：每个属性开新动画时把起点设为**当前视觉值**，复用剩余时长；过半程才发生的新改动开新批次。
+- 窗口覆盖主窗口客户区、自身全透明（不做容量包络，也不再逐帧改窗口矩形）。
+- 动画**彻底重写**为单一进度钟，不保留现有三套结构；独立方形的背景也并入同一只钟，不再用 WPF `DoubleAnimation`。
+- **打断**：每个属性开新动画时把起点设为**当前视觉值**，进度归零、用**完整时长**重开（Inkeys `SetTar`）。
 - **两阶段交付**：先拆窗+旧动画桥接（非动画行为零回归），再换新动画核。
 
 参考实现：本地仓库 `C:\Users\Admin\Documents\GitHub\Inkeys`（C++20 + Direct2D 分层窗口），核心在 `Inkeys\Inkeys\UI\Bar\`：
@@ -113,26 +113,20 @@ window.Top  = mainWindow.Top  + margin.Top  - padding
 
 以上全是窗口内部元素坐标，不牵动窗口矩形。
 
-### 2.1 容量包络（窗口矩形）
+### 2.1 窗口矩形（实际实现：整窗覆盖，不做容量包络）
 
-照 Inkeys `Bar.WindowGeometry.cppm` 的规则：
-
-- 锚点 = 头部按钮中心在当前屏幕的位置。窗口**围绕锚点对称**：`Left = anchorX − Wmax/2`，`Top = anchorY − Hmax/2`。
-- `Wmax = Whead + Σ Wexp`；因展开曲线含回弹，再乘 **1.06**。
-- **动画开始前**一次 `SetWindowPos` 设到 `Wmax × Hmax`（`SWP_NOACTIVATE`）。
-- 动画期间窗口矩形**只允许扩张**（预测不足时按本帧真实外框补），绝不收缩。
-- **进入 idle 的最后一帧**才按当前实际外框收缩一次。
-- 位置仍逐帧更新（Inkeys 也允许尺寸不变时用 `SetWindowPos` 直移），只是尺寸不参与。
+- 窗口铺满主窗口客户区（`FloatingToolbarWindow` 与主窗同步 Left/Top/Width/Height），自身全透明，内部元素用 Margin 定位。
+- 因此**不需要**容量包络、`WindowPadding`、`SetWindowPos` 预扩或 1.06 回弹余量：窗口矩形全程不变，胶囊与过冲都画在窗口内部。
+- 早先计划里的"围绕锚点对称 / Wmax×Hmax / 动画期间只增不减"未采用。
 
 ### 3. 打断
 
-完全照 Inkeys 的"目标制"：
+完全照 Inkeys `SetTar`：
 
-- 时间轴**不重启**，只把剩余时长作为新时长：`dur = duration × (1 − progress)`。
-- 每个属性 `SetTar` 时 `startV = 当前显示值`，新方向第一帧值不跳。
-- 相位映射：`absolute = startProgress + (1 − startProgress) × p`，再按曲线取剩余段（Inkeys `BarUiApplyCurveRange`）。中途反向**不重播 EaseOut 的陡起步**，只在剩余时间里重走回弹形状。
-- 接管规则：进度 `≤ 0.5` 可加入当前批次；> 0.5 或折叠/换边这类大动作**开新批次**（新时长、新曲线），不压缩到旧截止时间。
-- **没有 `Completed`**：到点只在本帧把值落到目标，不存在延迟写入的旧终点 → 迟到回调与代际号机制从设计上消失。
+- 时间轴**重开**：`startV = 当前可见值`、`progress = 0`、`dur = 完整时长`（值连续、速度重启；不做 `dur × (1 - progress)` 的剩余时长压缩，也不反解进度）。
+- 展开取 `EaseOutBack(p, 1.1)`，收起取它的时间反演（≡ `EaseInBack`），所以收起是展开的严格倒放。
+- 接管规则：同一分段同方向、同端点时不打断；反向或端点变化时从当前值重开一段。
+- **没有 `Completed`**：进度到 1 只在本帧把值落到目标，不存在延迟写入的旧终点 → 迟到回调与代际号机制从设计上消失。
 
 ### 4. 退役删除
 

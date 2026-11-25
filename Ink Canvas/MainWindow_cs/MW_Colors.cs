@@ -145,9 +145,7 @@ namespace Ink_Canvas
                         {
                             GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(234, 235, 237));
                         }
-                        WaterMarkTime.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
-                        WaterMarkDate.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
-                        BlackBoardWaterMark.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
+                        UpdateWatermarkForegroundByBackground();
                         isUselightThemeColor = false;
                     }
                     else
@@ -161,9 +159,7 @@ namespace Ink_Canvas
                         {
                             GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(22, 41, 36));
                         }
-                        WaterMarkTime.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));
-                        WaterMarkDate.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));
-                        BlackBoardWaterMark.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));
+                        UpdateWatermarkForegroundByBackground();
                         isUselightThemeColor = true;
                     }
                 }
@@ -639,6 +635,122 @@ namespace Ink_Canvas
             UpdatePenIconColor();
             // 更新白板工具栏画笔图标颜色
             UpdateBoardPenIconColor();
+        }
+
+        /// <summary>
+        /// 根据当前背景亮度自动调整左上角时间与右上角一言的文字颜色（亮背景用深色字，暗背景用浅色字）。
+        /// 覆盖白板/黑板、自定义背景色以及视频展台（摄像头画面/冻结照片）等场景，
+        /// 避免视频展台拍摄白纸时白字与白色背景重合而看不清。
+        /// </summary>
+        internal void UpdateWatermarkForegroundByBackground()
+        {
+            if (WaterMarkTime == null || WaterMarkDate == null || BlackBoardWaterMark == null) return;
+
+            try
+            {
+                if (!TryGetBackgroundLuminance(out double luminance)) return;
+
+                var foreground = new SolidColorBrush(luminance > 0.5
+                    ? Color.FromRgb(22, 41, 36)
+                    : Color.FromRgb(234, 235, 237));
+
+                WaterMarkTime.Foreground = foreground;
+                WaterMarkDate.Foreground = foreground;
+                BlackBoardWaterMark.Foreground = foreground;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新水印文字颜色失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 估算当前水印下方背景的平均亮度（0=黑，1=白）。
+        /// 视频展台特殊模式优先采样冻结照片或摄像头当前帧；普通模式使用白板/黑板/自定义背景色。
+        /// </summary>
+        /// <returns>能否取得有效的背景亮度；桌面模式下返回 false。</returns>
+        private bool TryGetBackgroundLuminance(out double luminance)
+        {
+            luminance = 0;
+
+            if (_isVideoPresenterSpecialMode)
+            {
+                // 照片预览页：直接采样冻结照片
+                if (_boothCurrentPhotoIndex >= 0
+                    && VideoPresenterFrozenFrameImage?.Source is BitmapSource frozenFrame)
+                {
+                    luminance = GetBitmapAverageLuminance(frozenFrame);
+                    return true;
+                }
+
+                // 直播页：从 VideoCaptureElement 的 D3D 前缓冲取一帧；首帧未就绪时返回 null
+                var liveFrame = VideoPresenterFullCanvasImage?.CaptureCurrentFrame();
+                if (liveFrame != null)
+                {
+                    luminance = GetBitmapAverageLuminance(liveFrame);
+                    return true;
+                }
+
+                // 无可用画面时，特殊模式占位容器是深色背景
+                luminance = 0;
+                return true;
+            }
+
+            if (currentMode == 0) return false;
+
+            if (CustomBackgroundColor.HasValue)
+            {
+                luminance = GetColorLuminance(CustomBackgroundColor.Value);
+                return true;
+            }
+
+            luminance = (Settings?.Canvas?.UsingWhiteboard ?? true) ? 1.0 : 0.0;
+            return true;
+        }
+
+        /// <summary>计算颜色的亮度（0=黑，1=白）。</summary>
+        private static double GetColorLuminance(Color color)
+        {
+            return (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255.0;
+        }
+
+        /// <summary>
+        /// 缩小采样后计算位图的平均亮度（0=黑，1=白）。
+        /// </summary>
+        private static double GetBitmapAverageLuminance(BitmapSource source)
+        {
+            if (source == null) return 1.0;
+
+            try
+            {
+                // 统一转为 Bgra32，并按长边 64 像素降采样，避免大图逐像素扫描
+                var converted = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
+                double scale = 64.0 / Math.Max(converted.PixelWidth, converted.PixelHeight);
+                BitmapSource sampled = scale < 1.0
+                    ? new TransformedBitmap(converted, new ScaleTransform(scale, scale))
+                    : (BitmapSource)converted;
+
+                int width = sampled.PixelWidth;
+                int height = sampled.PixelHeight;
+                if (width <= 0 || height <= 0) return 1.0;
+
+                int stride = width * 4;
+                var pixels = new byte[stride * height];
+                sampled.CopyPixels(pixels, stride, 0);
+
+                double sum = 0;
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    // Bgra32：B、G、R、A
+                    sum += 0.114 * pixels[i] + 0.587 * pixels[i + 1] + 0.299 * pixels[i + 2];
+                }
+
+                return sum / (pixels.Length / 4) / 255.0;
+            }
+            catch
+            {
+                return 1.0;
+            }
         }
 
         /// <summary>

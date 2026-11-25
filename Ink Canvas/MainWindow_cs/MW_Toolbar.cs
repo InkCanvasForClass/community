@@ -312,11 +312,11 @@ namespace Ink_Canvas
                 // 填充工具栏组件
                 ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout, orientation);
 
-                // 跨度逐帧变化时让整条栏保持居中（幂等，重建工具栏时不会重复挂）
-                HookFloatingBarCenterFollow();
-
                 // 显隐动画收尾后补一次选中高光（动画途中量到的按钮位置是中间态）
                 HookFloatingBarHighlightRefresh();
+
+                // 跨度变化（展开/收起/切模式）过程中让整条栏在居中轴上不动
+                HookFloatingBarCenterFollow();
 
                 // 根据位置设置拖动图标的位置
                 SetToolbarHeadPosition(position);
@@ -502,6 +502,8 @@ namespace Ink_Canvas
             _userHasDraggedFloatingBar = false;
             pointDesktop = new Point(-1, -1);
             pointPPT = new Point(-1, -1);
+            // 重新落位即回到居中模式
+            _floatingBarCenteredMode = true;
             ViewboxFloatingBarScaleTransform.ScaleX = scale;
             ViewboxFloatingBarScaleTransform.ScaleY = scale;
 

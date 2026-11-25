@@ -59,8 +59,8 @@ namespace Ink_Canvas
         /// <returns>弹簧静止后完成的任务；不播放动画时返回已完成任务。</returns>
         private Task MoveFloatingBarTo(Thickness targetMargin, bool animate)
         {
-            // 居中跟随的补偿还挂在 RenderTransform 上：先原子提交进 Margin，
-            // 下面读到的 currentMargin 才是视觉上的真实位置，弹簧起点不会跳
+            // 还没提交的居中补偿先并进 Margin：下面拿 currentMargin 当视觉起点，
+            // 少算这段会让弹簧一起步就跳。
             FlushFloatingBarCenterFollow();
 
             var spring = FloatingBarSpring;
@@ -70,6 +70,8 @@ namespace Ink_Canvas
                 spring.SnapToLayout();
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 ViewboxFloatingBar.Margin = targetMargin;
+                // 落位即真值：把跟随基准一起挪过来，否则下一次跨度变化会按旧位置补错量
+                SyncFloatingBarCenterFollowBaseline();
                 return Task.CompletedTask;
             }
 
@@ -97,6 +99,10 @@ namespace Ink_Canvas
             // 布局一次落到终点；之后所有逐帧变化都只发生在 RenderTransform 上。
             ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
             ViewboxFloatingBar.Margin = targetMargin;
+
+            // 跨度补间期间横向位置归居中跟随所有（上面那条守卫），基准不能在这里改写，
+            // 否则会把它的托底补偿打断；其余情况落位即真值，基准跟着走。
+            if (!ToolbarRegistry.IsExtentAnimating) SyncFloatingBarCenterFollowBaseline();
 
             var start = new Vector(visualLeft - targetMargin.Left, visualTop - targetMargin.Top);
 

@@ -319,6 +319,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw._userHasDraggedFloatingBar = false;
                 mw.pointDesktop = new Point(-1, -1);
                 mw.pointPPT = new Point(-1, -1);
+                // 缩放变化后重新落位，回到居中模式
+                mw._floatingBarCenteredMode = true;
                 // 紧凑模式叠加缩放因子
                 double effectiveScale = actualScale;
                 if (SettingsManager.Settings.Appearance.CompactFloatingBar)

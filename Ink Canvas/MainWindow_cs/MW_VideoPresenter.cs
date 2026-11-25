@@ -384,6 +384,11 @@ namespace Ink_Canvas
                 UpdateBoothPageInfoDisplay();
                 // 刷新侧栏页码列表：填充第 0 项（直播页，文字"再次点击返回直播画面"）
                 RefreshBoothPageListView();
+
+                // 摄像头画面可能是白纸等亮背景，先按深色占位背景显示浅色文字，
+                // 待首帧到达后再按画面实际亮度校正（避免白字落在白纸上看不清）
+                UpdateWatermarkForegroundByBackground();
+                ScheduleBoothWatermarkColorRefresh();
             }
             catch (Exception ex)
             {
@@ -450,6 +455,9 @@ namespace Ink_Canvas
 
             // 恢复翻页按钮（显示"新页面"按钮，全部启用）
             RestoreBoothPagingButtons();
+
+            // 退出特殊模式后按白板/黑板（含自定义背景色）重新计算水印文字颜色
+            UpdateWatermarkForegroundByBackground();
         }
 
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
@@ -727,8 +735,33 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     "[VideoPresenter] MediaOpened: 摄像头已打开，隐藏占位文字",
                     LogHelper.LogType.Info);
+
+                // 首帧就绪后按画面亮度校正水印文字颜色
+                ScheduleBoothWatermarkColorRefresh();
             }
             catch { }
+        }
+
+        /// <summary>
+        /// 延迟采样展台画面亮度并刷新左上角时间、右上角一言的文字颜色。
+        /// VMR9 的 D3D 前缓冲通常晚于 MediaOpened 就绪，因此分两次尝试（首次可能取不到帧）。
+        /// </summary>
+        private async void ScheduleBoothWatermarkColorRefresh()
+        {
+            try
+            {
+                await Task.Delay(400);
+                if (!_isVideoPresenterSpecialMode) return;
+                UpdateWatermarkForegroundByBackground();
+
+                await Task.Delay(1400);
+                if (!_isVideoPresenterSpecialMode) return;
+                UpdateWatermarkForegroundByBackground();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新展台水印文字颜色失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         /// <summary>
@@ -2493,6 +2526,9 @@ namespace Ink_Canvas
             // 同步页码列表 SelectedIndex 到照片项（index=photoIndex+1）
             int selectedIndex = photoIndex + 1;
             SyncPageListSelection(selectedIndex);
+
+            // 照片内容可能比直播画面更亮/更暗，按冻结照片亮度重新选择水印文字颜色
+            UpdateWatermarkForegroundByBackground();
         }
 
         /// <summary>
@@ -2536,6 +2572,8 @@ namespace Ink_Canvas
                 if (camIdx >= 0)
                 {
                     _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    // 回到直播页后重新按摄像头画面亮度校正水印文字颜色
+                    ScheduleBoothWatermarkColorRefresh();
                 }
             }
 

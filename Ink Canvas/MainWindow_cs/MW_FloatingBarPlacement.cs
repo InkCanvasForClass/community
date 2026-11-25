@@ -153,6 +153,8 @@ namespace Ink_Canvas
             _userHasDraggedFloatingBar = false;
             pointDesktop = new Point(-1, -1);
             pointPPT = new Point(-1, -1);
+            // 恢复默认位置即回到居中模式
+            _floatingBarCenteredMode = true;
 
             if (placement == FloatingBarPlacement.PptExpanded)
                 PureViewboxFloatingBarMarginAnimationInPPTMode();

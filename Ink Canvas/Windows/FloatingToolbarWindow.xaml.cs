@@ -39,6 +39,10 @@ namespace Ink_Canvas.Windows
         /// <summary>当前是否要求整个窗口点击穿透（拖动时用）。</summary>
         private bool _forceHitTestTransparent;
 
+        /// <summary>Z 序丢失日志的节流，避免巡检每 400ms 刷一条。</summary>
+        private const long ZOrderWarningIntervalMs = 5000;
+        private long _lastZOrderWarningTick;
+
         internal FloatingToolbarWindow(MainWindow owner)
         {
             _owner = owner;
@@ -152,6 +156,194 @@ namespace Ink_Canvas.Windows
         internal void OnOwnerGeometryChanged()
         {
             SyncToOwnerBounds();
+        }
+
+        /// <summary>把自己的 Z 序重新排到主窗口（以及它的透明覆盖层）的正上方。</summary>
+        /// <remarks>
+        /// 主窗口每次被激活（在画布上落笔批注就会激活它）或被原生置顶时，
+        /// 会把自己提到同层窗口的最前面，工具栏窗口只镜像了 Topmost 标志、
+        /// 没有再次断言自己的相对位置，就会掉到画布下面。
+        ///
+        /// 另外批注时主窗口会冒出湿墨覆盖层（owner 也是主窗口，创建时间比工具栏晚），
+        /// 它天然排在工具栏上面；WindowTopmostManager 还会把这类未纳管窗口提成 TOPMOST。
+        /// 所以修复不能只插到主窗口后面，而要排到「主窗口的透明覆盖层」之上。
+        /// </remarks>
+        internal void EnsureAboveOwner()
+        {
+            if (!IsLoaded || !IsVisible) return;
+
+            var rawHandle = new WindowInteropHelper(this).Handle;
+            if (rawHandle == IntPtr.Zero) return;
+
+            var ownerHandle = new WindowInteropHelper(_owner).Handle;
+            if (ownerHandle == IntPtr.Zero) return;
+
+            var toolbar = new HWND(rawHandle);
+            var owner = new HWND(ownerHandle);
+
+            // Topmost 必须和主窗口一致，否则非 TOPMOST 的窗口永远插不到 TOPMOST 窗口上面。
+            if (Topmost != _owner.Topmost)
+            {
+                Topmost = _owner.Topmost;
+            }
+
+            if (_owner.Topmost)
+            {
+                // 主窗口处于 TOPMOST 层时，WindowTopmostManager.BoostPopupWindowsAboveChildren
+                // 会把湿墨覆盖层等未纳管窗口提成 HWND_TOPMOST，工具栏被排除在那套管理外，
+                // 只能自己顶到该层最前面，否则批注落笔后就被覆盖层压住。
+                PInvoke.SetWindowPos(toolbar, new HWND(Helpers.NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+                    SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                    SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                    SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
+                return;
+            }
+
+            // 非置顶时不能用 HWND_TOPMOST（会压住其他应用），改成插到主窗口最上面那个
+            // 透明覆盖层之后；没有覆盖层时直接插到主窗口之后。
+            var insertAfter = FindTopmostTransparentOverlay(owner);
+            if (insertAfter == IntPtr.Zero)
+            {
+                insertAfter = owner;
+            }
+
+            PInvoke.SetWindowPos(toolbar, insertAfter, 0, 0, 0, 0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+                SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
+        }
+
+        /// <summary>检查工具栏窗口是否真的在主窗口及其透明覆盖层上方；不在就修好并记一条日志。</summary>
+        /// <returns>检查后是否处于正确层级。</returns>
+        internal bool VerifyZOrderAboveOwner()
+        {
+            if (!IsLoaded || !IsVisible) return true;
+
+            var rawHandle = new WindowInteropHelper(this).Handle;
+            var ownerHandle = new WindowInteropHelper(_owner).Handle;
+            if (rawHandle == IntPtr.Zero || ownerHandle == IntPtr.Zero) return true;
+
+            var toolbar = new HWND(rawHandle);
+            var owner = new HWND(ownerHandle);
+
+            if (IsAboveOwnerAndOverlays(toolbar, owner)) return true;
+
+            long now = Environment.TickCount64;
+            if (now - _lastZOrderWarningTick >= ZOrderWarningIntervalMs)
+            {
+                _lastZOrderWarningTick = now;
+
+                var above = PInvoke.GetWindow(toolbar, GET_WINDOW_CMD.GW_HWNDPREV);
+                int ownerExStyle = PInvoke.GetWindowLong(owner, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                Helpers.LogHelper.WriteLogToFile(
+                    $"[浮动工具栏] Z 序丢失，重新排回主窗口上方。toolbar=0x{rawHandle.ToInt64():X} owner=0x{ownerHandle.ToInt64():X} " +
+                    $"正上方窗口={DescribeWindow(above)} " +
+                    $"Topmost(toolbar/owner)=({Topmost}/{_owner.Topmost}) " +
+                    $"ownerRealTopmost={((ownerExStyle & (int)WINDOW_EX_STYLE.WS_EX_TOPMOST) != 0)}",
+                    Helpers.LogHelper.LogType.Warning);
+            }
+
+            EnsureAboveOwner();
+            return false;
+        }
+
+        /// <summary>检查工具栏是否在主窗口及其透明覆盖层上方；不在就修好并记一条日志。</summary>
+        private static bool IsAboveOwnerAndOverlays(HWND toolbar, HWND owner)
+        {
+            // 工具栏必须在主窗口之上。
+            if (!IsWindowAbove(toolbar, owner)) return false;
+
+            // 主窗口的透明覆盖层（湿墨层）也必须在工具栏之下，否则批注时就把它盖住了。
+            var current = owner;
+            for (int i = 0; i < 256; i++)
+            {
+                var above = PInvoke.GetWindow(current, GET_WINDOW_CMD.GW_HWNDPREV);
+                if (above == IntPtr.Zero) break;
+
+                if (PInvoke.GetWindow(above, GET_WINDOW_CMD.GW_OWNER) == owner
+                    && IsTransparentOverlay(above)
+                    && IsWindowAbove(above, toolbar))
+                {
+                    return false;
+                }
+
+                current = above;
+            }
+
+            return true;
+        }
+
+        /// <summary>upper 是否在 lower 之上：从 lower 沿 Z 序向上（GW_HWNDPREV）能找到 upper 就算。</summary>
+        private static bool IsWindowAbove(HWND upper, HWND lower)
+        {
+            var current = lower;
+
+            for (int i = 0; i < 4096; i++)
+            {
+                var above = PInvoke.GetWindow(current, GET_WINDOW_CMD.GW_HWNDPREV);
+                if (above == IntPtr.Zero) return false;
+                if (above == upper) return true;
+                current = above;
+            }
+
+            return false;
+        }
+
+        /// <summary>找主窗口的透明覆盖层里 Z 序最靠上的那个，返回值可能为零。</summary>
+        private static HWND FindTopmostTransparentOverlay(HWND owner)
+        {
+            var result = HWND.Null;
+            var current = owner;
+
+            for (int i = 0; i < 256; i++)
+            {
+                var above = PInvoke.GetWindow(current, GET_WINDOW_CMD.GW_HWNDPREV);
+                if (above == IntPtr.Zero) break;
+
+                if (PInvoke.GetWindow(above, GET_WINDOW_CMD.GW_OWNER) == owner && IsTransparentOverlay(above))
+                {
+                    result = above;
+                }
+
+                current = above;
+            }
+
+            return result;
+        }
+
+        /// <summary>主窗口的透明覆盖层：点击穿透（WS_EX_TRANSPARENT）且不抢焦点（WS_EX_NOACTIVATE）。</summary>
+        private static bool IsTransparentOverlay(HWND hwnd)
+        {
+            const int WsExTransparent = 0x00000020;
+            const int WsExNoActivate = unchecked((int)0x08000000);
+
+            int exStyle = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+            return (exStyle & (WsExTransparent | WsExNoActivate)) == (WsExTransparent | WsExNoActivate);
+        }
+
+        /// <summary>把窗口句柄写成「类名 + 标题 + owner + 扩展样式」，用于定位真正压在上面的窗口。</summary>
+        private static string DescribeWindow(HWND hwnd)
+        {
+            if (hwnd == IntPtr.Zero) return "<无>";
+
+            var classBuffer = new char[256];
+            int classLength = PInvoke.GetClassName(hwnd, new Span<char>(classBuffer));
+            var textBuffer = new char[256];
+            int textLength = PInvoke.GetWindowText(hwnd, new Span<char>(textBuffer));
+
+            var className = classLength > 0
+                ? new string(classBuffer, 0, Math.Min(classLength, classBuffer.Length))
+                : string.Empty;
+            var title = textLength > 0
+                ? new string(textBuffer, 0, Math.Min(textLength, textBuffer.Length))
+                : string.Empty;
+
+            var windowOwner = PInvoke.GetWindow(hwnd, GET_WINDOW_CMD.GW_OWNER);
+            int exStyle = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+
+            return $"0x{((IntPtr)hwnd).ToInt64():X}(class='{className}', title='{title}', owner=0x{((IntPtr)windowOwner).ToInt64():X}, exStyle=0x{exStyle:X})";
         }
 
         private void SymbolIconEmoji_MouseDown(object sender, MouseButtonEventArgs e)
