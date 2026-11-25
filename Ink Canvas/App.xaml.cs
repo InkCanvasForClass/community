@@ -485,16 +485,6 @@ namespace Ink_Canvas
             SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
-            UpdateCpuUsageSnapshot();
-            LogHelper.WriteLogToFile("[Crash] 已注册应用启动、退出和未处理异常事件", LogHelper.LogType.Info);
-
-            // 初始化全局异常和进程结束处理
-            InitializeCrashListeners();
-
-            // 看门狗必须在 App_Startup 读取 Settings.json 并同步 CrashAction 后启动。
-            // 构造函数阶段仍使用默认 CrashAction，不能在此处做判断。
-        }
-
         }
 
         /// <summary>
