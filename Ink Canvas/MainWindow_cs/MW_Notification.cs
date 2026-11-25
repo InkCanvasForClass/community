@@ -159,9 +159,7 @@ namespace Ink_Canvas
         {
             if (DynamicNotification == null) return;
 
-            DynamicNotification.HorizontalAlignment = HorizontalAlignment.Center;
-            DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
-            DynamicNotification.Margin = new Thickness(0);
+            SetDynamicNotificationPlacement(HorizontalAlignment.Center, VerticalAlignment.Top, new Thickness(0));
 
             if (message?.Source == "ppt-mode-prompt")
             {
@@ -172,17 +170,25 @@ namespace Ink_Canvas
             switch (Settings?.Notification?.Placement)
             {
                 case "TopLeft":
-                    DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
-                    DynamicNotification.Margin = new Thickness(16, 0, 0, 0);
+                    SetDynamicNotificationPlacement(HorizontalAlignment.Left, VerticalAlignment.Top, new Thickness(16, 0, 0, 0));
                     break;
                 case "TopRight":
-                    DynamicNotification.HorizontalAlignment = HorizontalAlignment.Right;
-                    DynamicNotification.Margin = new Thickness(0, 0, 16, 0);
+                    SetDynamicNotificationPlacement(HorizontalAlignment.Right, VerticalAlignment.Top, new Thickness(0, 0, 16, 0));
                     break;
                 case "FloatingBarAbove":
                     ApplyDynamicNotificationFloatingBarPlacement();
                     break;
             }
+        }
+
+        private void SetDynamicNotificationPlacement(HorizontalAlignment horizontal, VerticalAlignment vertical, Thickness margin)
+        {
+            if (DynamicNotification.HorizontalAlignment != horizontal)
+                DynamicNotification.HorizontalAlignment = horizontal;
+            if (DynamicNotification.VerticalAlignment != vertical)
+                DynamicNotification.VerticalAlignment = vertical;
+            if (DynamicNotification.Margin != margin)
+                DynamicNotification.Margin = margin;
         }
 
         private void ApplyDynamicNotificationFloatingBarPlacement()
@@ -209,9 +215,7 @@ namespace Ink_Canvas
                 left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));
                 top = Math.Max(12, top);
 
-                DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
-                DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
-                DynamicNotification.Margin = new Thickness(left, top, 0, 0);
+                SetDynamicNotificationPlacement(HorizontalAlignment.Left, VerticalAlignment.Top, new Thickness(left, top, 0, 0));
             }
             catch
             {
