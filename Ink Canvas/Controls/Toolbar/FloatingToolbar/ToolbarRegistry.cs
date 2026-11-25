@@ -129,6 +129,18 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             LogHelper.WriteLogToFile(text.TrimEnd(), LogHelper.LogType.Info);
         }
 
+        /// <summary>日志里的槽位：组件在父面板里的下标，用来区分一串同名按钮。</summary>
+        private static string SlotOf(FrameworkElement element)
+        {
+            if (element?.Parent is Panel panel)
+            {
+                int index = panel.Children.IndexOf(element);
+                if (index >= 0) return index.ToString();
+            }
+
+            return "-";
+        }
+
         /// <summary>日志里的元素标签：Name → ToolTip → 类型名（组件大多没有 Name）。</summary>
         private static string Describe(FrameworkElement element)
         {
@@ -3238,9 +3250,17 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         }
 
         /// <summary>把独立方形的背景视觉归位：撤销淡出/缩放，摘掉残留动画。</summary>
-        private static void ResetSegmentUnitVisual(Border border)
+        private static void ResetSegmentUnitVisual(Border border, string reason = null)
         {
             if (border == null || !IsSeparateSegment(border)) return;
+
+            bool hadAnimation = border.HasAnimatedProperties;
+            double opacityBefore = border.Opacity;
+            double scaleBefore = EnsureSegmentUnitScale(border).ScaleX;
+            if (hadAnimation || opacityBefore < 0.99 || Math.Abs(scaleBefore - 1.0) > 0.01)
+            {
+                MotionTrace($"方形视觉复位 {Describe(border)} 原因={reason ?? "未标注"} 复位前:动画中={hadAnimation} 不透明度={opacityBefore:F2} 缩放={scaleBefore:F2}");
+            }
 
             _enteringUnits.Remove(border);
 
@@ -3972,6 +3992,38 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         /// </remarks>
         public static bool IsMotionActive =>
             _extentMotions.Count > 0 || _channelMotions.Count > 0 || _exiting.Count > 0 || _enteringUnits.Count > 0;
+
+        /// <summary>这个组件（或它的某个祖先段）是不是正在往"隐藏"走。</summary>
+        /// <remarks>
+        /// 高光跟随者最需要这一条：收起途中按钮还 Visible、排布却已让出，
+        /// 这时量到的原点是"飞过的那一帧"，蓝色背景和指示条会被永久留在半路。
+        /// </remarks>
+        public static bool IsElementHiding(FrameworkElement element)
+        {
+            for (DependencyObject node = element; node != null; node = VisualTreeHelper.GetParent(node))
+            {
+                if (node is FrameworkElement fe && _exiting.ContainsKey(fe)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>这个组件（或它的某个祖先）此刻是不是有位移/缩放在跑。</summary>
+        public static bool IsElementMoving(FrameworkElement element)
+        {
+            for (DependencyObject node = element; node != null; node = VisualTreeHelper.GetParent(node))
+            {
+                if (!(node is FrameworkElement fe)) continue;
+                if (_exiting.ContainsKey(fe) || (fe is Border border && _enteringUnits.ContainsKey(border))) return true;
+                if (!(fe.RenderTransform is TransformGroup group)) continue;
+                foreach (var child in group.Children)
+                {
+                    if (child is TranslateTransform translate && _channelMotions.ContainsKey(translate)) return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <param name="ancestorsHidden">
         /// 上层分组是否已经判成隐藏。分组容器自己不再动画，而是把条件往下传，
