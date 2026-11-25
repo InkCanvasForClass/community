@@ -1472,9 +1472,9 @@ namespace Ink_Canvas
                 TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
                 ThemeHelper.ApplySystemAccentColor();
 
-                bool shouldShowSplashScreen = ShouldShowSplashScreenFromParsed(parsedSettings)
+                bool shouldShowSplashScreenForUpdate = ShouldShowSplashScreenFromParsed(parsedSettings)
                     && !IsLaunchByFileOrUri(e.Args);
-                if (shouldShowSplashScreen)
+                if (shouldShowSplashScreenForUpdate)
                 {
                     SplashScreen.CachedSettingsJson = CachedSettingsJson;
                     ShowSplashScreen();
