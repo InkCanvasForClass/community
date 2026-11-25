@@ -1408,8 +1408,6 @@ namespace Ink_Canvas
 
             // 第一阶段只读取 UIA 所需的少量配置；其余设置、主题和启动画面延后到交接判定之后。
             bool shouldUseUIAccess = TryGetUIAccessStartupOptions(parsedSettings, out bool useProcessToken);
-            bool shouldShowSplashScreen = ShouldShowSplashScreenFromParsed(parsedSettings)
-                && !IsLaunchByFileOrUri(e.Args);
 
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
@@ -1474,6 +1472,8 @@ namespace Ink_Canvas
                 TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
                 ThemeHelper.ApplySystemAccentColor();
 
+                bool shouldShowSplashScreen = ShouldShowSplashScreenFromParsed(parsedSettings)
+                    && !IsLaunchByFileOrUri(e.Args);
                 if (shouldShowSplashScreen)
                 {
                     SplashScreen.CachedSettingsJson = CachedSettingsJson;
@@ -1868,6 +1868,8 @@ namespace Ink_Canvas
             TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
             ThemeHelper.ApplySystemAccentColor();
 
+            bool shouldShowSplashScreen = ShouldShowSplashScreenFromParsed(parsedSettings)
+                && !IsLaunchByFileOrUri(e.Args);
             if (shouldShowSplashScreen)
             {
                 SplashScreen.CachedSettingsJson = CachedSettingsJson;
