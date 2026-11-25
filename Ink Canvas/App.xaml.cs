@@ -1657,11 +1657,13 @@ namespace Ink_Canvas
             //   抢不到也继续运行（交接场景旧实例即将退出），只跳过“检测到已有实例则退出”的决策。
             // - 正常路径：抢不到标准名 => 已有实例在运行 => 交接给已运行实例并退出（原有行为）。
             bool skipExitDecision = isUpdateInProgress || isUpdateMode || isFinalApp || skipMutexCheck;
+            bool ownsStandardMutex = false;
 
             if (!skipExitDecision)
             {
                 bool ret;
                 mutex = new Mutex(true, StandardMutexName, out ret);
+                ownsStandardMutex = ret;
 
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
@@ -1782,6 +1784,7 @@ namespace Ink_Canvas
                 // 旧实例可能正处于释放窗口期，带短重试等待抢占；抢不到也继续运行（交接场景旧实例即将退出），
                 // 仅跳过“检测到已有实例则退出”的决策。
                 mutex = AcquireStandardMutexWithRetry();
+                ownsStandardMutex = true;
 
                 // 交接等待改为事件驱动：final-app 已精确等待更新进程退出；
                 // 其余交接路径（如 --skip-mutex-check）等同类进程真正消失即继续。
@@ -1807,20 +1810,26 @@ namespace Ink_Canvas
                     $"UIAccess | 阶段一：启动前检测到 UIAccess 需求 (Mode={(useProcessToken ? "ProcessToken" : "UserToken")})");
 
                 // 让最终 UIAccess 子进程能够接管标准单实例互斥体。
+                bool restoreMutexAfterFailure = ownsStandardMutex;
                 ReleaseMutexForRestart();
+                ownsStandardMutex = false;
 
                 bool uiaStarted = AppRestartHelper.TryLaunchUIAFromStartup(useProcessToken);
                 if (uiaStarted)
                 {
-                    IsUIAccessTopMostEnabled = true;
-                    IsAppExitByUser = true;
-                    LogHelper.WriteLogToFile("UIAccess | 阶段二完成：最终 UIAccess 进程已启动，当前过渡进程退出");
-                    Shutdown();
+                    LogHelper.WriteLogToFile("UIAccess | 阶段二完成：最终 UIAccess 进程已启动，当前轻量过渡进程退出");
+                    // 不走 App_Exit：该过渡进程没有初始化托盘、插件或 IPC，常规退出清理反而会创建这些单例。
+                    Environment.Exit(0);
                     return;
                 }
 
-                // UAC 取消或 helper 启动失败：恢复互斥体，当前普通进程继续完整启动。
-                mutex = AcquireStandardMutexWithRetry();
+                // UAC 取消或 helper 启动失败：只在原进程确实持有标准互斥体时重新获取。
+                if (restoreMutexAfterFailure)
+                {
+                    mutex = AcquireStandardMutexWithRetry();
+                    ownsStandardMutex = true;
+                }
+
                 IsUIAccessFallbackLaunch = true;
                 IsUIAccessTopMostEnabled = false;
                 IsAppExitByUser = false;
@@ -2158,10 +2167,6 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
-        /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
-        /// </summary>
-        /// <summary>
         /// 从已缓存的 Settings.json 中读取 UIAccess 启动所需的最小配置。
         /// 不创建 SettingsManager，避免在 UIA 交接前加载完整应用配置。
         /// </summary>
@@ -2198,6 +2203,10 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
+        /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
+        /// </summary>
         private static dynamic ReadSettingsJsonOnce()
         {
             if (_cachedParsedSettings != null) return _cachedParsedSettings;
