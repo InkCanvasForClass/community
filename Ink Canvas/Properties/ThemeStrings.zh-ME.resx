@@ -178,7 +178,7 @@
     <value>UI 母语</value>
   </data>
   <data name="Theme_UIFont_Default" xml:space="preserve">
-    <value>默认 (Segoe UI)</value>
+    <value>默认 (Microsoft YaHei UI)</value>
   </data>
   <data name="Theme_UIFont_Description" xml:space="preserve">
     <value>挑个顺眼的字体，或者自己扔个 .ttf/.ttc 进来</value>
