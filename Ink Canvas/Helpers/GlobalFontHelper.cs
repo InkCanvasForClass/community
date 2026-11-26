@@ -30,6 +30,7 @@ namespace Ink_Canvas.Helpers
         public static IReadOnlyList<KeyValuePair<string, string>> PresetFonts { get; } = new[]
         {
             new KeyValuePair<string, string>("Microsoft YaHei UI", "Microsoft YaHei UI"),
+            new KeyValuePair<string, string>("Segoe UI", "Segoe UI"),
             new KeyValuePair<string, string>("等线 DengXian", "DengXian"),
             new KeyValuePair<string, string>("霞鹜文楷 LXGW WenKai TC", EmbeddedWenKaiFontFamily),
             new KeyValuePair<string, string>("宋体 SimSun", "SimSun"),
