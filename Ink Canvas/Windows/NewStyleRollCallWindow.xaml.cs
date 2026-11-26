@@ -186,6 +186,18 @@ namespace Ink_Canvas
 
         // 设置相关
         private Settings settings;
+
+        /// <summary>
+        /// 点名学号池总人数（无名单时按 1~N 抽取；可通过“点名总人数”设置调整）
+        /// </summary>
+        private int TotalStudents
+        {
+            get
+            {
+                int total = settings?.RandSettings?.TotalStudents ?? 60;
+                return total < 1 ? 60 : total;
+            }
+        }
         private int autoCloseWaitTime = 2500; // 自动关闭等待时间（毫秒）
 
         // 点名模式
@@ -1127,8 +1139,8 @@ namespace Ink_Canvas
 
             if (isSingleDrawMode)
             {
-                // 单次抽模式：最多选择60个数字，但受设置限制
-                int maxCount = Math.Min(maxPeopleLimit, 60);
+                // 单次抽模式：最多选择“点名总人数”个数字，但仍受单次上限限制
+                int maxCount = Math.Min(maxPeopleLimit, TotalStudents);
                 currentCount = Math.Min(currentCount + 1, maxCount);
             }
             else
@@ -1137,8 +1149,8 @@ namespace Ink_Canvas
                 int maxCount;
                 if (nameList.Count == 0)
                 {
-                    // 没有名单时，使用60个数字
-                    maxCount = Math.Min(maxPeopleLimit, 60);
+                    // 没有名单时，使用“点名总人数”个数字
+                    maxCount = Math.Min(maxPeopleLimit, TotalStudents);
                 }
                 else
                 {
@@ -1696,7 +1708,7 @@ namespace Ink_Canvas
                 for (int i = 0; i < animationTimes; i++)
                 {
                     // 随机选择一个数字进行动画显示
-                    int randomNumber = new Random().Next(1, 61); // 1-60
+                    int randomNumber = new Random().Next(1, TotalStudents + 1); // 1~TotalStudents
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -1711,7 +1723,7 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     // 根据选择的模式进行不同的抽选逻辑
-                    var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+                    var numberList = Enumerable.Range(1, TotalStudents).Select(n => n.ToString()).ToList();
                     var selectedNumbers = SelectNamesByMode(numberList, currentCount);
 
                     // 更新历史记录
@@ -1860,7 +1872,7 @@ namespace Ink_Canvas
                 int randomNumber;
                 do
                 {
-                    randomNumber = singleDrawRandom.Next(1, 61); // 1-60
+                    randomNumber = singleDrawRandom.Next(1, TotalStudents + 1); // 1~TotalStudents
                 } while (usedNumbers.Count > 0 && usedNumbers[usedNumbers.Count - 1] == randomNumber);
 
                 usedNumbers.Add(randomNumber);
@@ -1877,7 +1889,7 @@ namespace Ink_Canvas
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // 根据选择的模式进行不同的抽选逻辑
-                var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+                var numberList = Enumerable.Range(1, TotalStudents).Select(n => n.ToString()).ToList();
                 var selectedNumbers = SelectNamesByMode(numberList, currentCount);
 
                 // 更新历史记录
@@ -1938,14 +1950,14 @@ namespace Ink_Canvas
             var selectedNumbers = new List<string>();
             var usedNumbers = new List<int>();
 
-            for (int i = 0; i < count && usedNumbers.Count < 60; i++)
+            for (int i = 0; i < count && usedNumbers.Count < TotalStudents; i++)
             {
-                int randomNumber = singleDrawRandom.Next(1, 61); // 1-60
+                int randomNumber = singleDrawRandom.Next(1, TotalStudents + 1); // 1~TotalStudents
 
                 // 避免重复选择
                 while (usedNumbers.Contains(randomNumber))
                 {
-                    randomNumber = singleDrawRandom.Next(1, 61);
+                    randomNumber = singleDrawRandom.Next(1, TotalStudents + 1);
                 }
 
                 usedNumbers.Add(randomNumber);

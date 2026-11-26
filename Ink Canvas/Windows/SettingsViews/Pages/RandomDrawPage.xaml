@@ -91,6 +91,25 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_TotalStudents}">
+                        <ComboBox x:Name="ComboBoxTotalStudents"
+                                  Width="200"
+                                  IsEditable="True"
+                                  IsTextSearchEnabled="False"
+                                  SelectionChanged="ComboBoxTotalStudents_SelectionChanged"
+                                  LostFocus="ComboBoxTotalStudents_LostFocus">
+                            <ComboBoxItem Content="30" />
+                            <ComboBoxItem Content="35" />
+                            <ComboBoxItem Content="40" />
+                            <ComboBoxItem Content="45" />
+                            <ComboBoxItem Content="50" />
+                            <ComboBoxItem Content="55" />
+                            <ComboBoxItem Content="60" />
+                            <ComboBoxItem Content="65" />
+                            <ComboBoxItem Content="70" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <ui:SettingsExpander Header="{x:Static props:RandomStrings.Random_QuickDraw_FinalJump}"
                             Description="{x:Static props:RandomStrings.Random_QuickDraw_FinalJumpHint}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchQuickDrawFinalJump, Mode=OneWay}">

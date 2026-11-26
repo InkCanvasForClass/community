@@ -18,6 +18,7 @@ namespace Ink_Canvas
         private Random random = new Random();
         private int autoCloseWaitTime = 2500; // 自动关闭等待时间（毫秒）
         private List<string> nameList = new List<string>(); // 名单列表
+        private int _totalStudents = 60; // 学号池总人数（无名单时 1~N）
 
         private bool _finalJumpEnabled;               // "最后一跳"开关
         private double _finalJumpProbability = 0.3;   // 最后一跳触发概率（0-1）
@@ -49,6 +50,7 @@ namespace Ink_Canvas
                 if (MainWindow.Settings?.RandSettings != null)
                 {
                     autoCloseWaitTime = (int)MainWindow.Settings.RandSettings.RandWindowOnceCloseLatency * 1000;
+                    _totalStudents = Math.Max(1, MainWindow.Settings.RandSettings.TotalStudents);
                     _finalJumpEnabled = MainWindow.Settings.RandSettings.EnableQuickDrawFinalJump;
                     _finalJumpProbability = Math.Max(0, Math.Min(1, MainWindow.Settings.RandSettings.QuickDrawFinalJumpProbability));
                     _finalJumpSettleDelaySeconds = Math.Max(0, MainWindow.Settings.RandSettings.QuickDrawFinalJumpSettleDelaySeconds);
@@ -220,7 +222,7 @@ namespace Ink_Canvas
                 int randomNumber;
                 do
                 {
-                    randomNumber = random.Next(1, 61); // 1-60
+                    randomNumber = random.Next(1, _totalStudents + 1); // 1~TotalStudents
                 } while (usedNumbers.Count > 0 && usedNumbers[usedNumbers.Count - 1] == randomNumber);
 
                 usedNumbers.Add(randomNumber);
@@ -234,12 +236,12 @@ namespace Ink_Canvas
             }
 
             // 动画结束：真最终走正常路径（降重抽选）
-            var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+            var numberList = Enumerable.Range(1, _totalStudents).Select(n => n.ToString()).ToList();
             string finalNumber = Application.Current.Dispatcher.Invoke(() =>
             {
                 // 使用降重抽选方法选择最终数字
                 var selectedNumbers = NewStyleRollCallWindow.SelectNamesWithML(numberList, 1, random);
-                return selectedNumbers.Count > 0 ? selectedNumbers[0] : random.Next(1, 61).ToString();
+                return selectedNumbers.Count > 0 ? selectedNumbers[0] : random.Next(1, _totalStudents + 1).ToString();
             });
 
             // "快抽结果滑动"（若命中）：先快速随机亮一个假最终，停顿后滑到真最终

@@ -1975,6 +1975,8 @@ namespace Ink_Canvas
         public double RandWindowOnceCloseLatency { get; set; } = 2.5;
         [JsonProperty("randWindowOnceMaxStudents")]
         public int RandWindowOnceMaxStudents { get; set; } = 10;
+        [JsonProperty("totalStudents")]
+        public int TotalStudents { get; set; } = 60;
         [JsonProperty("showRandomAndSingleDraw")]
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
