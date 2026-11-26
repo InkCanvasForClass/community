@@ -31,6 +31,42 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
             <Thickness x:Key="NavigationViewContentGridBorderThickness">1,1,0,0</Thickness>
             <CornerRadius x:Key="NavigationViewContentGridCornerRadius">8,0,0,0</CornerRadius>
             <Thickness x:Key="NavigationViewHeaderMargin">56,34,0,0</Thickness>
+            <!--  标题栏按钮样式（与主窗口命令栏按钮一致）  -->
+            <Style x:Key="SettingsTitleBarButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent">
+                                <Border
+                                    x:Name="RootBorder"
+                                    Margin="2"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="4">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorSecondaryBrushKey}}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorTertiaryBrushKey}}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -56,7 +92,9 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="137"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!--  为系统/库自绘的窗口按钮（最小化、最大化、关闭）预留宽度，避免自定义按钮被压在下面  -->
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <ikw:SimpleStackPanel x:Name="AppTitle" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Image Source="\Resources\icc.ico" Width="20" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -64,6 +102,25 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                         VerticalAlignment="Center"
                         Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
                 </ikw:SimpleStackPanel>
+                <!--  标题栏置顶开关：位于最小化按钮左侧，用于让设置窗口不再强制置顶  -->
+                <Button
+                    x:Name="ButtonWindowTopmost"
+                    Grid.Column="2"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource SettingsTitleBarButtonStyle}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="ButtonWindowTopmost_Click">
+                    <ui:FontIcon
+                        x:Name="IconWindowTopmost"
+                        FontSize="14"
+                        Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
+                </Button>
+                <!--  窗口按钮区域占位：宽度取库给出的右侧系统覆盖区，最小 138 DIP（三枚按钮各 46 DIP）  -->
+                <Border
+                    Grid.Column="3"
+                    MinWidth="138"
+                    Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
             </Grid>
         </Border>
 

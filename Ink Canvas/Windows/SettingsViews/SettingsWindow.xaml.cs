@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
@@ -161,10 +162,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
             UpdateAppTitleBarMargin();
+            InitializeSettingsWindowTopmostToggle();
 
             this.Loaded += (sender, e) =>
             {
                 SetMaxSizeAndCenter();
+                ApplySettingsWindowTopmostToggle();
                 RegisterDpiChangedListener();
 
                 Dispatcher.BeginInvoke(new Action(() =>
@@ -205,7 +208,11 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             this.TouchUp += (s, e) => PInvoke.ShowCursor(true);
             this.MouseEnter += (s, e) => PInvoke.ShowCursor(true);
-            this.Activated += (s, e) => PInvoke.ShowCursor(true);
+            this.Activated += (s, e) =>
+            {
+                PInvoke.ShowCursor(true);
+                UpdateSettingsWindowTopmostToggle();
+            };
 
             this.StateChanged += (sender, e) =>
             {
@@ -659,6 +666,60 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             UpdateAppTitleBarMargin(sender);
         }
+
+        #region 标题栏置顶开关
+
+        // 本窗口实例的置顶状态：默认跟随全局“窗口置顶”设置，切换只影响当前设置窗口
+        private bool _isSettingsWindowTopmost;
+
+        private void InitializeSettingsWindowTopmostToggle()
+        {
+            _isSettingsWindowTopmost = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
+            UpdateSettingsWindowTopmostToggle();
+        }
+
+        private void ApplySettingsWindowTopmostToggle()
+        {
+            // 全局“窗口置顶”关闭时所有窗口本就不置顶，无需单独处理
+            if (!Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop) return;
+
+            WindowTopmostManager.SetWindowTopmost(this, _isSettingsWindowTopmost);
+        }
+
+        private void ButtonWindowTopmost_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop) return;
+
+            _isSettingsWindowTopmost = !_isSettingsWindowTopmost;
+            ApplySettingsWindowTopmostToggle();
+            UpdateSettingsWindowTopmostToggle();
+
+            LogHelper.WriteLogToFile(
+                $"[Window] 设置窗口置顶已{(_isSettingsWindowTopmost ? "开启" : "关闭")}",
+                LogHelper.LogType.Info);
+        }
+
+        private void UpdateSettingsWindowTopmostToggle()
+        {
+            if (ButtonWindowTopmost == null || IconWindowTopmost == null) return;
+
+            bool canToggle = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
+
+            ButtonWindowTopmost.IsEnabled = canToggle;
+            // 置顶时显示实心图钉，取消置顶后显示空心图钉
+            IconWindowTopmost.Icon = _isSettingsWindowTopmost ? SegoeFluentIcons.Pinned : SegoeFluentIcons.Pin;
+
+            string toolTip = !canToggle
+                ? WindowStrings.SettingsWindow_Topmost_Disabled
+                : _isSettingsWindowTopmost
+                    ? WindowStrings.SettingsWindow_Topmost_Unpin
+                    : WindowStrings.SettingsWindow_Topmost_Pin;
+
+            ToolTipService.SetToolTip(ButtonWindowTopmost, toolTip);
+            System.Windows.Automation.AutomationProperties.SetName(ButtonWindowTopmost, toolTip);
+        }
+
+        #endregion
 
         private void UpdateAppTitleBarMargin()
         {

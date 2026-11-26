@@ -238,6 +238,83 @@ namespace Ink_Canvas.Helpers
             });
         }
 
+        /// <summary>
+        /// 单独设置某个窗口的置顶状态（设置窗口标题栏的置顶按钮使用）。
+        /// topmost 为 false 时把窗口排除出自动置顶管理并立即取消 TOPMOST，
+        /// 为 true 时重新纳入管理并立即置顶。
+        /// </summary>
+        public static void SetWindowTopmost(Window window, bool isTopmost)
+        {
+            if (window == null) return;
+
+            RunOnDispatcher(() =>
+            {
+                lock (SyncRoot)
+                {
+                    var handle = new WindowInteropHelper(window).Handle;
+
+                    if (isTopmost)
+                    {
+                        window.Closed -= ExcludedWindow_Closed;
+                        ExcludedWindows.Remove(window);
+                        if (handle != IntPtr.Zero)
+                        {
+                            ExcludedHandles.Remove(handle);
+                        }
+
+                        RegisterWindowCore(window, window == _mainWindow);
+                        ApplyZOrderCore();
+                        return;
+                    }
+
+                    ExcludedWindows.Add(window);
+                    if (handle != IntPtr.Zero)
+                    {
+                        ExcludedHandles.Add(handle);
+                    }
+
+                    UnregisterWindowCore(window);
+                    window.Closed -= ExcludedWindow_Closed;
+                    window.Closed += ExcludedWindow_Closed;
+
+                    try
+                    {
+                        window.Topmost = false;
+                        if (handle != IntPtr.Zero)
+                        {
+                            NativeWindowHelper.SetNotTopmost(handle);
+                        }
+                    }
+                    catch
+                    {
+                        // 窗口可能正在关闭
+                    }
+
+                    ApplyZOrderCore();
+                }
+            });
+        }
+
+        /// <summary>
+        /// 被排除的窗口关闭后清理排除记录，避免 ExcludedWindows 长期持有已关闭窗口。
+        /// </summary>
+        private static void ExcludedWindow_Closed(object sender, EventArgs e)
+        {
+            if (sender is not Window window) return;
+
+            window.Closed -= ExcludedWindow_Closed;
+
+            lock (SyncRoot)
+            {
+                ExcludedWindows.Remove(window);
+                var handle = new WindowInteropHelper(window).Handle;
+                if (handle != IntPtr.Zero)
+                {
+                    ExcludedHandles.Remove(handle);
+                }
+            }
+        }
+
         private static bool IsWindowExcluded(Window window)
         {
             if (window == null) return false;

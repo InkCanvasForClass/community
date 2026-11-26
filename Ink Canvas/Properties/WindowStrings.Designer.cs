@@ -87,5 +87,11 @@ namespace Ink_Canvas.Properties
         public static string FollowMouseScreen => ResourceManager.GetString(nameof(FollowMouseScreen), _resourceCulture);
 
         public static string FollowMouseScreenHint => ResourceManager.GetString(nameof(FollowMouseScreenHint), _resourceCulture);
+
+        public static string SettingsWindow_Topmost_Unpin => ResourceManager.GetString(nameof(SettingsWindow_Topmost_Unpin), _resourceCulture);
+
+        public static string SettingsWindow_Topmost_Pin => ResourceManager.GetString(nameof(SettingsWindow_Topmost_Pin), _resourceCulture);
+
+        public static string SettingsWindow_Topmost_Disabled => ResourceManager.GetString(nameof(SettingsWindow_Topmost_Disabled), _resourceCulture);
     }
 }
