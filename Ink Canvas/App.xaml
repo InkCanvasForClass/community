@@ -263,8 +263,8 @@
                             TrayLeftMouseDown="TaskbarTrayIcon_TrayLeftMouseDown"
                             TrayRightMouseDown="TaskbarTrayIcon_TrayRightMouseDown"
                             IconSource="/Resources/icc.ico"/>
-            <FontFamily x:Key="GlobalUIFontFamily">Segoe UI</FontFamily>
-            <FontFamily x:Key="ContentControlThemeFontFamily">Segoe UI</FontFamily>
+            <FontFamily x:Key="GlobalUIFontFamily">Microsoft YaHei UI</FontFamily>
+            <FontFamily x:Key="ContentControlThemeFontFamily">Microsoft YaHei UI</FontFamily>
             <FontFamily x:Key="MonoUIFontFamily">Consolas</FontFamily>
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemeResources/>
