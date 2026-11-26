@@ -178,7 +178,7 @@
     <value>UI language</value>
   </data>
   <data name="Theme_UIFont_Default" xml:space="preserve">
-    <value>Default (Segoe UI)</value>
+    <value>Default (Microsoft YaHei UI)</value>
   </data>
   <data name="Theme_UIFont_Description" xml:space="preserve">
     <value>Choose the global UI font, or add a .ttf/.ttc font file from anywhere</value>
