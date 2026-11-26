@@ -1021,7 +1021,7 @@ namespace Ink_Canvas
         public string Language { get; set; } = "";
 
         [JsonProperty("globalUIFontFamily")]
-        public string GlobalUIFontFamily { get; set; } = "Segoe UI";
+        public string GlobalUIFontFamily { get; set; } = "Microsoft YaHei UI";
 
         [JsonProperty("importedUIFonts")]
         public List<string> ImportedUIFonts { get; set; } = new List<string>();

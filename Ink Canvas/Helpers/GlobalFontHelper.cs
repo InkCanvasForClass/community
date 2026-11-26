@@ -10,7 +10,7 @@ namespace Ink_Canvas.Helpers
 {
     public static class GlobalFontHelper
     {
-        public const string DefaultUIFontFamily = "Segoe UI";
+        public const string DefaultUIFontFamily = "Microsoft YaHei UI";
         public const string MonoUIFontFamily = "Consolas";
         public const string MonoUIFontFamilyChain = "Consolas, Cascadia Mono, Courier New";
         public const string EmbeddedWenKaiFontFamily = "pack://application:,,,/Resources/Fonts/#LXGW WenKai TC";
