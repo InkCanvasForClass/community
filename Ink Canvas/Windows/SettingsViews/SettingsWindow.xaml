@@ -56,7 +56,9 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
-                    <ColumnDefinition Width="137"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <!--  为系统/库自绘的窗口按钮（最小化、最大化、关闭）预留宽度，避免自定义按钮被压在下面  -->
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <ikw:SimpleStackPanel x:Name="AppTitle" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Image Source="\Resources\icc.ico" Width="20" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -64,6 +66,32 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                         VerticalAlignment="Center"
                         Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
                 </ikw:SimpleStackPanel>
+                <!--  标题栏置顶开关：与最小化/最大化/关闭按钮同款的 ui:TitleBarButton，位于最小化按钮左侧；
+                      置顶时整块按钮铺与最小化/最大化/关闭悬停同款的底色（TitleBarButton 的模板不绘制 Button.Background，故用同级 Border 当高亮底）  -->
+                <Grid Grid.Column="2">
+                    <Border
+                        x:Name="BorderWindowTopmostFill"
+                        Background="Transparent"
+                        IsHitTestVisible="False" />
+                    <ui:TitleBarButton
+                        x:Name="ButtonWindowTopmost"
+                        Width="46"
+                        MinWidth="0"
+                        Background="Transparent"
+                        Focusable="False"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Click="ButtonWindowTopmost_Click">
+                        <ui:FontIcon
+                            x:Name="IconWindowTopmost"
+                            FontSize="14"
+                            Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
+                    </ui:TitleBarButton>
+                </Grid>
+                <!--  窗口按钮区域占位：宽度取库给出的右侧系统覆盖区，最小 138 DIP（三枚按钮各 46 DIP）  -->
+                <Border
+                    Grid.Column="3"
+                    MinWidth="138"
+                    Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
             </Grid>
         </Border>
 

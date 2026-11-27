@@ -114,4 +114,13 @@
   <data name="FollowMouseScreenHint" xml:space="preserve">
     <value>默认开启：自动以鼠标所在显示屏作为当前目标显示屏</value>
   </data>
+  <data name="SettingsWindow_Topmost_Unpin" xml:space="preserve">
+    <value>取消置顶</value>
+  </data>
+  <data name="SettingsWindow_Topmost_Pin" xml:space="preserve">
+    <value>置顶</value>
+  </data>
+  <data name="SettingsWindow_Topmost_Disabled" xml:space="preserve">
+    <value>窗口置顶已在设置中关闭，无法使用</value>
+  </data>
 </root>

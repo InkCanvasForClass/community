@@ -2,6 +2,8 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
@@ -161,10 +163,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
             UpdateAppTitleBarMargin();
+            InitializeSettingsWindowTopmostToggle();
 
             this.Loaded += (sender, e) =>
             {
                 SetMaxSizeAndCenter();
+                ApplySettingsWindowTopmostToggle();
                 RegisterDpiChangedListener();
 
                 Dispatcher.BeginInvoke(new Action(() =>
@@ -205,7 +209,11 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             this.TouchUp += (s, e) => PInvoke.ShowCursor(true);
             this.MouseEnter += (s, e) => PInvoke.ShowCursor(true);
-            this.Activated += (s, e) => PInvoke.ShowCursor(true);
+            this.Activated += (s, e) =>
+            {
+                PInvoke.ShowCursor(true);
+                UpdateSettingsWindowTopmostToggle();
+            };
 
             this.StateChanged += (sender, e) =>
             {
@@ -659,6 +667,77 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             UpdateAppTitleBarMargin(sender);
         }
+
+        #region 标题栏置顶开关
+
+        // 本窗口实例的置顶状态：默认跟随全局“窗口置顶”设置，切换只影响当前设置窗口
+        private bool _isSettingsWindowTopmost;
+
+        private void InitializeSettingsWindowTopmostToggle()
+        {
+            _isSettingsWindowTopmost = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
+
+            // 图钉用主题主文本色，和最小化/最大化/关闭的图标保持一致的深浅
+            IconWindowTopmost.SetResourceReference(Control.ForegroundProperty, ThemeKeys.TextFillColorPrimaryBrushKey);
+            UpdateSettingsWindowTopmostToggle();
+        }
+
+        private void ApplySettingsWindowTopmostToggle()
+        {
+            // 全局“窗口置顶”关闭时所有窗口本就不置顶，无需单独处理
+            if (!Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop) return;
+
+            WindowTopmostManager.SetWindowTopmost(this, _isSettingsWindowTopmost);
+        }
+
+        private void ButtonWindowTopmost_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop) return;
+
+            _isSettingsWindowTopmost = !_isSettingsWindowTopmost;
+            ApplySettingsWindowTopmostToggle();
+            UpdateSettingsWindowTopmostToggle();
+
+            LogHelper.WriteLogToFile(
+                $"[Window] 设置窗口置顶已{(_isSettingsWindowTopmost ? "开启" : "关闭")}",
+                LogHelper.LogType.Info);
+        }
+
+        private void UpdateSettingsWindowTopmostHighlight(bool canToggle)
+        {
+            // TitleBarButton 的模板不绘制 Button.Background，高亮底由按钮下方这层 Border 呈现；
+            // 底色直接取按钮自身的悬停底色，保证与最小化/最大化/关闭的悬停效果完全一致
+            if (BorderWindowTopmostFill == null) return;
+
+            BorderWindowTopmostFill.Background = _isSettingsWindowTopmost && canToggle
+                ? ButtonWindowTopmost.HoverBackground
+                : Brushes.Transparent;
+        }
+
+        private void UpdateSettingsWindowTopmostToggle()
+        {
+            if (ButtonWindowTopmost == null || IconWindowTopmost == null) return;
+
+            bool canToggle = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
+
+            ButtonWindowTopmost.IsEnabled = canToggle;
+            // 两种状态用明显不同的图标：置顶=图钉（Pin），未置顶=带斜杠图钉（Unpin）；实心图钉 PinnedFill 在 14 号字下会糊成黑块，不适合标题栏小图标
+            IconWindowTopmost.Icon = _isSettingsWindowTopmost ? SegoeFluentIcons.Pin : SegoeFluentIcons.Unpin;
+
+            // 是否置顶用灰色高亮区分：置顶时整块按钮铺浅灰底，取消置顶后恢复与最小化/最大化/关闭按钮一致的透明底
+            UpdateSettingsWindowTopmostHighlight(canToggle);
+
+            string toolTip = !canToggle
+                ? WindowStrings.SettingsWindow_Topmost_Disabled
+                : _isSettingsWindowTopmost
+                    ? WindowStrings.SettingsWindow_Topmost_Unpin
+                    : WindowStrings.SettingsWindow_Topmost_Pin;
+
+            ToolTipService.SetToolTip(ButtonWindowTopmost, toolTip);
+            System.Windows.Automation.AutomationProperties.SetName(ButtonWindowTopmost, toolTip);
+        }
+
+        #endregion
 
         private void UpdateAppTitleBarMargin()
         {

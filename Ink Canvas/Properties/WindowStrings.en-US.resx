@@ -114,4 +114,13 @@
   <data name="FollowMouseScreenHint" xml:space="preserve">
     <value>On by default: automatically use the display where the mouse is as the target display</value>
   </data>
+  <data name="SettingsWindow_Topmost_Unpin" xml:space="preserve">
+    <value>Unpin</value>
+  </data>
+  <data name="SettingsWindow_Topmost_Pin" xml:space="preserve">
+    <value>Pin to top</value>
+  </data>
+  <data name="SettingsWindow_Topmost_Disabled" xml:space="preserve">
+    <value>Always on top is turned off in settings</value>
+  </data>
 </root>
