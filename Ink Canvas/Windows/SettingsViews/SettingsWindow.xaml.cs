@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -675,6 +676,9 @@ namespace Ink_Canvas.Windows.SettingsViews
         private void InitializeSettingsWindowTopmostToggle()
         {
             _isSettingsWindowTopmost = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
+
+            // 图钉用主题主文本色，和最小化/最大化/关闭的图标保持一致的深浅
+            IconWindowTopmost.SetResourceReference(Control.ForegroundProperty, ThemeKeys.TextFillColorPrimaryBrushKey);
             UpdateSettingsWindowTopmostToggle();
         }
 
@@ -699,6 +703,17 @@ namespace Ink_Canvas.Windows.SettingsViews
                 LogHelper.LogType.Info);
         }
 
+        private void UpdateSettingsWindowTopmostHighlight(bool canToggle)
+        {
+            // TitleBarButton 的模板不绘制 Button.Background，高亮底由按钮下方这层 Border 呈现；
+            // 底色直接取按钮自身的悬停底色，保证与最小化/最大化/关闭的悬停效果完全一致
+            if (BorderWindowTopmostFill == null) return;
+
+            BorderWindowTopmostFill.Background = _isSettingsWindowTopmost && canToggle
+                ? ButtonWindowTopmost.HoverBackground
+                : Brushes.Transparent;
+        }
+
         private void UpdateSettingsWindowTopmostToggle()
         {
             if (ButtonWindowTopmost == null || IconWindowTopmost == null) return;
@@ -706,8 +721,11 @@ namespace Ink_Canvas.Windows.SettingsViews
             bool canToggle = Helpers.SettingsManager.Settings.Advanced.IsAlwaysOnTop;
 
             ButtonWindowTopmost.IsEnabled = canToggle;
-            // 置顶时显示实心图钉，取消置顶后显示空心图钉
-            IconWindowTopmost.Icon = _isSettingsWindowTopmost ? SegoeFluentIcons.Pinned : SegoeFluentIcons.Pin;
+            // 两种状态用明显不同的图标：置顶=图钉（Pin），未置顶=带斜杠图钉（Unpin）；实心图钉 PinnedFill 在 14 号字下会糊成黑块，不适合标题栏小图标
+            IconWindowTopmost.Icon = _isSettingsWindowTopmost ? SegoeFluentIcons.Pin : SegoeFluentIcons.Unpin;
+
+            // 是否置顶用灰色高亮区分：置顶时整块按钮铺浅灰底，取消置顶后恢复与最小化/最大化/关闭按钮一致的透明底
+            UpdateSettingsWindowTopmostHighlight(canToggle);
 
             string toolTip = !canToggle
                 ? WindowStrings.SettingsWindow_Topmost_Disabled
