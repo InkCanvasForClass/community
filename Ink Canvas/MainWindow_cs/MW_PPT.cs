@@ -199,6 +199,34 @@ namespace Ink_Canvas
         private int _previousSlideID = 0;
 
         /// <summary>
+        /// 点页码临时交出鼠标之前的批注状态：
+        /// true 表示切换前处于批注（非鼠标）状态，PowerPoint 缩略图关闭后需要恢复批注。
+        /// </summary>
+        private bool IsCommentMode { get; set; }
+
+        /// <summary>
+        /// PowerPoint 自带缩略图导航（SlideShowWindow.SlideNavigation）当前是否展开。
+        /// 打开缩略图导航后先置 true，再由轮询写入实际读取结果；轮询据此判断导航何时关闭。
+        /// </summary>
+        private bool IsSlideNavigationOpen { get; set; }
+
+        /// <summary>
+        /// 缩略图导航状态轮询定时器：点页码打开原生导航后启动，
+        /// 发现导航关闭后自动恢复批注。Tick 在 UI（STA）线程执行，可直接调 COM。
+        /// </summary>
+        private DispatcherTimer _pptNavStateTimer;
+
+        /// <summary>
+        /// 连续读到“导航已关闭”的次数，用于过滤 PowerPoint 应用状态的瞬间抖动。
+        /// </summary>
+        private int _pptNavStateMissCount;
+
+        /// <summary>
+        /// 轮询间隔（毫秒）。用户选页通常在数秒内完成，250ms 兼顾手感与 COM 开销。
+        /// </summary>
+        private const int PPTNavStatePollIntervalMs = 250;
+
+        /// <summary>
         /// 用于在PowerPoint连接断开后延迟退出PPT模式的定时器。
         /// </summary>
         private DispatcherTimer _exitPPTModeAfterDisconnectTimer;
@@ -991,6 +1019,7 @@ namespace Ink_Canvas
                     else
                     {
                         LogHelper.WriteLogToFile("[PPT] 连接已断开，已安排模式清理", LogHelper.LogType.Info);
+                        StopPPTNavStatePolling();
                         _singlePPTInkManager?.ClearAllStrokes();
                         CollapseAllPPTNavBarPreviews();
                         ResetPPTEnhancedPreviewCache();
@@ -1876,6 +1905,7 @@ namespace Ink_Canvas
             try
             {
                 ResetPPTEnhancedPreviewCache();
+                StopPPTNavStatePolling();
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
 
                 // 形态收敛（折叠/展开）统一交给状态机 helper；这里只描述目标形态，位置由清理段尾部统一落地。
@@ -2781,7 +2811,6 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
                 SetTransparentNotHitThrough();
-                CursorIcon_Click(null, null);
 
                 if (Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview && bar != null)
                 {
@@ -2789,7 +2818,10 @@ namespace Ink_Canvas
                     var targetBar = ResolvePreviewTargetBar(bar);
                     if (targetBar == null)
                     {
-                        _pptManager.TryShowSlideNavigation();
+                        if (_pptManager.TryShowSlideNavigation())
+                        {
+                            SwitchToCursorForNativeNavigation();
+                        }
                     }
                     else if (targetBar.IsPreviewExpanded)
                     {
@@ -2803,7 +2835,10 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile("PPT增强预览未生成可用缩略图，改用默认导航", LogHelper.LogType.Warning);
                             targetBar.IsPreviewExpanded = false;
-                            _pptManager.TryShowSlideNavigation();
+                            if (_pptManager.TryShowSlideNavigation())
+                            {
+                                SwitchToCursorForNativeNavigation();
+                            }
                         }
                         else
                         {
@@ -2828,6 +2863,7 @@ namespace Ink_Canvas
                 {
                     if (_pptManager.TryShowSlideNavigation())
                     {
+                        SwitchToCursorForNativeNavigation(); //此处调用powerpoint自带的缩略图，所以要把批注关掉
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext)
                         {
                             ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 导航时）");
@@ -2850,6 +2886,92 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"PPT翻页控件操作失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 临时把鼠标交还给 PowerPoint 自带的缩略图导航：
+        /// 先记录当前是否处于批注（非鼠标）状态到 IsCommentMode，再切到鼠标。
+        /// 缩略图关闭后可依据 IsCommentMode 决定是否恢复批注。
+        /// </summary>
+        private void SwitchToCursorForNativeNavigation()
+        {
+            // 先取状态再切鼠标：CursorIcon_Click 内部会停轮询并清理 IsCommentMode / IsSlideNavigationOpen
+            var wasCommentMode = IsAnnotating;
+
+            CursorIcon_Click(null, null);
+
+            IsCommentMode = wasCommentMode;
+            IsSlideNavigationOpen = true;   // 导航由调用方刚刚打开（TryShowSlideNavigation 已成功）
+            StartPPTNavStatePolling();
+        }
+
+        /// <summary>
+        /// 启动缩略图导航状态轮询。只在 TryShowSlideNavigation() 成功（导航确实打开）后调用。
+        /// Agent 模式读不到导航状态（TryShowSlideNavigationState 恒为 false），开轮询会在
+        /// 首个 500ms 内误判“导航已关闭”并把批注收回来挡住导航，因此直接跳过。
+        /// </summary>
+        private void StartPPTNavStatePolling()
+        {
+            if (_pptManager is PPTAgentLinkManager) return;
+
+            if (_pptNavStateTimer == null)
+            {
+                _pptNavStateTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(PPTNavStatePollIntervalMs)
+                };
+                _pptNavStateTimer.Tick += PPTNavStateTimer_Tick;
+            }
+
+            _pptNavStateMissCount = 0;
+            _pptNavStateTimer.Start();
+        }
+
+        /// <summary>
+        /// 停止轮询。不清 IsCommentMode，是否恢复批注由恢复方法自行判断。
+        /// </summary>
+        private void StopPPTNavStatePolling()
+        {
+            _pptNavStateTimer?.Stop();
+            _pptNavStateMissCount = 0;
+        }
+
+        private void PPTNavStateTimer_Tick(object sender, EventArgs e)
+        {
+            IsSlideNavigationOpen = _pptManager?.TryShowSlideNavigationState() == true;
+
+            if (IsSlideNavigationOpen)
+            {
+                _pptNavStateMissCount = 0;
+                return;
+            }
+
+            // 连续两次读到关闭才认为用户真的离开了缩略图页面，
+            // 避免 PowerPoint 应用状态的瞬间抖动导致误恢复。
+            if (++_pptNavStateMissCount < 2) return;
+
+            StopPPTNavStatePolling();
+            RestoreCommentAfterNavigation();
+        }
+
+        /// <summary>
+        /// 缩略图导航关闭后把批注还给用户。只在进入导航前本处于批注状态时执行；
+        /// 笔的类型/颜色/宽度都是全局状态，CursorIcon_Click 没有改过它们，因此无需额外还原。
+        /// </summary>
+        private void RestoreCommentAfterNavigation()
+        {
+            if (!IsCommentMode) return;
+
+            IsCommentMode = false;
+
+            try
+            {
+                PenIcon_Click(null, null);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复批注失败: {ex}", LogHelper.LogType.Warning);
             }
         }
 

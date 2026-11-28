@@ -63,6 +63,12 @@ namespace Ink_Canvas.Helpers
         string GetPresentationName();
         string GetPresentationPath();
         bool TryShowSlideNavigation();
+
+        /// <summary>
+        /// 查询 PowerPoint 放映中自带的幻灯片导航（缩略图）界面当前是否可见。
+        /// </summary>
+        /// <returns>可见返回 <c>true</c>；不可见、未在放映或实现不支持时返回 <c>false</c>。</returns>
+        bool TryShowSlideNavigationState();
         object GetCurrentActivePresentation();
         List<PPTSlideThumbnail> ExportSlideThumbnails(
             int width,
