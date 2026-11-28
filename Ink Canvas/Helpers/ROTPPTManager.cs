@@ -2275,6 +2275,54 @@ namespace Ink_Canvas.Helpers
                 SafeReleaseComObject(slideShowWindows);
             }
         }
+
+        public bool TryShowSlideNavigationState()
+        {
+            object slideShowWindows = null;
+            object slideShowWindow = null;
+            object slideNavigation = null;
+            try
+            {
+                if (!IsConnected || !IsInSlideShow || PPTApplication == null) return false;
+                if (!Marshal.IsComObject(PPTApplication)) return false;
+
+                slideShowWindows = PPTApplication.SlideShowWindows;
+                if (slideShowWindows == null) return false;
+
+                slideShowWindow = ((dynamic)slideShowWindows)[1];
+                if (slideShowWindow == null) return false;
+
+                slideNavigation = ((dynamic)slideShowWindow).SlideNavigation;
+                if (slideNavigation == null) return false;
+
+                return Convert.ToBoolean(((dynamic)slideNavigation).Visible);
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x80020006)
+                {
+                    LogHelper.WriteLogToFile("WPS不支持SlideNavigation功能", LogHelper.LogType.Warning);
+                    return false;
+                }
+                if (hr == 0x8001010E || hr == 0x80004005)
+                {
+                    DisconnectFromPPT();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"读取幻灯片导航状态失败: {ex}", LogHelper.LogType.Warning);
+                return false;
+            }
+            finally
+            {
+                SafeReleaseComObject(slideNavigation);
+                SafeReleaseComObject(slideShowWindow);
+                SafeReleaseComObject(slideShowWindows);
+            }
+        }
         #endregion
 
         #region WPS Process Management

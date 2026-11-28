@@ -565,6 +565,7 @@ namespace InkCanvas.Calibration.Tests
             public string GetPresentationName() => "Regression.pptx";
             public string GetPresentationPath() => @"C:\Presentations\Regression.pptx";
             public bool TryShowSlideNavigation() => true;
+            public bool TryShowSlideNavigationState() => false;
             public object GetCurrentActivePresentation() => null;
             public List<PPTSlideThumbnail> ExportSlideThumbnails(
                 int width,

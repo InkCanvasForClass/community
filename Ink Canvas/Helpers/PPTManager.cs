@@ -1725,6 +1725,30 @@ namespace Ink_Canvas.Helpers
             return Volatile.Read(ref _cachedPresentationPath) ?? string.Empty;
         }
 
+        public bool TryShowSlideNavigationState()
+        {
+            try
+            {
+                var activePresentation = GetCurrentActivePresentation();
+                if (activePresentation == null) return false;
+                if (activePresentation.SlideShowWindow.SlideNavigation.Visible) return true;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x80020006)
+                {
+                    LogHelper.WriteLogToFile("WPS不支持SlideNavigation功能", LogHelper.LogType.Warning);
+                    return false;
+                }
+            }
+            catch
+             {
+                LogHelper.WriteLogToFile("读取PowerPoint缩略图状态失败", LogHelper.LogType.Warning);
+                return false;
+            }
+            return false;
+        }
         public bool TryShowSlideNavigation()
         {
             object slideShowWindows = null;

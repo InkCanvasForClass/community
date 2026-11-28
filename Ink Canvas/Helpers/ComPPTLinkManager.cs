@@ -100,6 +100,8 @@ namespace Ink_Canvas.Helpers
 
         public bool TryShowSlideNavigation() => _inner.TryShowSlideNavigation();
 
+        public bool TryShowSlideNavigationState() => _inner.TryShowSlideNavigationState();
+
         public object GetCurrentActivePresentation() => _inner.GetCurrentActivePresentation();
 
         public List<PPTSlideThumbnail> ExportSlideThumbnails(

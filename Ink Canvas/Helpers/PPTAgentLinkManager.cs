@@ -87,6 +87,9 @@ namespace Ink_Canvas.Helpers
 
         public bool TryShowSlideNavigation() => Send(PPTCommands.ShowSlideNavigation);
 
+        // Agent 架构下 COM 对象在 PowerPoint 进程内，主程序这边读不到该状态，统一按"不支持"处理。
+        public bool TryShowSlideNavigationState() => false;
+
         public bool TryUnhideHiddenSlides() => Send(PPTCommands.UnhideHiddenSlides);
 
         public bool TryDisableAutoPlayTimings() => Send(PPTCommands.DisableAutoPlayTimings);

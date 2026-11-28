@@ -3645,6 +3645,11 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal async void CursorIcon_Click(object sender, MouseButtonEventArgs e)
         {
+            // 用户显式切到鼠标，缩略图导航的自动恢复不再需要（也不该覆盖用户的选择）
+            StopPPTNavStatePolling();
+            IsCommentMode = false;
+            IsSlideNavigationOpen = false;
+
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
